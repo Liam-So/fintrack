@@ -24,11 +24,12 @@ class TransactionExtractor:
                 break
             
             if TransactionExtractor._is_valid_date(line):
-                if current_transaction.get('date') and current_transaction.get('amount') and current_transaction.get('description'):
-                    transactions.append(Transaction(**current_transaction))
-                current_transaction = {'date': line}
+                if 'date' not in current_transaction:
+                  current_transaction = {'date': line}
             elif TransactionExtractor._is_valid_amount(line):
-                current_transaction['amount'] = float(line.replace(",", ""))
+                if 'amount' not in current_transaction:
+                  current_transaction['amount'] = float(line.replace(",", ""))
+            # if the description is more than one line we only want to add the first line
             elif current_transaction.get('date') and 'description' not in current_transaction:
                 current_transaction['description'] = TransactionExtractor._normalize_spaces(line)
             
@@ -36,10 +37,6 @@ class TransactionExtractor:
             if all(key in current_transaction for key in ['date', 'amount', 'description']):
                 transactions.append(Transaction(**current_transaction))
                 current_transaction = {}
-        
-        # Add the last transaction if it's complete
-        if all(key in current_transaction for key in ['date', 'amount', 'description']):
-            transactions.append(Transaction(**current_transaction))
         
         return transactions
 

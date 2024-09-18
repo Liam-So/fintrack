@@ -1,20 +1,27 @@
 import fitz
 from enum import Enum
 from typing import Dict, List, Optional
+from pydantic import BaseModel
 
-class Institution(Enum):
+class Institution(str, Enum):
     AMEX = "AMEX"
     SCOTIA = "SCOTIA"
 
+class PageContent(BaseModel):
+    content: str
+
+class PDFContent(BaseModel):
+    pages: Dict[str, PageContent]
+
 class PDFExtractor:
     @staticmethod
-    def extract_text(pdf_path: str, institution: Institution) -> Dict[str, str]:
+    def extract_text(pdf_path: str, institution: Institution) -> PDFContent:
         if institution == Institution.AMEX:
             return PDFExtractor._extract_text_for_amex(pdf_path)
         raise NotImplementedError(f"Extraction for {institution.value} not implemented")
 
     @staticmethod
-    def _extract_text_for_amex(pdf_path: str) -> Dict[str, str]:
+    def _extract_text_for_amex(pdf_path: str) -> PDFContent:
         pages = {}
         with fitz.open(pdf_path) as pdf:
             for page_num, page in enumerate(pdf, start=1):

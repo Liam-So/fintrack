@@ -1,0 +1,8 @@
+TODO:
+[] 
+
+PROD:
+[] Delete pyopenssl dependency. For production, use SSL in a reverse proxy like Nginx 
+   or IIS and place the Flask app behind the reverse proxy. SSL is good, but the former is better.
+   https://blog.miguelgrinberg.com/post/running-your-flask-application-over-https
+   https://nagasudhir.blogspot.com/2022/10/run-flask-application-over-https.html

@@ -6,6 +6,10 @@ from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP, AES
 from Crypto.Util.Padding import unpad
 
+import tempfile
+import os
+import uuid
+
 bp = Blueprint('api', __name__)
 
 # Generate RSA key pair (do this securely and store the private key safely)
@@ -26,11 +30,34 @@ def get_public_key():
 
 @bp.route('/extract', methods=['POST'])
 def extract():
-    json_content = request.json
-    pdf_path = json_content["filename"]
-    institution = Institution(json_content.get("institution", "AMEX"))
+    if 'pdf' not in request.files:
+      return 'No file part', 400
+    
+    file = request.files['pdf']
+    
+    if file.filename == '':
+      return 'No selected file', 400
 
-    text_by_page = PDFExtractor.extract_text(pdf_path, institution)
-    transactions = TransactionExtractor.extract_transactions(text_by_page)
+    if file and file.filename.endswith('.pdf'):
+      # Create a temporary file with a unique name
+      temp_dir = tempfile.gettempdir()
+      temp_filename = f"{uuid.uuid4()}.pdf"
+      temp_filepath = os.path.join(temp_dir, temp_filename)
 
-    return jsonify({"transactions": [t.__dict__ for t in transactions]})
+      try:
+        # Save the file temporarily
+        file.save(temp_filepath)
+        institution = Institution("AMEX")
+        text_by_page = PDFExtractor.extract_text(temp_filepath, institution)
+        transactions = TransactionExtractor.extract_transactions(text_by_page)
+
+        return jsonify({"transactions": [t.__dict__ for t in transactions]}), 200
+
+      except Exception as e:
+        return str(e), 500
+      finally:
+        # Always attempt to delete the temporary file
+        if os.path.exists(temp_filepath):
+          print(f"Deleting PDF file: {temp_filename} in location: {temp_filepath}")
+          os.remove(temp_filepath)
+      

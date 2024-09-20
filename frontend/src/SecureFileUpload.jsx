@@ -25,8 +25,28 @@ const SecureFileUpload = () => {
   }, []);
 
   const encryptAndUploadFile = async () => {
-    console.log(file)
-    // if (!file || !publicKey) return;
+    if (!file) {
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('pdf', file);
+
+    try {
+      setUploading(true);
+      const response = await api.post("/extract", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      console.log(response.data.transactions);
+
+      setUploadComplete(true)
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleFileChange = (e) => {

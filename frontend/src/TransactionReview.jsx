@@ -1,4 +1,23 @@
 import React, { useState } from 'react';
+import { PlusCircle, Send, Pencil, Check } from 'lucide-react';
+
+
+const CategoryBadge = ({ category }) => {
+  const baseClasses = "px-2 py-1 rounded-full text-xs font-semibold";
+  const categoryColors = {
+    food: "bg-green-100 text-green-800",
+    transport: "bg-blue-100 text-blue-800",
+    utilities: "bg-yellow-100 text-yellow-800",
+    entertainment: "bg-purple-100 text-purple-800",
+    other: "bg-gray-100 text-gray-800"
+  };
+
+  return (
+    <span className={`${baseClasses} ${categoryColors[category] || categoryColors.other}`}>
+      {category}
+    </span>
+  );
+};
 
 const TransactionReview = ({ transactions: initialTransactions, onSubmit }) => {
   const [transactions, setTransactions] = useState(initialTransactions);
@@ -89,7 +108,7 @@ const TransactionReview = ({ transactions: initialTransactions, onSubmit }) => {
                       <option value="other">Other</option>
                     </select>
                   ) : (
-                    transaction.category
+                    <CategoryBadge category={transaction.category} />
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium border-b">
@@ -103,9 +122,9 @@ const TransactionReview = ({ transactions: initialTransactions, onSubmit }) => {
                   ) : (
                     <button 
                       onClick={() => handleEdit(transaction.id)}
-                      className="text-blue-600 hover:text-blue-900"
+                      className="inline-flex items-center text-blue-600 hover:text-blue-900"
                     >
-                      Edit
+                      <Pencil className="mr-2 h-4 w-4" /> Edit
                     </button>
                   )}
                 </td>
@@ -114,12 +133,18 @@ const TransactionReview = ({ transactions: initialTransactions, onSubmit }) => {
           </tbody>
         </table>
       </div>
-      <div className="mt-4">
-        <button 
-          onClick={handleSubmit} 
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+      <div className="flex justify-between items-center pt-8">
+        <button
+          onClick={() => {}}
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
-          Submit Transactions
+          <PlusCircle className="mr-2 h-4 w-4" /> Add Transaction
+        </button>
+        <button
+          onClick={handleSubmit}
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          <Send className="mr-2 h-4 w-4" /> Send Transactions
         </button>
       </div>
     </div>

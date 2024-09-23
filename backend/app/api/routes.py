@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from app.services.pdf_extractor import PDFExtractor, Institution
 from app.services.transaction_extractor import TransactionExtractor
+from app.services.llm_controller import generate_response, PromptRequest, get_transaction_prompt, parse_json_response, clean_response
 
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP, AES
@@ -11,6 +12,8 @@ import os
 import uuid
 
 bp = Blueprint('api', __name__)
+
+CATEGORIES = ["Cellphone", "Utilities", "Groceries", "Restaurants", "Beverages", "Transportation", "Entertainment", "Gym", "Subscriptions"]
 
 # Generate RSA key pair (do this securely and store the private key safely)
 key = RSA.generate(2048)
@@ -51,7 +54,25 @@ def extract():
         text_by_page = PDFExtractor.extract_text(temp_filepath, institution)
         transactions = TransactionExtractor.extract_transactions(text_by_page)
 
-        return jsonify({"transactions": [t.__dict__ for t in transactions]}), 200
+        transactions_to_return = []
+
+        for i in range(0, len(transactions), 5):
+           chunk_of_transactions = transactions[i:i+5]
+           print(f"⏳ Processing 5 transactions...")
+          #  for chunk in chunk_of_transactions:
+          #     print(chunk.description)
+           descriptions = [t.description for t in chunk_of_transactions]
+           prompt = get_transaction_prompt(CATEGORIES, descriptions)
+           model = 'mistral'
+
+           prompt_request = PromptRequest(prompt=prompt, model=model)
+           raw_response = generate_response(prompt_request)
+           parsed_items = parse_json_response(raw_response)
+
+           cleaned_response = clean_response(parsed_items, CATEGORIES, descriptions, chunk_of_transactions)
+           transactions_to_return.extend(cleaned_response)
+
+        return jsonify({"transactions": [t.__dict__ for t in transactions_to_return]}), 200
 
       except Exception as e:
         return str(e), 500

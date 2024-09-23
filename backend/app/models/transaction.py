@@ -8,3 +8,4 @@ class Transaction(BaseModel):
     date: str # TODO: Change to date
     amount: Decimal = Field(..., decimal_places=2)
     description: str
+    category: str

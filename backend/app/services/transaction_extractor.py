@@ -1,3 +1,4 @@
+import uuid
 import re
 from typing import List
 from app.models.transaction import Transaction
@@ -35,6 +36,7 @@ class TransactionExtractor:
             
             # If we have all required fields, add the transaction
             if all(key in current_transaction for key in ['date', 'amount', 'description']):
+                current_transaction['id'] = str(uuid.uuid4())
                 transactions.append(Transaction(**current_transaction))
                 current_transaction = {}
         

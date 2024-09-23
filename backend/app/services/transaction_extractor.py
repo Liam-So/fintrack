@@ -4,6 +4,7 @@ from typing import List
 from app.models.transaction import Transaction
 from typing import Dict, List, Optional
 
+
 class TransactionExtractor:
     @staticmethod
     def extract_transactions(text_by_page: Dict[str, str]) -> List[Transaction]:
@@ -37,6 +38,7 @@ class TransactionExtractor:
             # If we have all required fields, add the transaction
             if all(key in current_transaction for key in ['date', 'amount', 'description']):
                 current_transaction['id'] = str(uuid.uuid4())
+                current_transaction['category'] = ""
                 transactions.append(Transaction(**current_transaction))
                 current_transaction = {}
         

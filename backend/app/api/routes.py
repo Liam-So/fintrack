@@ -6,6 +6,7 @@ from app.services.llm_controller import generate_response, PromptRequest, get_tr
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP, AES
 from Crypto.Util.Padding import unpad
+import traceback
 
 import tempfile
 import os
@@ -84,6 +85,8 @@ def extract():
         return jsonify({"transactions": [t.__dict__ for t in transactions_to_return]}), 200
 
       except Exception as e:
+        print(f"Error processing PDF file: {str(e)}")
+        print(traceback.format_exc())
         return str(e), 500
       finally:
         # Always attempt to delete the temporary file

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, Send, Pencil, Trash2 } from 'lucide-react';
 import AddTransactionModal from './AddTransactionModal';
+import { useNavigate } from 'react-router-dom';
 
 const CategoryBadge = ({ category }) => {
   const baseClasses = "px-2 py-1 rounded-full text-xs font-semibold";
@@ -19,10 +20,12 @@ const CategoryBadge = ({ category }) => {
   );
 };
 
-const TransactionReview = ({ transactions: initialTransactions, onSubmit, categories }) => {
+const TransactionReview = ({ transactions: initialTransactions, categories }) => {
   const [transactions, setTransactions] = useState(initialTransactions);
   const [editingId, setEditingId] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  const navigate = useNavigate();
 
   const handleAddTransaction = (newTransaction) => {
     setTransactions([...transactions, newTransaction]);
@@ -47,14 +50,9 @@ const TransactionReview = ({ transactions: initialTransactions, onSubmit, catego
   };
 
   const handleSubmit = () => {
-    onSubmit(transactions);
+    navigate('/dashboard');
   };
 
-
-  useEffect(() => {
-    console.log(transactions)
-  }, [transactions])
-  
 
   return (
     <div className="container mx-auto p-4">

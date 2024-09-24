@@ -2,6 +2,8 @@ TODO:
 [] Retry mechanism
 [] Table edits
 [] Send categories
+[] React count-up for values
+[] Chart visualization via Chart.js
 
 PROD:
 [] Delete pyopenssl dependency. For production, use SSL in a reverse proxy like Nginx 

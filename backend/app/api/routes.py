@@ -15,8 +15,6 @@ import json
 
 bp = Blueprint('api', __name__)
 
-CATEGORIES = ["Cellphone", "Utilities", "Groceries", "Restaurants", "Beverages", "Transportation", "Entertainment", "Gym", "Subscriptions"]
-
 # Generate RSA key pair (do this securely and store the private key safely)
 key = RSA.generate(2048)
 private_key = key.export_key()

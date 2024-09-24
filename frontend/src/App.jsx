@@ -4,6 +4,7 @@ import {
   createBrowserRouter
 } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
+import Dashboard from "./pages/Dashboard";
 
 
 const router = createBrowserRouter([
@@ -15,6 +16,10 @@ const router = createBrowserRouter([
   {
     path: "/upload",
     Component: SecureFileUpload
+  },
+  {
+    path: "/dashboard",
+    Component: Dashboard
   },
   {
     path: "*",

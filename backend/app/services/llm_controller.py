@@ -3,6 +3,7 @@ import requests
 import re
 from typing import List, Optional, Any
 import json
+from retry import retry
 
 OLLAMA_API_URL = "http://localhost:11434/api/generate"  # Adjust this URL if your Ollama server is running elsewhere
 
@@ -13,9 +14,10 @@ class PromptRequest(BaseModel):
     prompt: str = Field(..., min_length=1, description="The prompt to send to the Ollama model")
     model: str = Field(default="llama2", description="The name of the Ollama model to use")
 
-
-def generate_response(prompt_request: PromptRequest) -> str:
-    return send_to_ollama(prompt_request.prompt, prompt_request.model)
+@retry(ValueError, tries=3)
+def generate_response(prompt_request: PromptRequest) -> List[dict]:
+    raw_response = send_to_ollama(prompt_request.prompt, prompt_request.model)
+    return parse_json_response(raw_response)
 
 def send_to_ollama(prompt, model="llama2"):
   payload = {
@@ -30,7 +32,6 @@ def send_to_ollama(prompt, model="llama2"):
       return response.json()["response"]
   except requests.RequestException as e:
       return f"Error calling Ollama API: {str(e)}"
-
 
 def parse_json_response(response: str) -> List[dict]:
     # Find the JSON list in the response

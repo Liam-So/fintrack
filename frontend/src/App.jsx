@@ -1,9 +1,9 @@
-import SecureFileUpload from "./SecureFileUpload";
+import SecureFileUpload from "./pages/SecureFileUpload";
 import {
   RouterProvider,
   createBrowserRouter
 } from "react-router-dom";
-import LandingPage from "./LandingPage";
+import LandingPage from "./pages/LandingPage";
 
 
 const router = createBrowserRouter([

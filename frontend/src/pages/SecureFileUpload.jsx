@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Upload, Lock, CheckCircle } from 'lucide-react';
-import TransactionReview from './TransactionReview';
+import TransactionReview from '../components/TransactionReview';
 
 
 // Create an axios instance with default config

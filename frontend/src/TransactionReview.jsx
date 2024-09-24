@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { PlusCircle, Send, Pencil, Check } from 'lucide-react';
-
+import { PlusCircle, Send, Pencil, Trash2 } from 'lucide-react';
 
 const CategoryBadge = ({ category }) => {
   const baseClasses = "px-2 py-1 rounded-full text-xs font-semibold";
@@ -26,6 +25,10 @@ const TransactionReview = ({ transactions: initialTransactions, onSubmit, catego
   const handleEdit = (id) => {
     setEditingId(id);
   };
+
+  const handleDelete = (id) => {
+    setTransactions(transactions.filter(t => t.id !== id));
+  }
 
   const handleSave = (id) => {
     setEditingId(null);
@@ -126,12 +129,20 @@ const TransactionReview = ({ transactions: initialTransactions, onSubmit, catego
                       Save
                     </button>
                   ) : (
-                    <button 
-                      onClick={() => handleEdit(transaction.id)}
-                      className="inline-flex items-center text-blue-600 hover:text-blue-900"
-                    >
-                      <Pencil className="mr-2 h-4 w-4" /> Edit
-                    </button>
+                    <div className='flex justify-between'>
+                      <button 
+                        onClick={() => handleEdit(transaction.id)}
+                        className="inline-flex items-center text-blue-600 hover:text-blue-900"
+                      >
+                        <Pencil className="mr-2 h-4 w-4" /> Edit
+                      </button>
+                      <button 
+                        onClick={() => handleDelete(transaction.id)}
+                        className="inline-flex items-center text-red-600 hover:text-red-900"
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                      </button>
+                    </div>
                   )}
                 </td>
               </tr>

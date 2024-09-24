@@ -32,7 +32,6 @@ def hello():
 def get_public_key():
     return public_key.decode(), 200
 
-
 @bp.route('/extract', methods=['POST'])
 def extract():
     if 'pdf' not in request.files:
@@ -76,14 +75,12 @@ def extract():
            model = 'mistral'
 
            prompt_request = PromptRequest(prompt=prompt, model=model)
-           raw_response = generate_response(prompt_request)
-           parsed_items = parse_json_response(raw_response)
+           parsed_items = generate_response(prompt_request)
 
            cleaned_response = clean_response(parsed_items, categories, descriptions, chunk_of_transactions)
            transactions_to_return.extend(cleaned_response)
 
         return jsonify({"transactions": [t.__dict__ for t in transactions_to_return]}), 200
-
       except Exception as e:
         print(f"Error processing PDF file: {str(e)}")
         print(traceback.format_exc())

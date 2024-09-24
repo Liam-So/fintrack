@@ -1,5 +1,7 @@
 TODO:
-[] 
+[] Retry mechanism
+[] Table edits
+[] Send categories
 
 PROD:
 [] Delete pyopenssl dependency. For production, use SSL in a reverse proxy like Nginx 

@@ -13,6 +13,8 @@ const api = axios.create({
   }
 });
 
+const categories = ["Cellphone", "Utilities", "Groceries", "Restaurants", "Drinks", "Transportation", "Clothes", "Gym", "Subscriptions", "Entertainment", "Vacation", "Toiletries", "Haircut"];
+
 const SecureFileUpload = () => {
   const [publicKey, setPublicKey] = useState('');
   const [file, setFile] = useState(null);
@@ -33,6 +35,9 @@ const SecureFileUpload = () => {
 
     const formData = new FormData();
     formData.append('pdf', file);
+
+    const jsonMetadata = { categories: categories };
+    formData.append('json', JSON.stringify(jsonMetadata));
 
     try {
       setUploading(true);
@@ -59,7 +64,7 @@ const SecureFileUpload = () => {
   return (
     <>
     {(transactions.length > 0 && uploadComplete) ? (
-     <TransactionReview transactions={transactions} /> 
+     <TransactionReview transactions={transactions} categories={categories} /> 
     ): (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="max-w-md w-full space-y-8">

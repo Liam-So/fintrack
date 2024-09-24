@@ -10,6 +10,7 @@ from Crypto.Util.Padding import unpad
 import tempfile
 import os
 import uuid
+import json
 
 bp = Blueprint('api', __name__)
 
@@ -40,6 +41,15 @@ def extract():
     
     if file.filename == '':
       return 'No selected file', 400
+    
+    json_data = {}
+
+    if 'json' in request.form:
+       try:
+          json_data = json.loads(request.form['json'])
+          categories = json_data['categories']
+       except Exception as e:
+          return jsonify({"Error processing JSON": str(e)}), 400
 
     if file and file.filename.endswith('.pdf'):
       # Create a temporary file with a unique name
@@ -59,17 +69,16 @@ def extract():
         for i in range(0, len(transactions), 5):
            chunk_of_transactions = transactions[i:i+5]
            print(f"⏳ Processing 5 transactions...")
-          #  for chunk in chunk_of_transactions:
-          #     print(chunk.description)
+
            descriptions = [t.description for t in chunk_of_transactions]
-           prompt = get_transaction_prompt(CATEGORIES, descriptions)
+           prompt = get_transaction_prompt(categories, descriptions)
            model = 'mistral'
 
            prompt_request = PromptRequest(prompt=prompt, model=model)
            raw_response = generate_response(prompt_request)
            parsed_items = parse_json_response(raw_response)
 
-           cleaned_response = clean_response(parsed_items, CATEGORIES, descriptions, chunk_of_transactions)
+           cleaned_response = clean_response(parsed_items, categories, descriptions, chunk_of_transactions)
            transactions_to_return.extend(cleaned_response)
 
         return jsonify({"transactions": [t.__dict__ for t in transactions_to_return]}), 200

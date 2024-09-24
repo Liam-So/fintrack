@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PlusCircle, Send, Pencil, Check } from 'lucide-react';
 
 
@@ -19,7 +19,7 @@ const CategoryBadge = ({ category }) => {
   );
 };
 
-const TransactionReview = ({ transactions: initialTransactions, onSubmit }) => {
+const TransactionReview = ({ transactions: initialTransactions, onSubmit, categories }) => {
   const [transactions, setTransactions] = useState(initialTransactions);
   const [editingId, setEditingId] = useState(null);
 
@@ -40,6 +40,12 @@ const TransactionReview = ({ transactions: initialTransactions, onSubmit }) => {
   const handleSubmit = () => {
     onSubmit(transactions);
   };
+
+
+  useEffect(() => {
+    console.log(transactions)
+  }, [transactions])
+  
 
   return (
     <div className="container mx-auto p-4">
@@ -101,11 +107,11 @@ const TransactionReview = ({ transactions: initialTransactions, onSubmit }) => {
                       onChange={(e) => handleChange(transaction.id, 'category', e.target.value)}
                       className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                      <option value="food">Food</option>
-                      <option value="transport">Transport</option>
-                      <option value="utilities">Utilities</option>
-                      <option value="entertainment">Entertainment</option>
-                      <option value="other">Other</option>
+                      {categories.map((category) => (
+                        <option key={category} value={category}>
+                          {category}
+                        </option>
+                      ))}
                     </select>
                   ) : (
                     <CategoryBadge category={transaction.category} />

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, Send, Pencil, Trash2 } from 'lucide-react';
+import AddTransactionModal from './AddTransactionModal';
 
 const CategoryBadge = ({ category }) => {
   const baseClasses = "px-2 py-1 rounded-full text-xs font-semibold";
@@ -21,6 +22,11 @@ const CategoryBadge = ({ category }) => {
 const TransactionReview = ({ transactions: initialTransactions, onSubmit, categories }) => {
   const [transactions, setTransactions] = useState(initialTransactions);
   const [editingId, setEditingId] = useState(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  const handleAddTransaction = (newTransaction) => {
+    setTransactions([...transactions, newTransaction]);
+  };
 
   const handleEdit = (id) => {
     setEditingId(id);
@@ -152,7 +158,7 @@ const TransactionReview = ({ transactions: initialTransactions, onSubmit, catego
       </div>
       <div className="flex justify-between items-center pt-8">
         <button
-          onClick={() => {}}
+          onClick={() => setIsAddModalOpen(true)}
           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
           <PlusCircle className="mr-2 h-4 w-4" /> Add Transaction
@@ -164,6 +170,12 @@ const TransactionReview = ({ transactions: initialTransactions, onSubmit, catego
           <Send className="mr-2 h-4 w-4" /> Send Transactions
         </button>
       </div>
+      <AddTransactionModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onAdd={handleAddTransaction}
+        categories={categories}
+      />
     </div>
   );
 };

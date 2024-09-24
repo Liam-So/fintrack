@@ -1,17 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Upload, Lock, CheckCircle } from 'lucide-react';
 import TransactionReview from '../components/TransactionReview';
-
-
-// Create an axios instance with default config
-const api = axios.create({
-  baseURL: 'http://localhost:8000',
-  headers: {
-    'Content-Type': 'application/json',
-    // 'Authorization': `Bearer ${yourAuthToken}` // Replace with your actual auth token
-  }
-});
+import { api } from '../axios';
 
 const categories = ["Cellphone", "Utilities", "Groceries", "Restaurants", "Drinks", "Transportation", "Clothes", "Gym", "Subscriptions", "Entertainment", "Vacation", "Toiletries", "Haircut"];
 

@@ -31,6 +31,34 @@ def get_public_key():
     return public_key.decode(), 200
 
 
+@bp.route('/categories/percentages', methods=['GET'])
+def categories():
+    # pull transactions from the database
+    # calculate the percentage of each category
+
+    # This is a dummy response for now
+    return jsonify({
+        "categories": [
+            {
+                "category": "Groceries",
+                "amount": 300
+            },
+            {
+                "category": "Restaurants",
+                "amount": 250
+            },
+            {
+               "category": "Bars",
+               "amount": 200
+            },
+            {
+                "category": "Shopping",
+                "amount": 100
+            }
+        ]
+    }), 200
+
+
 @bp.route('/extract', methods=['POST'])
 def extract():
     if 'pdf' not in request.files:

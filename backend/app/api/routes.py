@@ -30,6 +30,7 @@ def hello():
 def get_public_key():
     return public_key.decode(), 200
 
+
 @bp.route('/extract', methods=['POST'])
 def extract():
     if 'pdf' not in request.files:

@@ -25,6 +25,33 @@ public_key = key.publickey().export_key()
 def hello():
     return 'Welcome to FinTrack 💸'
 
+@bp.route('/transactions', methods=['GET'])
+def transactions():
+     # pull transactions from the database
+      # return them as JSON
+      return jsonify({
+          "transactions": [
+              {
+                  "date": "2021-10-01",
+                  "description": "Whole Foods",
+                  "amount": 50.00,
+                  "category": "Groceries"
+              },
+              {
+                  "date": "2021-10-02",
+                  "description": "Starbucks",
+                  "amount": 5.00,
+                  "category": "Restaurants"
+              },
+              {
+                  "date": "2021-10-03",
+                  "description": "Amazon",
+                  "amount": 100.00,
+                  "category": "Shopping"
+              }
+          ]
+      }), 200   
+
 
 @bp.route('/get-public-key', methods=['GET'])
 def get_public_key():
@@ -40,20 +67,20 @@ def categories():
     return jsonify({
         "categories": [
             {
-                "category": "Groceries",
-                "amount": 300
+                "label": "Groceries",
+                "value": 300
             },
             {
-                "category": "Restaurants",
-                "amount": 250
+                "label": "Restaurants",
+                "value": 250
             },
             {
-               "category": "Bars",
-               "amount": 200
+               "label": "Bars",
+               "value": 200
             },
             {
-                "category": "Shopping",
-                "amount": 100
+                "label": "Shopping",
+                "value": 100
             }
         ]
     }), 200

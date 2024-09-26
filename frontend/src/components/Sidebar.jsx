@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
 import { Menu, Home, Settings, HelpCircle } from 'lucide-react';
 
-const Sidebar = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
   return (
     <>

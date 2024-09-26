@@ -111,6 +111,41 @@ const Dashboard = () => {
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
           <div className="container mx-auto px-6 py-8">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Basic monthly stats */}
+              <div className="flex flex-col gap-6">
+                <div className="bg-white rounded-lg shadow-sm p-6 flex-grow flex flex-col justify-center">
+                  <h2 className="text-xl font-semibold mb-4 text-gray-700">
+                    Monthly Income
+                  </h2>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-3xl font-bold text-gray-900">
+                        $6,000
+                      </p>
+                      <p className="text-sm text-gray-500">vs last month</p>
+                    </div>
+                    <div className="flex items-center text-green-500">
+                      <ArrowUpIcon size={20} />
+                      <span className="text-lg font-semibold ml-1">8.2%</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-white rounded-lg shadow-sm p-6 flex-grow flex flex-col justify-center">
+                  <h2 className="text-xl font-semibold mb-4 text-gray-700">
+                    Amount Spent
+                  </h2>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-3xl font-bold text-gray-900">$2,565</p>
+                      <p className="text-sm text-gray-500">vs last month</p>
+                    </div>
+                    <div className="flex items-center text-red-500">
+                      <ArrowDownIcon size={20} />
+                      <span className="text-lg font-semibold ml-1">3.5%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               {/* Category Breakdown */}
               <div className="bg-white rounded-lg shadow-sm p-6 flex flex-col">
@@ -144,41 +179,6 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* Basic monthly stats */}
-              <div className="flex flex-col gap-6">
-                <div className="bg-white rounded-lg shadow-sm p-6 flex-grow flex flex-col justify-center">
-                  <h2 className="text-xl font-semibold mb-4 text-gray-700">
-                    Monthly Income
-                  </h2>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-3xl font-bold text-gray-900">
-                        $12,345
-                      </p>
-                      <p className="text-sm text-gray-500">vs last month</p>
-                    </div>
-                    <div className="flex items-center text-green-500">
-                      <ArrowUpIcon size={20} />
-                      <span className="text-lg font-semibold ml-1">8.2%</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-white rounded-lg shadow-sm p-6 flex-grow flex flex-col justify-center">
-                  <h2 className="text-xl font-semibold mb-4 text-gray-700">
-                    Amount Spent
-                  </h2>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-3xl font-bold text-gray-900">$8,765</p>
-                      <p className="text-sm text-gray-500">vs last month</p>
-                    </div>
-                    <div className="flex items-center text-red-500">
-                      <ArrowDownIcon size={20} />
-                      <span className="text-lg font-semibold ml-1">3.5%</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
 
             {/* Additional content */}

@@ -4,8 +4,9 @@ import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, BarElement, P
 import { Menu, ArrowUpIcon, ArrowDownIcon } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import { api } from '../axios';
+import ChartDataLabels from "chartjs-plugin-datalabels";
 
-ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Tooltip, Legend);
+ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Tooltip, Legend, ChartDataLabels);
 
 const Dashboard = () => {
   const [transactions, setTransactions] = useState([]);
@@ -111,6 +112,7 @@ const Dashboard = () => {
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
           <div className="container mx-auto px-6 py-8">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              
               {/* Basic monthly stats */}
               <div className="flex flex-col gap-6">
                 <div className="bg-white rounded-lg shadow-sm p-6 flex-grow flex flex-col justify-center">
@@ -157,7 +159,22 @@ const Dashboard = () => {
                     <Doughnut
                       data={doughnutData(categoryPercentages)}
                       options={{
-                        plugins: { legend: { position: "bottom" } },
+                        plugins: { 
+                          legend: { position: "bottom" },
+                          datalabels: {
+                            display: true,
+                            color: '#fff',
+                            formatter: (_, context) => {
+                              const categoryValues = categoryPercentages.map((category) => category.value); // should we extract this?
+                              const total = categoryValues.reduce((acc, curr) => acc + curr, 0);
+                              const staticLabels = categoryValues.map((value) => `${Math.round((value / total) * 100)}%`);
+                              return staticLabels[context.dataIndex];
+                            },
+                            font: {
+                              size: 16
+                            },
+                          }
+                        },
                         cutout: "70%",
                         maintainAspectRatio: false,
                       }}

@@ -61,13 +61,15 @@ const Dashboard = () => {
     datasets: [
       {
         label: "Revenue",
-        data: [65],
+        data: [6000],
         backgroundColor: "rgba(0, 214, 180, 0.6)",
+        borderRadius: 10
       },
       {
         label: "Expenses",
-        data: [45],
+        data: [2565],
         backgroundColor: "rgba(51, 51, 51, 0.6)",
+        borderRadius: 10
       },
     ],
   };
@@ -84,6 +86,8 @@ const Dashboard = () => {
         text: "Revenue vs Expenses",
       },
     },
+    barPercentage: 0.8,  // Adjust this value to control bar width
+    categoryPercentage: 0.3  // Adjust this value to control category width
   };
 
   return (

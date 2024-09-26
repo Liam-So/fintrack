@@ -10,6 +10,7 @@ ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, PointElemen
 const Dashboard = () => {
   const [transactions, setTransactions] = useState([]);
   const [categoryPercentages, setCategoryPercentages] = useState([]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   
   useEffect(() => {
     api.get('/transactions')
@@ -121,7 +122,7 @@ const Dashboard = () => {
 
   return (
     <div className="flex h-screen bg-gray-100">
-      <Sidebar />
+      <Sidebar setSidebarOpen={setSidebarOpen} sidebarOpen={sidebarOpen}/>
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top bar */}

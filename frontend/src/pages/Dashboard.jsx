@@ -49,19 +49,19 @@ const Dashboard = () => {
   };
 
   const barData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+    labels: ['Sep'],
     datasets: [
       {
         label: 'Revenue',
-        data: [65, 59, 80, 81, 56, 55],
+        data: [65],
         backgroundColor: 'rgba(0, 214, 180, 0.6)',
       },
       {
         label: 'Expenses',
-        data: [45, 50, 60, 70, 40, 50],
+        data: [45],
         backgroundColor: 'rgba(51, 51, 51, 0.6)',
       },
-    ],
+    ]
   };
 
   const lineData = {

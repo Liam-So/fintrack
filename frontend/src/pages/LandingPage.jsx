@@ -1,8 +1,12 @@
 import React from 'react';
 import { MoveRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuth0 } from "@auth0/auth0-react";
+import Profile from './Profile';
 
 const LandingPage = () => {
+  const { loginWithRedirect, logout, isAuthenticated } = useAuth0();
+
   return (
     <div className="bg-gray-900 text-white min-h-screen flex items-center justify-center">
       <div className="max-w-3xl w-full space-y-8">
@@ -18,14 +22,22 @@ const LandingPage = () => {
             <span>Try It Out</span>
             <MoveRight />
           </Link>
-          <Link
-            to="/login"
+          <button
+            onClick={() => loginWithRedirect()}
             className="bg-gray-800 hover:bg-gray-700 text-white font-bold py-4 px-8 rounded-lg flex items-center justify-between"
           >
-            <span>Login</span>
+            <span>Login/Register</span>
             <MoveRight />
-          </Link>
+          </button>
         </div>
+
+        {isAuthenticated && (
+          <button onClick={() => logout()}>
+            Log out
+          </button>
+        )}
+
+        <Profile />
       </div>
     </div>
   );

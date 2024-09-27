@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Doughnut, Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import { Menu, ArrowUpIcon, ArrowDownIcon } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import { api } from '../axios';
 import ChartDataLabels from "chartjs-plugin-datalabels";
+import DonutChart from '../components/DonutChart';
+import HorizontalBarChart from '../components/HorizontalBarChart';
 
 ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Tooltip, Legend, ChartDataLabels);
 
@@ -31,64 +32,6 @@ const Dashboard = () => {
         console.error("Error fetching category percentages:", error),
       );
   }, []);
-
-  function generateRandomColors(numColors) {
-    return Array.from(
-      { length: numColors },
-      () =>
-        `rgb(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)})`,
-    );
-  }
-
-  const doughnutData = (categoryPerc) => {
-    const colors = generateRandomColors(categoryPerc.length);
-
-    return {
-      labels: categoryPerc.map((category) => category.label),
-      datasets: [
-        {
-          data: categoryPerc.map((category) => category.value),
-          backgroundColor: colors,
-          borderColor: colors,
-          borderWidth: 1,
-        },
-      ],
-    };
-  };
-
-  const barData = {
-    labels: ["Sep"],
-    datasets: [
-      {
-        label: "Revenue",
-        data: [6000],
-        backgroundColor: "rgba(0, 214, 180, 0.6)",
-        borderRadius: 10
-      },
-      {
-        label: "Expenses",
-        data: [2565],
-        backgroundColor: "rgba(51, 51, 51, 0.6)",
-        borderRadius: 10
-      },
-    ],
-  };
-
-  const barOptions = {
-    indexAxis: "y",
-    responsive: true,
-    plugins: {
-      legend: {
-        position: "bottom",
-      },
-      title: {
-        display: true,
-        text: "Revenue vs Expenses",
-      },
-    },
-    barPercentage: 0.8,  // Adjust this value to control bar width
-    categoryPercentage: 0.3  // Adjust this value to control category width
-  };
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -159,30 +102,8 @@ const Dashboard = () => {
                   Category Breakdown
                 </h2>
                 <div className="flex-grow flex items-center justify-center">
-                  <div className="w-4/5 aspect-square">
-                    <Doughnut
-                      data={doughnutData(categoryPercentages)}
-                      options={{
-                        plugins: { 
-                          legend: { position: "bottom" },
-                          datalabels: {
-                            display: true,
-                            color: '#fff',
-                            formatter: (_, context) => {
-                              const categoryValues = categoryPercentages.map((category) => category.value); // should we extract this?
-                              const total = categoryValues.reduce((acc, curr) => acc + curr, 0);
-                              const staticLabels = categoryValues.map((value) => `${Math.round((value / total) * 100)}%`);
-                              return staticLabels[context.dataIndex];
-                            },
-                            font: {
-                              size: 16
-                            },
-                          }
-                        },
-                        cutout: "70%",
-                        maintainAspectRatio: false,
-                      }}
-                    />
+                  <div className="aspect-square">
+                    <DonutChart categoryPercentages={categoryPercentages} />
                   </div>
                 </div>
               </div>
@@ -193,10 +114,7 @@ const Dashboard = () => {
                   Revenue vs Expenses
                 </h2>
                 <div className="flex-grow">
-                  <Bar
-                    data={barData}
-                    options={{ ...barOptions, maintainAspectRatio: false }}
-                  />
+                  <HorizontalBarChart />
                 </div>
               </div>
 

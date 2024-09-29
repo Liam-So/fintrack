@@ -6,31 +6,50 @@ import { api } from '../axios';
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import DonutChart from '../components/DonutChart';
 import HorizontalBarChart from '../components/HorizontalBarChart';
+import { useLocation } from 'react-router-dom';
 
 ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Tooltip, Legend, ChartDataLabels);
 
-const Dashboard = () => {
+const Dashboard = ({ isTrialDashboard }) => {
   const [transactions, setTransactions] = useState([]);
   const [categoryPercentages, setCategoryPercentages] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  useEffect(() => {
-    api
-      .get("/transactions")
-      .then((response) => {
-        setTransactions(response.data.transactions);
-      })
-      .catch((error) => console.error("Error fetching transactions:", error));
+  const location = useLocation();
 
-    api
-      .get("/categories/percentages")
-      .then((response) => {
-        console.log(response.data);
-        setCategoryPercentages(response.data.categories);
-      })
-      .catch((error) =>
-        console.error("Error fetching category percentages:", error),
-      );
+  // Access the state
+  const { state } = location;
+
+  useEffect(() => {
+    if (!isTrialDashboard) {
+      api
+        .get("/transactions")
+        .then((response) => {
+          setTransactions(response.data.transactions);
+        })
+        .catch((error) => console.error("Error fetching transactions:", error));
+
+      api
+        .get("/categories/percentages")
+        .then((response) => {
+          console.log(response.data);
+          setCategoryPercentages(response.data.categories);
+        })
+        .catch((error) =>
+          console.error("Error fetching category percentages:", error),
+        );
+    } else {
+      setTransactions(state?.transactions || []);
+
+      api.post("/trial/categories/percentages", { transactions: state?.transactions || [] })
+        .then((response) => {
+          console.log(response.data);
+          setCategoryPercentages(response.data);
+        })
+        .catch((error) =>
+          console.error("Error fetching category percentages:", error),
+        );
+    }
   }, []);
 
   return (

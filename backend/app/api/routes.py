@@ -25,6 +25,11 @@ public_key = key.publickey().export_key()
 def hello():
     return 'Welcome to FinTrack 💸'
 
+
+@bp.route('/generate_temp_session', methods=['GET'])
+def generate_temp_session():
+   return jsonify({"session_id": str(uuid.uuid4())}), 200
+
 @bp.route('/transactions', methods=['GET'])
 def transactions():
      # pull transactions from the database

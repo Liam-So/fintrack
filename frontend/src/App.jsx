@@ -14,7 +14,7 @@ const router = createBrowserRouter([
     Component: LandingPage
   },
   {
-    path: "/upload",
+    path: "/upload/:id",
     Component: SecureFileUpload
   },
   {

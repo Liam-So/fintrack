@@ -47,7 +47,8 @@ const Dashboard = ({ isTrialDashboard }) => {
           const { data } = response;
           setCategoryPercentages(data);
 
-          const totalAmount = Object.values(data).reduce((acc, curr) => acc + curr, 0);
+          const totalAmount = Object.values(data).reduce((acc, curr) => acc + curr, 0).toFixed(2);
+
           setAmountSpent(totalAmount);
         })
         .catch((error) =>

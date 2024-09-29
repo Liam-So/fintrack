@@ -1,7 +1,7 @@
 import React from 'react';
 import { Bar } from 'react-chartjs-2';
 
-const HorizontalBarChart = () => {
+const HorizontalBarChart = ({ amountSpent }) => {
   const barData = {
     labels: ["Sep"],
     datasets: [
@@ -13,7 +13,7 @@ const HorizontalBarChart = () => {
       },
       {
         label: "Expenses",
-        data: [2565],
+        data: [amountSpent],
         backgroundColor: "rgba(51, 51, 51, 0.6)",
         borderRadius: 10
       },

@@ -9,10 +9,10 @@ const LandingPage = () => {
   const { loginWithRedirect, logout, isAuthenticated } = useAuth0();
   const navigate = useNavigate();
 
-  const handleTryItOutSession = async () => {
+  const handleTrialSession = async () => {
     api.get('/generate_temp_session').then((response) => {
       if (response.data.session_id) {
-        navigate(`/upload/${response.data.session_id}`);
+        navigate(`/trial/onboard/${response.data.session_id}`);
       }
     }).catch((error) => {
       console.error('Error generating temp session:', error);
@@ -29,7 +29,7 @@ const LandingPage = () => {
         <div className="grid grid-cols-2 gap-8">
           <button
             className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-lg flex items-center justify-between"
-            onClick={handleTryItOutSession}
+            onClick={handleTrialSession}
           >
             <span>Try It Out</span>
             <MoveRight />

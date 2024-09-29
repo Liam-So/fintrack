@@ -21,12 +21,13 @@ const CategoryBadge = ({ category }) => {
   );
 };
 
-const TransactionReview = ({ transactions: initialTransactions, categories, isTrialFlow }) => {
+const TransactionReview = ({ transactions: initialTransactions, categories, isTrialFlow, income }) => {
   const [transactions, setTransactions] = useState(initialTransactions);
   const [editingId, setEditingId] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const { id } = useParams();
 
+  // routing
+  const { id } = useParams();
   const navigate = useNavigate();
 
   const handleAddTransaction = (newTransaction) => {
@@ -54,7 +55,7 @@ const TransactionReview = ({ transactions: initialTransactions, categories, isTr
   const handleSubmit = () => {
     if (isTrialFlow) {
       console.log("here")
-      navigate(`/trialDashboard/${id}`, { state: { transactions } });
+      navigate(`/trial/dashboard/${id}`, { state: { transactions, income } });
     } else {
       navigate('/dashboard');
     }

@@ -93,7 +93,7 @@ const Dashboard = ({ isTrialDashboard }) => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-3xl font-bold text-gray-900">
-                        $6,000
+                        ${state?.income || 0}
                       </p>
                       <p className="text-sm text-gray-500">vs last month</p>
                     </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { PlusCircle, Send, Pencil, Trash2 } from 'lucide-react';
 import AddTransactionModal from './AddTransactionModal';
 import { useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 const CategoryBadge = ({ category }) => {
   const baseClasses = "px-2 py-1 rounded-full text-xs font-semibold";
@@ -20,10 +21,11 @@ const CategoryBadge = ({ category }) => {
   );
 };
 
-const TransactionReview = ({ transactions: initialTransactions, categories }) => {
+const TransactionReview = ({ transactions: initialTransactions, categories, isTrialFlow }) => {
   const [transactions, setTransactions] = useState(initialTransactions);
   const [editingId, setEditingId] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const { id } = useParams();
 
   const navigate = useNavigate();
 
@@ -50,7 +52,12 @@ const TransactionReview = ({ transactions: initialTransactions, categories }) =>
   };
 
   const handleSubmit = () => {
-    navigate('/dashboard');
+    if (isTrialFlow) {
+      console.log("here")
+      navigate(`/trialDashboard/${id}`, { state: { transactions } });
+    } else {
+      navigate('/dashboard');
+    }
   };
 
 

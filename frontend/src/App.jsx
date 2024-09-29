@@ -5,6 +5,7 @@ import {
 } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import Dashboard from "./pages/Dashboard";
+import TrialDashboard from "./pages/TrialDashboard";
 
 
 const router = createBrowserRouter([
@@ -14,12 +15,16 @@ const router = createBrowserRouter([
     Component: LandingPage
   },
   {
-    path: "/upload/:id",
+    path: "/upload/:id", // We should authenticate the user before they can access this route
     Component: SecureFileUpload
   },
   {
     path: "/dashboard",
     Component: Dashboard
+  },
+  {
+    path: "/trialDashboard/:id",
+    Component: TrialDashboard
   },
   {
     path: "*",

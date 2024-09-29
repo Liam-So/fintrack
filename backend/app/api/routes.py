@@ -28,7 +28,7 @@ def hello():
 
 @bp.route('/generate_temp_session', methods=['GET'])
 def generate_temp_session():
-   return jsonify({"session_id": str(uuid.uuid4())}), 200
+   return jsonify({"session_id": f"temp_{str(uuid.uuid4())}"}), 200
 
 @bp.route('/transactions', methods=['GET'])
 def transactions():
@@ -70,25 +70,30 @@ def categories():
 
     # This is a dummy response for now
     return jsonify({
-        "categories": [
-            {
-                "label": "Groceries",
-                "value": 300
-            },
-            {
-                "label": "Restaurants",
-                "value": 250
-            },
-            {
-               "label": "Bars",
-               "value": 200
-            },
-            {
-                "label": "Shopping",
-                "value": 100
-            }
-        ]
+       "Groceries": 300,
+       "Restaurants": 100,
+       "Shopping": 200,
+       "Transportation": 50
     }), 200
+
+
+@bp.route('/trial/categories/percentages', methods=['POST'])
+def trial_categories():
+   request_data = json.loads(request.data)
+
+   transactions = request_data['transactions']
+
+   categories = {}
+
+   for transaction in transactions:
+      if transaction['category'] not in categories:
+         categories[transaction['category']] = float(transaction['amount'])
+      else:
+         categories[transaction['category']] += float(transaction['amount'])
+
+      categories[transaction['category']] = round(categories[transaction['category']], 2)
+
+   return categories, 200
 
 
 @bp.route('/extract', methods=['POST'])

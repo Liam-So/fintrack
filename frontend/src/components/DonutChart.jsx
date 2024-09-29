@@ -12,13 +12,13 @@ const DonutChart = ({ categoryPercentages }) => {
   }
 
   const doughnutData = (categoryPercentages) => {
-    const colors = generateRandomColors(categoryPercentages.length);
+    const colors = generateRandomColors(Object.entries(categoryPercentages).length);
 
     return {
-      labels: categoryPercentages.map((category) => category.label),
+      labels: Object.keys(categoryPercentages),
       datasets: [
         {
-          data: categoryPercentages.map((category) => category.value),
+          data: Object.values(categoryPercentages),
           backgroundColor: colors,
           borderColor: colors,
           borderWidth: 1,
@@ -37,9 +37,7 @@ const DonutChart = ({ categoryPercentages }) => {
             display: true,
             color: "#fff",
             formatter: (_, context) => {
-              const categoryValues = categoryPercentages.map(
-                (category) => category.value,
-              ); // should we extract this?
+              const categoryValues = Object.values(categoryPercentages);
               const total = categoryValues.reduce((acc, curr) => acc + curr, 0);
               const staticLabels = categoryValues.map(
                 (value) => `${Math.round((value / total) * 100)}%`,

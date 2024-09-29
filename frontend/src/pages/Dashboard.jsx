@@ -14,6 +14,7 @@ const Dashboard = ({ isTrialDashboard }) => {
   const [transactions, setTransactions] = useState([]);
   const [categoryPercentages, setCategoryPercentages] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [amountSpent, setAmountSpent] = useState(0);
 
   const location = useLocation();
 
@@ -43,8 +44,11 @@ const Dashboard = ({ isTrialDashboard }) => {
 
       api.post("/trial/categories/percentages", { transactions: state?.transactions || [] })
         .then((response) => {
-          console.log(response.data);
-          setCategoryPercentages(response.data);
+          const { data } = response;
+          setCategoryPercentages(data);
+
+          const totalAmount = Object.values(data).reduce((acc, curr) => acc + curr, 0);
+          setAmountSpent(totalAmount);
         })
         .catch((error) =>
           console.error("Error fetching category percentages:", error),
@@ -104,7 +108,7 @@ const Dashboard = ({ isTrialDashboard }) => {
                   </h2>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-3xl font-bold text-gray-900">$2,565</p>
+                      <p className="text-3xl font-bold text-gray-900">${amountSpent}</p>
                       <p className="text-sm text-gray-500">vs last month</p>
                     </div>
                     <div className="flex items-center text-red-500">
@@ -133,7 +137,7 @@ const Dashboard = ({ isTrialDashboard }) => {
                   Revenue vs Expenses
                 </h2>
                 <div className="flex-grow">
-                  <HorizontalBarChart />
+                  <HorizontalBarChart amountSpent={amountSpent} />
                 </div>
               </div>
 

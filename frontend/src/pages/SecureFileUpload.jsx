@@ -2,32 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { Upload, Lock, CheckCircle } from 'lucide-react';
 import TransactionReview from '../components/TransactionReview';
 import { api } from '../axios';
-import { useParams } from 'react-router-dom';
-import { useAuth0 } from "@auth0/auth0-react";
+import { useParams, useLocation } from 'react-router-dom';
 
-const categories = ["Cellphone", "Utilities", "Groceries", "Restaurants", "Drinks", "Transportation", "Clothes", "Gym", "Subscriptions", "Entertainment", "Vacation", "Toiletries", "Haircut"];
-
-const SecureFileUpload = () => {
+const SecureFileUpload = ({ isTrial }) => {
   const [publicKey, setPublicKey] = useState('');
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
   const [transactions, setTransactions] = useState([]);
-  const { isAuthenticated } = useAuth0();
 
-  // This state is used to determine if the user is in the "Try It Out" flow
-  const [isTrialFlow, setIsTrialFlow] = useState(false);
+  const location = useLocation();
 
-  const { id } = useParams();
+  // Access the state
+  const { state } = location;
 
-  useEffect(() => {
-    console.log("ID:", id)
-    if (id.includes("temp_") && !isAuthenticated) {
-      setIsTrialFlow(true);
-      console.log("We are in a temp session flow")
-    }
-  }, [id])
-  
   useEffect(() => {
     api.get('/get-public-key')
       .then(response => setPublicKey(response.data))
@@ -42,7 +30,7 @@ const SecureFileUpload = () => {
     const formData = new FormData();
     formData.append('pdf', file);
 
-    const jsonMetadata = { categories: categories };
+    const jsonMetadata = { categories: state.selectedCategories };
     formData.append('json', JSON.stringify(jsonMetadata));
 
     try {
@@ -72,8 +60,9 @@ const SecureFileUpload = () => {
     {(transactions.length > 0 && uploadComplete) ? (
      <TransactionReview 
         transactions={transactions}
-        categories={categories} 
-        isTrialFlow={isTrialFlow}
+        categories={state.selectedCategories} 
+        isTrialFlow={isTrial}
+        income={state.income}
      /> 
     ): (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">

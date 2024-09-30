@@ -1,19 +1,49 @@
+import React, { useEffect } from "react";
 import SecureFileUpload from "./pages/SecureFileUpload";
 import {
   RouterProvider,
-  createBrowserRouter
+  createBrowserRouter,
+  Navigate
 } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import Dashboard from "./pages/Dashboard";
 import TrialDashboard from "./pages/TrialDashboard";
 import OnboardingFlow from "./pages/OnboardingFlow";
+import { useAuth0 } from "@auth0/auth0-react";
 
+const Callback = () => {
+  const { isAuthenticated, isLoading } = useAuth0();
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  return isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/" />;
+};
+
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated, isLoading } = useAuth0();
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  return isAuthenticated ? children : <Navigate to="/" />;
+};
 
 const router = createBrowserRouter([
   {
     id: "root",
     path: "/",
-    Component: LandingPage
+    Component: LandingPage,
+  },
+  {
+    element: <ProtectedRoute />,
+    children: [
+      { path: '/onboard/:id', element: <OnboardingFlow /> },
+      { path: '/upload/:id', element: <SecureFileUpload /> },
+      { path: '/dashboard/:id', element: <Dashboard /> }
+    ]
   },
   {
     path: "/trial/upload/:id",
@@ -27,14 +57,13 @@ const router = createBrowserRouter([
     path: "/trial/dashboard/:id",
     Component: TrialDashboard
   },
-  // TODO: Add authentication to these routes
   {
     path: "/dashboard",
-    Component: Dashboard
+    element: <div>Welcome Home 🏡</div> 
   },
   {
-    path: "/upload/:id", // We should authenticate the user before they can access this route
-    Component: SecureFileUpload
+    path: "/callback",
+    element: <Callback />
   },
   {
     path: "*",

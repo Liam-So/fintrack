@@ -15,6 +15,7 @@ const Dashboard = ({ isTrialDashboard }) => {
   const [categoryPercentages, setCategoryPercentages] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [amountSpent, setAmountSpent] = useState(0);
+  const [monthlyRevenue, setMonthlyRevenue] = useState(0);
 
   const location = useLocation();
 
@@ -50,6 +51,7 @@ const Dashboard = ({ isTrialDashboard }) => {
           const totalAmount = Object.values(data).reduce((acc, curr) => acc + curr, 0).toFixed(2);
 
           setAmountSpent(totalAmount);
+          setMonthlyRevenue(state?.income || 0);
         })
         .catch((error) =>
           console.error("Error fetching category percentages:", error),
@@ -138,7 +140,7 @@ const Dashboard = ({ isTrialDashboard }) => {
                   Revenue vs Expenses
                 </h2>
                 <div className="flex-grow">
-                  <HorizontalBarChart amountSpent={amountSpent} />
+                  <HorizontalBarChart amountSpent={amountSpent} monthlyRevenue={monthlyRevenue} />
                 </div>
               </div>
 

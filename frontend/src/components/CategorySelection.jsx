@@ -31,9 +31,11 @@ const CategorySelection = ({ onComplete }) => {
   };
 
   const addCustomCategory = () => {
-    if (newCategory.trim()) {
-      const newId = `custom-${Date.now()}`;
-      setCategories([...categories, { id: newId, name: newCategory.trim(), icon: '🔹' }]);
+    // TODO: Ensure no duplicates
+    const customCategory = newCategory.trim();
+    if (customCategory) {
+      const newId = customCategory;
+      setCategories([...categories, { id: newId, name: newId, icon: '🔹' }]);
       setSelectedCategories([...selectedCategories, newId]);
       setNewCategory('');
     }

@@ -168,7 +168,7 @@ def user_count():
 @bp.route('/user', methods=['POST'])
 def create_user():
     data = request.json
-    new_user = User(username=data['username'], email=data['email'])
+    new_user = User(username=data['username'], email=data['email'], monthly_income=data['monthly_income'])
     db.session.add(new_user)
     db.session.commit()
     return jsonify({"message": "User created successfully"}), 201

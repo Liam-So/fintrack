@@ -1,0 +1,14 @@
+Single-database configuration for Flask.
+
+To migrate perform the sequence of commands:
+```
+flask db init # only if you haven't ran this before
+flask db migrate -m "Updated users schema"
+flask db upgrade
+```
+
+Resources:
+https://realpython.com/flask-by-example-part-2-postgres-sqlalchemy-and-alembic/
+
+Sometimes you may get target head not up to date:
+https://stackoverflow.com/questions/17768940/target-database-is-not-up-to-date

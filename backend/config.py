@@ -4,6 +4,7 @@ class Config:
 
 class DevelopmentConfig(Config):
     DEBUG = True
+    SQL_ALCHEMY_DATABASE_URI = 'postgresql://username:password@localhost:5432/fintrack'
 
 config = {
     'development': DevelopmentConfig,

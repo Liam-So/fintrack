@@ -2,10 +2,14 @@ from flask import Blueprint, request, jsonify
 from app.services.pdf_extractor import PDFExtractor, Institution
 from app.services.transaction_extractor import TransactionExtractor
 from app.services.llm_controller import generate_response, PromptRequest, get_transaction_prompt, parse_json_response, clean_response
+from app import db
 
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP, AES
 from Crypto.Util.Padding import unpad
+
+from app.models.user import User
+
 import traceback
 
 import tempfile
@@ -154,4 +158,17 @@ def extract():
         if os.path.exists(temp_filepath):
           print(f"Deleting PDF file: {temp_filename} in location: {temp_filepath}")
           os.remove(temp_filepath)
-      
+
+@bp.route('/user_count')
+def user_count():
+    count = User.query.count()
+    return jsonify({"user_count": count}), 200 
+
+
+@bp.route('/user', methods=['POST'])
+def create_user():
+    data = request.json
+    new_user = User(username=data['username'], email=data['email'])
+    db.session.add(new_user)
+    db.session.commit()
+    return jsonify({"message": "User created successfully"}), 201

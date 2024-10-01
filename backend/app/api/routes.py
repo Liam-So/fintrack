@@ -159,10 +159,20 @@ def extract():
           print(f"Deleting PDF file: {temp_filename} in location: {temp_filepath}")
           os.remove(temp_filepath)
 
+
+## Users
 @bp.route('/user_count')
 def user_count():
     count = User.query.count()
     return jsonify({"user_count": count}), 200 
+
+
+@bp.route('/user/<username>', methods=['GET'])
+def get_user(username):
+    user = User.query.filter_by(username=username).first()
+    if user:
+        return jsonify({"username": user.username, "email": user.email})
+    return jsonify({"message": "User not found"}), 404
 
 
 @bp.route('/user', methods=['POST'])

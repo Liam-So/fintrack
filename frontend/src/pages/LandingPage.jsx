@@ -42,14 +42,6 @@ const LandingPage = () => {
             <MoveRight />
           </button>
         </div>
-
-        {isAuthenticated && (
-          <button onClick={() => logout()}>
-            Log out
-          </button>
-        )}
-
-        <Profile />
       </div>
     </div>
   );

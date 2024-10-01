@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import TrialDashboard from "./pages/TrialDashboard";
 import OnboardingFlow from "./pages/OnboardingFlow";
 import { useAuth0 } from "@auth0/auth0-react";
+import Profile from "./pages/Profile";
 
 const Callback = () => {
   const { isAuthenticated, isLoading } = useAuth0();
@@ -48,6 +49,10 @@ const router = createBrowserRouter([
   {
     path: "/dashboard",
     element: <ProtectedRoute><Dashboard /></ProtectedRoute>
+  },
+  {
+    path: "/profile",
+    element: <ProtectedRoute><Profile /></ProtectedRoute>
   },
   {
     path: "/onboard/:id",

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { Menu, Home, Settings, HelpCircle } from 'lucide-react';
+import { Menu, Home, Settings, HelpCircle, User } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
@@ -17,6 +18,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
           <ul>
             <SidebarItem icon={Home} text="Dashboard" />
             <SidebarItem icon={Settings} text="Settings" />
+            <SidebarItem icon={User} text="Profile" link={"/profile"} />
             <SidebarItem icon={HelpCircle} text="Help" />
           </ul>
         </nav>
@@ -25,12 +27,12 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   )
 }
 
-const SidebarItem = ({ icon: Icon, text }) => (
+const SidebarItem = ({ icon: Icon, text, link = "#" }) => (
   <li className="mb-6">
-    <a href="#" className="flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg p-2 transition-colors duration-200">
+    <Link to={link} className="flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg p-2 transition-colors duration-200">
       <Icon className="mr-4" size={24} />
       <span className="text-lg">{text}</span>
-    </a>
+    </Link>
   </li>
 );
 

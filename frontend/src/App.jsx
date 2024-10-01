@@ -33,46 +33,46 @@ const ProtectedRoute = ({ children }) => {
 
 const router = createBrowserRouter([
   {
-    id: "root",
     path: "/",
-    Component: LandingPage,
-  },
-  {
-    element: <ProtectedRoute />,
-    children: [
-      { path: '/onboard/:id', element: <OnboardingFlow /> },
-      { path: '/upload/:id', element: <SecureFileUpload /> },
-      { path: '/dashboard/:id', element: <Dashboard /> }
-    ]
-  },
-  {
-    path: "/trial/upload/:id",
-    element: <SecureFileUpload isTrial />
-  },
-  {
-    path: "/trial/onboard/:id",
-    element: <OnboardingFlow isTrial />
-  },
-  {
-    path: "/trial/dashboard/:id",
-    Component: TrialDashboard
-  },
-  {
-    path: "/dashboard",
-    element: <div>Welcome Home 🏡</div> 
+    element: <LandingPage />,
   },
   {
     path: "/callback",
-    element: <Callback />
+    element: <Callback />,
   },
   {
     path: "*",
-    Component: () => <p>Not Found 🤔</p>
-  }
+    element: <p>Not Found 🤔</p>,
+  },
+  // Can we refactor protected routes?
+  {
+    path: "/dashboard",
+    element: <ProtectedRoute><Dashboard /></ProtectedRoute>
+  },
+  {
+    path: "/onboard/:id",
+    element: <ProtectedRoute><OnboardingFlow /></ProtectedRoute>
+  },
+  {
+    path: "/upload/:id",
+    element: <ProtectedRoute><SecureFileUpload /></ProtectedRoute>
+  },
+  {
+    path: "/trial/upload/:id",
+    element: <SecureFileUpload isTrial />,
+  },
+  {
+    path: "/trial/onboard/:id",
+    element: <OnboardingFlow isTrial />,
+  },
+  {
+    path: "/trial/dashboard/:id",
+    element: <TrialDashboard />,
+  },
 ]);
 
 export default function App() {
   return (
     <RouterProvider router={router} fallbackElement={<p>Initial Load...</p>} />
-  )
+  );
 }

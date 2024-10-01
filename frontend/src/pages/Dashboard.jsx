@@ -7,6 +7,7 @@ import ChartDataLabels from "chartjs-plugin-datalabels";
 import DonutChart from '../components/DonutChart';
 import HorizontalBarChart from '../components/HorizontalBarChart';
 import { useLocation } from 'react-router-dom';
+import { useAuth0 } from "@auth0/auth0-react";
 
 ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Tooltip, Legend, ChartDataLabels);
 
@@ -16,6 +17,7 @@ const Dashboard = ({ isTrialDashboard }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [amountSpent, setAmountSpent] = useState(0);
   const [monthlyRevenue, setMonthlyRevenue] = useState(0);
+  const { logout } = useAuth0();
 
   const location = useLocation();
 
@@ -74,9 +76,15 @@ const Dashboard = ({ isTrialDashboard }) => {
               <Menu size={24} />
             </button>
             <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
-            <div className="flex items-center">
+            <div className="flex items-center gap-4">
               <span className="text-sm text-gray-500 mr-4">John Doe</span>
               <div className="h-8 w-8 rounded-full bg-gray-300"></div>
+              <button 
+                className='p-2 bg-gray-50 font-semibold rounded-xs shadow-sm text-sm'
+                onClick={() => logout()}
+              >
+                Sign Out
+              </button>
             </div>
           </div>
         </header>

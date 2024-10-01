@@ -2,7 +2,6 @@ import React from "react";
 import { Doughnut } from 'react-chartjs-2';
 
 const DonutChart = ({ categoryPercentages }) => {
-
   function generateRandomColors(numColors) {
     return Array.from(
       { length: numColors },
@@ -28,32 +27,40 @@ const DonutChart = ({ categoryPercentages }) => {
   };
 
   return (
-    <Doughnut
-      data={doughnutData(categoryPercentages)}
-      options={{
-        plugins: {
-          legend: { position: "bottom" },
-          datalabels: {
-            display: true,
-            color: "#fff",
-            formatter: (_, context) => {
-              const categoryValues = Object.values(categoryPercentages);
-              const total = categoryValues.reduce((acc, curr) => acc + curr, 0);
-              const staticLabels = categoryValues.map(
-                (value) => `${Math.round((value / total) * 100)}%`,
-              );
-              return staticLabels[context.dataIndex];
-            },
-            font: {
-              size: 13,
-              weight: 500,
+    <>
+    {categoryPercentages ? (
+      <Doughnut
+        data={doughnutData(categoryPercentages)}
+        options={{
+          plugins: {
+            legend: { position: "bottom" },
+            datalabels: {
+              display: true,
+              color: "#fff",
+              formatter: (_, context) => {
+                const categoryValues = Object.values(categoryPercentages);
+                const total = categoryValues.reduce((acc, curr) => acc + curr, 0);
+                const staticLabels = categoryValues.map(
+                  (value) => `${Math.round((value / total) * 100)}%`,
+                );
+                return staticLabels[context.dataIndex];
+              },
+              font: {
+                size: 13,
+                weight: 500,
+              },
             },
           },
-        },
-        cutout: "70%",
-        maintainAspectRatio: false,
-      }}
-    />
+          cutout: "70%",
+          maintainAspectRatio: false,
+        }}
+      />
+    ) : (
+      <p className="text-md">
+      No data 💀
+      </p>
+    )}
+    </>
   );
 };
 

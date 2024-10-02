@@ -16,7 +16,7 @@ import Sidebar from "../components/Sidebar";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import DonutChart from "../components/DonutChart";
 import HorizontalBarChart from "../components/HorizontalBarChart";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import { fetchCategoryPercentages, fetchTransactions, fetchUserData, postNewUser } from "../api/dashboardApi";
 
@@ -41,8 +41,10 @@ const Dashboard = ({ isTrialDashboard }) => {
   const [monthlyRevenue, setMonthlyRevenue] = useState(0);
   const { user, logout } = useAuth0();
   const [isUserOnboarded, setIsUserOnboarded] = useState(true);
+  const [userId, setUserId] = useState(null)
 
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Access the state
   const { state } = location;
@@ -52,6 +54,8 @@ const Dashboard = ({ isTrialDashboard }) => {
       const { data } = userData;
       const hasMonthlyIncome = true ? "monthly_income" in data : false;
       setIsUserOnboarded(hasMonthlyIncome);
+      setUserId(data.id);
+      setMonthlyRevenue(data?.monthly_income);
     } else {
       // create user if they do not exist
       const postUser = await postNewUser(user);
@@ -105,7 +109,12 @@ const Dashboard = ({ isTrialDashboard }) => {
           {isUserOnboarded ? (
             <DashboardContent transactions={transactions} categoryPercentages={categoryPercentages} amountSpent={amountSpent} monthlyRevenue={monthlyRevenue} />
           ) : (
-            <>No data. Upload data to continue...</>
+            <>
+            <div className="flex flex-col items-center justify-center pt-8 gap-2">
+              No data. Upload data to continue...
+              <button onClick={() => navigate(`/onboard/${userId}`)} className="p-1 bg-gray-800 text-white rounded-md">Upload</button>
+            </div>
+            </>
           )}
         </main>
       </div>

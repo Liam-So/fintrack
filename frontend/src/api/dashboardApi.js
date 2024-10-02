@@ -18,3 +18,5 @@ export const postNewUser = (user) => (
     email: user.email
   })
 );
+
+export const updateUser = ({ id, updatedAttributes }) => (api.put(`/user/${id}`, updatedAttributes));

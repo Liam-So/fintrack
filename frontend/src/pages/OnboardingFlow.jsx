@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import MonthlyIncomeInput from '../components/MonthlyIncomeInput';
 import CategorySelection from '../components/CategorySelection';
 import { useNavigate, useParams } from 'react-router-dom';
+import { updateUser } from '../api/dashboardApi';
 
 const OnboardingFlow = ({ isTrial }) => {
   const [step, setStep] = useState('income');
@@ -16,10 +17,9 @@ const OnboardingFlow = ({ isTrial }) => {
     setStep('categories');
   }
 
-  const handleComplete = (selectedCategories) => {
+  const handleComplete = async (selectedCategories) => {
     setCategories(selectedCategories);
 
-    // TODO: if not trial flow, send to backend
     if (isTrial) {
       navigate(`/trial/upload/${id}`, {
         state: {
@@ -27,6 +27,9 @@ const OnboardingFlow = ({ isTrial }) => {
           income
         }
       })
+    } else {
+      const updatedUser = await updateUser({ id, updatedAttributes: { monthly_income: income } });
+      navigate(`/upload/${id}`)
     }
   }
 

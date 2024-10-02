@@ -171,7 +171,19 @@ def user_count():
 def get_user(username):
     user = User.query.filter_by(username=username).first()
     if user:
-        return jsonify({"username": user.username, "email": user.email})
+        return jsonify({"id": user.id, "username": user.username, "email": user.email, "monthly_income": user.monthly_income}), 200
+    return jsonify({"message": "User not found"}), 404
+
+
+@bp.route('/user/<id>', methods=['PUT'])
+def update_user(id):
+    user = User.query.get(id)
+    if user:
+        data = request.json
+        user.email = data.get("email", user.email)
+        user.monthly_income = data.get("monthly_income", user.monthly_income)
+        db.session.commit()
+        return jsonify({"message": "User updated successfully"}), 200
     return jsonify({"message": "User not found"}), 404
 
 

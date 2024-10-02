@@ -8,7 +8,7 @@ from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP, AES
 from Crypto.Util.Padding import unpad
 
-from app.models.user import User
+from app.models.db_models import User
 
 import traceback
 

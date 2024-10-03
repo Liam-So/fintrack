@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import MonthlyIncomeInput from '../components/MonthlyIncomeInput';
 import CategorySelection from '../components/CategorySelection';
 import { useNavigate, useParams } from 'react-router-dom';
-import { updateUser } from '../api/dashboardApi';
+import { postOnboardUser, updateUser } from '../api/dashboardApi';
 
 const OnboardingFlow = ({ isTrial }) => {
   const [step, setStep] = useState('income');
@@ -28,7 +28,9 @@ const OnboardingFlow = ({ isTrial }) => {
         }
       })
     } else {
+      // Update user AND add categories to user_categories
       const updatedUser = await updateUser({ id, updatedAttributes: { monthly_income: income } });
+      const onboardUser = await postOnboardUser({ id, selectedCategories, income });
       navigate(`/upload/${id}`)
     }
   }

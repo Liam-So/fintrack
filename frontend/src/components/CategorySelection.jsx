@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import { Check, Plus, X } from 'lucide-react';
 
 const initialCategories = [
-  { id: 'food', name: 'Food & Dining', icon: '🍽️' },
+  { id: 'rent', name: 'Rent', icon: '🏠' },
+  { id: 'restaurants', name: 'Restaurants', icon: '🍽️' },
+  { id: 'drinks', name: 'Drinks', icon: '🍷' },
+  { id: 'groceries', name: 'Groceries', icon: '🛒' },
   { id: 'transport', name: 'Transportation', icon: '🚗' },
   { id: 'utilities', name: 'Utilities', icon: '💡' },
   { id: 'entertainment', name: 'Entertainment', icon: '🎭' },
   { id: 'shopping', name: 'Shopping', icon: '🛍️' },
-  { id: 'health', name: 'Health & Fitness', icon: '💪' },
+  { id: 'health', name: 'Health', icon: '💪' },
   { id: 'travel', name: 'Travel', icon: '✈️' },
   { id: 'education', name: 'Education', icon: '📚' },
 ];

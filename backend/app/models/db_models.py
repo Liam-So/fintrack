@@ -15,6 +15,8 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     monthly_income = db.Column(db.Integer, nullable=True)
+    # Should we add an onboarded flag?
+
     categories = db.relationship('Category', secondary=user_categories, lazy='subquery',
         backref=db.backref('users', lazy=True))
 

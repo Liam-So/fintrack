@@ -19,6 +19,7 @@ class User(db.Model):
 
     categories = db.relationship('Category', secondary=user_categories, lazy='subquery',
         backref=db.backref('users', lazy=True))
+    transactions = db.relationship('Transaction', backref='user', lazy=True)
 
     def __repr__(self):
         return f'<User {self.username}>'
@@ -30,5 +31,20 @@ class Category(db.Model):
     name = db.Column(db.String(80), unique=True, nullable=False)
     is_predefined = db.Column(db.Boolean, default=False)
 
+    transactions = db.relationship('Transaction', backref='category', lazy='dynamic')
+
     def __repr__(self):
         return f'<Category {self.name}>'
+    
+
+class Transaction(db.Model):
+    __tablename__ = 'transactions'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
+    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    date = db.Column(db.DateTime, nullable=False)
+    description = db.Column(db.String(255), nullable=False)
+
+    def __repr__(self):
+        return f'<Transaction {self.id}>'

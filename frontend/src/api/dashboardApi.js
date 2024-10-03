@@ -27,3 +27,9 @@ export const postOnboardUser = ({ id, selectedCategories, income }) => (
     monthly_income: income
   })
 );
+
+export const postTransactions = (transactions) => (
+  api.post("/transactions", {
+    transactions: transactions
+  })
+);

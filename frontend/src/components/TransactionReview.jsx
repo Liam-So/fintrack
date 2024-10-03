@@ -3,6 +3,7 @@ import { PlusCircle, Send, Pencil, Trash2 } from 'lucide-react';
 import AddTransactionModal from './AddTransactionModal';
 import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
+import { postTransactions } from '../api/dashboardApi';
 
 const CategoryBadge = ({ category }) => {
   const baseClasses = "px-2 py-1 rounded-full text-xs font-semibold";
@@ -52,11 +53,11 @@ const TransactionReview = ({ transactions: initialTransactions, categories, isTr
     ));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (isTrialFlow) {
-      console.log("here")
       navigate(`/trial/dashboard/${id}`, { state: { transactions, income } });
     } else {
+      await postTransactions(transactions);
       navigate('/dashboard');
     }
   };

@@ -31,7 +31,12 @@ const OnboardingFlow = ({ isTrial }) => {
       // Update user AND add categories to user_categories
       const updatedUser = await updateUser({ id, updatedAttributes: { monthly_income: income } });
       const onboardUser = await postOnboardUser({ id, selectedCategories, income });
-      navigate(`/upload/${id}`)
+      navigate(`/upload/${id}`, {
+        state: {
+          selectedCategories,
+          income
+        }
+      })
     }
   }
 

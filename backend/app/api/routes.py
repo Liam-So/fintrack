@@ -8,7 +8,7 @@ from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP, AES
 from Crypto.Util.Padding import unpad
 
-from app.models.db_models import User, Category
+from app.models.db_models import User, Category, Transaction
 
 import traceback
 
@@ -129,8 +129,8 @@ def extract():
         # Save the file temporarily
         file.save(temp_filepath)
         institution = Institution("AMEX")
-        text_by_page = PDFExtractor.extract_text(temp_filepath, institution)
-        transactions = TransactionExtractor.extract_transactions(text_by_page)
+        text_by_page, open_close_dates = PDFExtractor.extract_text(temp_filepath, institution)
+        transactions = TransactionExtractor.extract_transactions(text_by_page, open_close_dates)
 
         transactions_to_return = []
 
@@ -148,7 +148,7 @@ def extract():
            cleaned_response = clean_response(parsed_items, categories, descriptions, chunk_of_transactions)
            transactions_to_return.extend(cleaned_response)
 
-        return jsonify({"transactions": [t.__dict__ for t in transactions_to_return]}), 200
+        return jsonify({"transactions": [t.__dict__ for t in transactions]}), 200
       except Exception as e:
         print(f"Error processing PDF file: {str(e)}")
         print(traceback.format_exc())
@@ -241,3 +241,22 @@ def onboard_user(id):
 
         return jsonify({"message": "User onboarded successfully"}), 200
     return jsonify({"message": "User not found"}), 404
+
+
+@bp.route('/transactions/<id>', methods=['POST'])
+def post_transactions(id):
+   data = request.json
+   transactions = data.get("transactions", [])
+   user = User.query.get(id)
+
+   if user and len(transactions) > 0:
+      for transaction in transactions:
+        amount = transaction.get("amount", 0)
+        date = transaction.get("date", None)
+        description = transaction.get("description", "")
+
+        category = Category.query.filter_by(name=transaction['category']).first()
+        if category:
+          user.transactions.append(Transaction(user_id=id, category_id=category.id, amount=amount, date=date, description=description))
+      db.session.commit()
+      return jsonify({"message": "Transactions added successfully"}), 200

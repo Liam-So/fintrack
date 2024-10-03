@@ -20,3 +20,10 @@ export const postNewUser = (user) => (
 );
 
 export const updateUser = ({ id, updatedAttributes }) => (api.put(`/user/${id}`, updatedAttributes));
+
+export const postOnboardUser = ({ id, selectedCategories, income }) => (
+  api.post(`/onboard/${id}`, {
+    categories: selectedCategories,
+    monthly_income: income
+  })
+);

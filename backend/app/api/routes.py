@@ -8,7 +8,7 @@ from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP, AES
 from Crypto.Util.Padding import unpad
 
-from app.models.db_models import User
+from app.models.db_models import User, Category
 
 import traceback
 
@@ -190,7 +190,54 @@ def update_user(id):
 @bp.route('/user', methods=['POST'])
 def create_user():
     data = request.json
-    new_user = User(username=data['username'], email=data['email'], monthly_income=data['monthly_income'])
+    monthly_income = data.get("monthly_income", None)
+    new_user = User(username=data['username'], email=data['email'], monthly_income=monthly_income)
     db.session.add(new_user)
     db.session.commit()
     return jsonify({"message": "User created successfully"}), 201
+
+
+@bp.route('/onboard/<id>', methods=['POST'])
+def onboard_user(id):
+    data = request.json
+    monthly_income = data.get("monthly_income", None)
+    categories = data.get("categories", [])
+    user = User.query.get(id)
+
+    # if user and monthly_income and len(categories) > 0:
+    if user:
+        if monthly_income:
+          # update user income
+          user.monthly_income = monthly_income
+          db.session.commit()
+
+        if len(categories) > 0:
+           # if user already has existing categories, only update them with the latest ones
+          if len(user.categories) > 0:
+            user.categories = []
+
+          # update categories
+          existing_categories = Category.query.filter(Category.name.in_(categories)).all()
+
+          # can't use set as they are Category objects
+          existing_category_names = {category.name for category in existing_categories}
+
+          # find new categories that need to be created if any
+          new_category_names = set(categories) - existing_category_names
+
+          new_categories = [Category(name=cat_name, is_predefined=False) for cat_name in new_category_names]
+
+          # add new categories to the session
+          if new_categories:
+              db.session.add_all(new_categories)
+              db.session.commit()
+
+          # associate user with all new categories
+          user.categories.extend(existing_categories + new_categories)
+
+          # comit the associations
+          db.session.commit()
+
+
+        return jsonify({"message": "User onboarded successfully"}), 200
+    return jsonify({"message": "User not found"}), 404

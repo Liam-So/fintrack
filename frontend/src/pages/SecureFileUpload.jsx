@@ -35,12 +35,19 @@ const SecureFileUpload = ({ isTrial }) => {
 
     try {
       setUploading(true);
-      const response = await api.post("/extract", formData, {
+      const { data } = await api.post("/extract", formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
-      setTransactions(response.data.transactions)
+      
+      // Decrypt the transactions
+      data.transactions.map(transaction => {
+        let newDate = new Date(transaction.date);
+        transaction.date = newDate;
+      })
+
+      setTransactions(data.transactions)
       setUploadComplete(true)
     } catch (error) {
       console.error(error);

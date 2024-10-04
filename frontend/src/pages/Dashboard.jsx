@@ -40,9 +40,13 @@ const Dashboard = ({ isTrialDashboard }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [amountSpent, setAmountSpent] = useState(0);
   const [monthlyRevenue, setMonthlyRevenue] = useState(0);
-  const { user, logout } = useAuth0();
+  const { user, isAuthenticated, logout, isLoading } = useAuth0();
   const [isUserOnboarded, setIsUserOnboarded] = useState(true);
-  const [userId, setUserId] = useState(null)
+
+  const [userData, setUserData] = useState(null);
+  const [userId, setUserId] = useState(null);
+
+  const [loading, setLoading] = useState(true);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -64,49 +68,116 @@ const Dashboard = ({ isTrialDashboard }) => {
   }
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        if (!isTrialDashboard) {
-          const userData = await fetchUserData(user);
-          await verifyUserHasOnboarded(user, userData);
-
-          const getTransactions = await fetchTransactions(userId);
-          setTransactions(getTransactions.data.transactions);
-
-          const { data: getCategoryPercentages } = await fetchCategoryPercentages(userId);
-          setCategoryPercentages(getCategoryPercentages);
-
-          const totalAmount = Object.values(getCategoryPercentages)
-          .reduce((acc, curr) => acc + curr, 0)
-          .toFixed(2);
-
-          setAmountSpent(totalAmount);
-        } else {
-          setTransactions(state?.transactions || []);
-
-          const postCategoryPercentages = await postCalculateCategoryPercentages(
-            state?.transactions || [],
-          );
-          setCategoryPercentages(postCategoryPercentages.data);
-
-          const totalAmount = Object.values(postCategoryPercentages.data)
-            .reduce((acc, curr) => acc + curr, 0)
-            .toFixed(2);
-
-          setAmountSpent(totalAmount);
-          setMonthlyRevenue(state?.income || 0);
+    const fetchUser = async () => {
+      if (isAuthenticated && user) {
+        try {
+          const { data: userData } = await fetchUserData(user);
+          setUserData(userData);
+        } catch (error) {
+          console.error('Failed to fetch user data:', error);
+        } finally {
+          setLoading(false);
         }
-      } catch (err) {
-        console.error(err)
+      } else {
+        setLoading(false);
       }
+    };
+
+    const fetchTrialUser = async () => {
+      setTransactions(state?.transactions || []);
+
+      const { data: postCategoryPercentages } = await postCalculateCategoryPercentages(
+        state?.transactions || [],
+      );
+      setCategoryPercentages(postCategoryPercentages);
+
+      const totalAmount = Object.values(postCategoryPercentages)
+        .reduce((acc, curr) => acc + curr, 0)
+        .toFixed(2);
+
+      setAmountSpent(totalAmount);
+      setMonthlyRevenue(state?.income || 0);
     }
 
-    fetchDashboardData()
-  }, [userId])
+    // Only fetch if not trial dashboard
+    if (!isLoading && !isTrialDashboard) {
+      fetchUser();
+    }  else {
+      fetchTrialUser()
+    }
+  }, [isAuthenticated, isLoading, user]);
+
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      if (!isTrialDashboard) {
+        setMonthlyRevenue(userData?.monthly_income);
+        
+        try {
+          const { data: getTransactions } = await fetchTransactions(userData.id);
+          setTransactions(getTransactions.transactions);
+
+
+          const { data: getCategoryPercentages } = await fetchCategoryPercentages(userData.id);
+          setCategoryPercentages(getCategoryPercentages);
+
+          const totalAmount = Object.values(getCategoryPercentages).reduce((acc, curr) => acc + curr, 0).toFixed(2);
+          setAmountSpent(totalAmount);
+        } catch (err) {
+          console.error(err)
+        }
+      }
+    }
+    
+    if (userData) {
+      fetchDashboardData();
+    }
+  }, [userData, isTrialDashboard]);
+
+  // useEffect(() => {
+  //   const fetchDashboardData = async () => {
+  //     try {
+  //       if (!isTrialDashboard) {
+  //         const userData = await fetchUserData(user);
+  //         await verifyUserHasOnboarded(user, userData);
+
+  //         const getTransactions = await fetchTransactions(userId);
+  //         setTransactions(getTransactions.data.transactions);
+
+  //         const { data: getCategoryPercentages } = await fetchCategoryPercentages(userId);
+  //         setCategoryPercentages(getCategoryPercentages);
+
+  //         const totalAmount = Object.values(getCategoryPercentages)
+  //         .reduce((acc, curr) => acc + curr, 0)
+  //         .toFixed(2);
+
+  //         setAmountSpent(totalAmount);
+  //       } else {
+  //         setTransactions(state?.transactions || []);
+
+  //         const postCategoryPercentages = await postCalculateCategoryPercentages(
+  //           state?.transactions || [],
+  //         );
+  //         setCategoryPercentages(postCategoryPercentages.data);
+
+  //         const totalAmount = Object.values(postCategoryPercentages.data)
+  //           .reduce((acc, curr) => acc + curr, 0)
+  //           .toFixed(2);
+
+  //         setAmountSpent(totalAmount);
+  //         setMonthlyRevenue(state?.income || 0);
+  //       }
+  //     } catch (err) {
+  //       console.error(err)
+  //     }
+  //   }
+
+  //   fetchDashboardData()
+  // }, [userId])
 
   return (
     <div className="flex h-screen bg-gray-100">
-      <Sidebar setSidebarOpen={setSidebarOpen} sidebarOpen={sidebarOpen} />
+      <Sidebar setSidebarOpen={setSidebarOpen} sidebarOpen={sidebarOpen} userId={userData?.id} />
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header setSidebarOpen={setSidebarOpen} logout={logout} />

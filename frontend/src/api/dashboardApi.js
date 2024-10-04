@@ -2,9 +2,9 @@ import { api } from "../axios";
 
 export const fetchUserData = (user) => (api.get(`user/${user.nickname}`));
 
-export const fetchTransactions = () => (api.get("/transactions"));
+export const fetchTransactions = (id) => (api.get(`/transactions/${id}`));
 
-export const fetchCategoryPercentages = () => (api.get("/categories/percentages"));
+export const fetchCategoryPercentages = (id) => (api.get(`/user/${id}/categories/percentages`));
 
 export const postCalculateCategoryPercentages = (transactions) => (
   api.post("/trial/categories/percentages", {
@@ -28,8 +28,8 @@ export const postOnboardUser = ({ id, selectedCategories, income }) => (
   })
 );
 
-export const postTransactions = (transactions) => (
-  api.post("/transactions", {
+export const postTransactions = (transactions, id) => (
+  api.post(`/transactions/${id}`, {
     transactions: transactions
   })
 );

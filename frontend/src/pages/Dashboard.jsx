@@ -18,7 +18,8 @@ import DonutChart from "../components/DonutChart";
 import HorizontalBarChart from "../components/HorizontalBarChart";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
-import { fetchCategoryPercentages, fetchTransactions, fetchUserData, postNewUser } from "../api/dashboardApi";
+import { fetchCategoryPercentages, fetchTransactions, fetchUserData, postCalculateCategoryPercentages, postNewUser } from "../api/dashboardApi";
+import { formattedDate } from '../utils/util';
 
 ChartJS.register(
   ArcElement,
@@ -69,11 +70,17 @@ const Dashboard = ({ isTrialDashboard }) => {
           const userData = await fetchUserData(user);
           await verifyUserHasOnboarded(user, userData);
 
-          const getTransactions = await fetchTransactions();
+          const getTransactions = await fetchTransactions(userId);
           setTransactions(getTransactions.data.transactions);
 
-          const getCategoryPercentages = await fetchCategoryPercentages();
-          setCategoryPercentages(getCategoryPercentages.data);
+          const { data: getCategoryPercentages } = await fetchCategoryPercentages(userId);
+          setCategoryPercentages(getCategoryPercentages);
+
+          const totalAmount = Object.values(getCategoryPercentages)
+          .reduce((acc, curr) => acc + curr, 0)
+          .toFixed(2);
+
+          setAmountSpent(totalAmount);
         } else {
           setTransactions(state?.transactions || []);
 
@@ -95,7 +102,7 @@ const Dashboard = ({ isTrialDashboard }) => {
     }
 
     fetchDashboardData()
-  }, [])
+  }, [userId])
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -201,7 +208,7 @@ const TransactionTable = ({ transactions }) => (
           {transactions.map((transaction, index) => (
             <tr key={index}>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {transaction.date}
+                {formattedDate(transaction.date)}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                 {transaction.description}

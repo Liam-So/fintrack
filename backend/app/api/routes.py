@@ -34,32 +34,12 @@ def hello():
 def generate_temp_session():
    return jsonify({"session_id": f"temp_{str(uuid.uuid4())}"}), 200
 
-@bp.route('/transactions', methods=['GET'])
-def transactions():
-     # pull transactions from the database
-      # return them as JSON
-      return jsonify({
-          "transactions": [
-              {
-                  "date": "2021-10-01",
-                  "description": "Whole Foods",
-                  "amount": 50.00,
-                  "category": "Groceries"
-              },
-              {
-                  "date": "2021-10-02",
-                  "description": "Starbucks",
-                  "amount": 5.00,
-                  "category": "Restaurants"
-              },
-              {
-                  "date": "2021-10-03",
-                  "description": "Amazon",
-                  "amount": 100.00,
-                  "category": "Shopping"
-              }
-          ]
-      }), 200   
+@bp.route('/transactions/<id>', methods=['GET'])
+def transactions(id):
+    user = User.query.get(id)
+    transactions = user.transactions
+
+    return jsonify({"transactions": [{"amount": t.amount, "description": t.description, "date": t.date, "category": t.category.name} for t in transactions]}), 200
 
 
 @bp.route('/get-public-key', methods=['GET'])
@@ -67,18 +47,23 @@ def get_public_key():
     return public_key.decode(), 200
 
 
-@bp.route('/categories/percentages', methods=['GET'])
-def categories():
-    # pull transactions from the database
-    # calculate the percentage of each category
+@bp.route('/user/<id>/categories/percentages', methods=['GET'])
+def categories(id):
+  user = User.query.get(id)
+  transactions_by_category = {}
 
-    # This is a dummy response for now
-    return jsonify({
-       "Groceries": 300,
-       "Restaurants": 100,
-       "Shopping": 200,
-       "Transportation": 50
-    }), 200
+  for transaction in user.transactions:
+    category = transaction.category.name
+    amount = transaction.amount
+
+    if category not in transactions_by_category:
+      transactions_by_category[category] = amount
+    else:
+      transactions_by_category[category] += amount
+
+    round(transactions_by_category[category], 2)
+  
+  return transactions_by_category, 200
 
 
 @bp.route('/trial/categories/percentages', methods=['POST'])

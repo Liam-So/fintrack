@@ -4,6 +4,7 @@ import AddTransactionModal from './AddTransactionModal';
 import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import { postTransactions } from '../api/dashboardApi';
+import { formattedDate } from '../utils/util';
 
 const CategoryBadge = ({ category }) => {
   const baseClasses = "px-2 py-1 rounded-full text-xs font-semibold";
@@ -57,11 +58,10 @@ const TransactionReview = ({ transactions: initialTransactions, categories, isTr
     if (isTrialFlow) {
       navigate(`/trial/dashboard/${id}`, { state: { transactions, income } });
     } else {
-      await postTransactions(transactions);
+      await postTransactions(transactions, id);
       navigate('/dashboard');
     }
   };
-
 
   return (
     <div className="container mx-auto p-4">
@@ -89,7 +89,7 @@ const TransactionReview = ({ transactions: initialTransactions, categories, isTr
                       className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   ) : (
-                    transaction.date
+                    formattedDate(transaction.date)
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap border-b">

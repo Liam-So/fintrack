@@ -1,6 +1,6 @@
 import { api } from "../axios";
 
-export const fetchUserData = (user) => (api.get(`user/${user.nickname}`));
+export const fetchUserData = (user) => (api.get(`user/${user.email}`));
 
 export const fetchTransactions = (id) => (api.get(`/transactions/${id}`));
 

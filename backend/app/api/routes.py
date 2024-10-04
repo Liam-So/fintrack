@@ -37,9 +37,17 @@ def generate_temp_session():
 @bp.route('/transactions/<id>', methods=['GET'])
 def transactions(id):
     user = User.query.get(id)
-    transactions = user.transactions
+    
+    if user:
+      transactions = user.transactions
+      print(f'length of transactions: {len(transactions)}')
 
-    return jsonify({"transactions": [{"amount": t.amount, "description": t.description, "date": t.date, "category": t.category.name} for t in transactions]}), 200
+      if len(transactions) == 0:
+        return jsonify({"transactions": []}), 200
+
+      return jsonify({"transactions": [{"amount": t.amount, "description": t.description, "date": t.date, "category": t.category.name} for t in transactions]}), 200
+
+    return jsonify({"message": "User not found"}), 404
 
 
 @bp.route('/get-public-key', methods=['GET'])
@@ -152,9 +160,9 @@ def user_count():
     return jsonify({"user_count": count}), 200 
 
 
-@bp.route('/user/<username>', methods=['GET'])
-def get_user(username):
-    user = User.query.filter_by(username=username).first()
+@bp.route('/user/<email>', methods=['GET'])
+def get_user(email):
+    user = User.query.filter_by(email=email).first()
     if user:
         return jsonify({"id": user.id, "username": user.username, "email": user.email, "monthly_income": user.monthly_income}), 200
     return jsonify({"message": "User not found"}), 404

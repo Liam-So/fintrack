@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
-import { Menu, Home, Settings, HelpCircle, User } from 'lucide-react';
+import React, { useId, useState } from 'react'
+import { Menu, Home, Settings, HelpCircle, User, Upload } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
+const Sidebar = ({ sidebarOpen, setSidebarOpen, userId }) => {
 
   return (
     <>
@@ -17,6 +17,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
           </div>
           <ul>
             <SidebarItem icon={Home} text="Dashboard" />
+            <SidebarItem icon={Upload} text="Upload" link={`/upload/${userId}`} />
             <SidebarItem icon={Settings} text="Settings" />
             <SidebarItem icon={User} text="Profile" link={"/profile"} />
             <SidebarItem icon={HelpCircle} text="Help" />

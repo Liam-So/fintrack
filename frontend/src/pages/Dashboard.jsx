@@ -119,8 +119,8 @@ const Dashboard = ({ isTrialDashboard }) => {
         try {
           const { data: getTransactions } = await fetchTransactions(userData.id, month);
           setTransactions(getTransactions.transactions);
-
-          const { data: getCategoryPercentages } = await fetchCategoryPercentages(userData.id);
+          
+          const { data: getCategoryPercentages } = await fetchCategoryPercentages(userData.id, getTransactions.transactions);
           setCategoryPercentages(getCategoryPercentages);
 
           const totalAmount = Object.values(getCategoryPercentages).reduce((acc, curr) => acc + curr, 0).toFixed(2);

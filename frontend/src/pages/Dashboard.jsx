@@ -43,6 +43,9 @@ const Dashboard = ({ isTrialDashboard }) => {
   const { user, isAuthenticated, logout, isLoading } = useAuth0();
   const [isUserOnboarded, setIsUserOnboarded] = useState(true);
 
+  // Add one to month because it is zero indexed
+  const [month, setMonth] = useState(new Date().getMonth() + 1);
+
   const [userData, setUserData] = useState(null);
   const [userId, setUserId] = useState(null);
 
@@ -114,9 +117,8 @@ const Dashboard = ({ isTrialDashboard }) => {
         setMonthlyRevenue(userData?.monthly_income);
         
         try {
-          const { data: getTransactions } = await fetchTransactions(userData.id);
+          const { data: getTransactions } = await fetchTransactions(userData.id, month);
           setTransactions(getTransactions.transactions);
-
 
           const { data: getCategoryPercentages } = await fetchCategoryPercentages(userData.id);
           setCategoryPercentages(getCategoryPercentages);
@@ -132,48 +134,8 @@ const Dashboard = ({ isTrialDashboard }) => {
     if (userData) {
       fetchDashboardData();
     }
-  }, [userData, isTrialDashboard]);
+  }, [userData, isTrialDashboard, month]);
 
-  // useEffect(() => {
-  //   const fetchDashboardData = async () => {
-  //     try {
-  //       if (!isTrialDashboard) {
-  //         const userData = await fetchUserData(user);
-  //         await verifyUserHasOnboarded(user, userData);
-
-  //         const getTransactions = await fetchTransactions(userId);
-  //         setTransactions(getTransactions.data.transactions);
-
-  //         const { data: getCategoryPercentages } = await fetchCategoryPercentages(userId);
-  //         setCategoryPercentages(getCategoryPercentages);
-
-  //         const totalAmount = Object.values(getCategoryPercentages)
-  //         .reduce((acc, curr) => acc + curr, 0)
-  //         .toFixed(2);
-
-  //         setAmountSpent(totalAmount);
-  //       } else {
-  //         setTransactions(state?.transactions || []);
-
-  //         const postCategoryPercentages = await postCalculateCategoryPercentages(
-  //           state?.transactions || [],
-  //         );
-  //         setCategoryPercentages(postCategoryPercentages.data);
-
-  //         const totalAmount = Object.values(postCategoryPercentages.data)
-  //           .reduce((acc, curr) => acc + curr, 0)
-  //           .toFixed(2);
-
-  //         setAmountSpent(totalAmount);
-  //         setMonthlyRevenue(state?.income || 0);
-  //       }
-  //     } catch (err) {
-  //       console.error(err)
-  //     }
-  //   }
-
-  //   fetchDashboardData()
-  // }, [userId])
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -185,7 +147,14 @@ const Dashboard = ({ isTrialDashboard }) => {
         {/* Dashboard content */}
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
           {isUserOnboarded ? (
-            <DashboardContent transactions={transactions} categoryPercentages={categoryPercentages} amountSpent={amountSpent} monthlyRevenue={monthlyRevenue} />
+            <DashboardContent 
+              transactions={transactions}
+              categoryPercentages={categoryPercentages}
+              amountSpent={amountSpent}
+              monthlyRevenue={monthlyRevenue}
+              month={month}
+              setMonth={setMonth}
+            />
           ) : (
             <>
             <div className="flex flex-col items-center justify-center pt-8 gap-2">
@@ -200,8 +169,31 @@ const Dashboard = ({ isTrialDashboard }) => {
   );
 };
 
-const DashboardContent = ({ transactions, categoryPercentages, amountSpent, monthlyRevenue }) => (
+const DashboardContent = ({ transactions, categoryPercentages, amountSpent, monthlyRevenue, month, setMonth }) => (
     <div className="container mx-auto px-6 py-8">
+      <div className="flex pb-4">
+        <select
+            id="month"
+            value={month}
+            onChange={(e) => setMonth(e.target.value)}
+            className="p-0.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+          <option value="">Month</option>
+          <option value="01">January</option>
+          <option value="02">February</option>
+          <option value="03">March</option>
+          <option value="04">April</option>
+          <option value="05">May</option>
+          <option value="06">June</option>
+          <option value="07">July</option>
+          <option value="08">August</option>
+          <option value="09">September</option>
+          <option value="10">October</option>
+          <option value="11">November</option>
+          <option value="12">December</option>
+        </select>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Basic monthly stats */}
         <div className="flex flex-col gap-6">

@@ -2,7 +2,13 @@ import { api } from "../axios";
 
 export const fetchUserData = (user) => (api.get(`user/${user.email}`));
 
-export const fetchTransactions = (id) => (api.get(`/transactions/${id}`));
+export const fetchTransactions = async (id, month) => (
+  api.get(`/users/${id}/transactions`, {
+    params: {
+      query_by_month: month
+    }
+  })
+)
 
 export const fetchCategoryPercentages = (id) => (api.get(`/user/${id}/categories/percentages`));
 

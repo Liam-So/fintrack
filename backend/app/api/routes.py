@@ -34,22 +34,6 @@ def hello():
 def generate_temp_session():
    return jsonify({"session_id": f"temp_{str(uuid.uuid4())}"}), 200
 
-@bp.route('/transactions/<id>', methods=['GET'])
-def transactions(id):
-    user = User.query.get(id)
-    
-    if user:
-      transactions = user.transactions
-      print(f'length of transactions: {len(transactions)}')
-
-      if len(transactions) == 0:
-        return jsonify({"transactions": []}), 200
-
-      return jsonify({"transactions": [{"amount": t.amount, "description": t.description, "date": t.date, "category": t.category.name} for t in transactions]}), 200
-
-    return jsonify({"message": "User not found"}), 404
-
-
 @bp.route('/get-public-key', methods=['GET'])
 def get_public_key():
     return public_key.decode(), 200
@@ -172,7 +156,7 @@ def get_user(email):
 def update_user(id):
     user = User.query.get(id)
     if user:
-        data = request.json
+        data = request.get_json(silent=True) or {}
         user.email = data.get("email", user.email)
         user.monthly_income = data.get("monthly_income", user.monthly_income)
         db.session.commit()
@@ -182,7 +166,7 @@ def update_user(id):
 
 @bp.route('/user', methods=['POST'])
 def create_user():
-    data = request.json
+    data = request.get_json(silent=True) or {}
     monthly_income = data.get("monthly_income", None)
     new_user = User(username=data['username'], email=data['email'], monthly_income=monthly_income)
     db.session.add(new_user)
@@ -192,7 +176,7 @@ def create_user():
 
 @bp.route('/onboard/<id>', methods=['POST'])
 def onboard_user(id):
-    data = request.json
+    data = request.get_json(silent=True) or {}
     monthly_income = data.get("monthly_income", None)
     categories = data.get("categories", [])
     user = User.query.get(id)
@@ -238,7 +222,7 @@ def onboard_user(id):
 
 @bp.route('/transactions/<id>', methods=['POST'])
 def post_transactions(id):
-   data = request.json
+   data = request.get_json(silent=True) or {}
    transactions = data.get("transactions", [])
    user = User.query.get(id)
 
@@ -253,3 +237,20 @@ def post_transactions(id):
           user.transactions.append(Transaction(user_id=id, category_id=category.id, amount=amount, date=date, description=description))
       db.session.commit()
       return jsonify({"message": "Transactions added successfully"}), 200
+
+
+@bp.route('/users/<id>/transactions', methods=['GET'])
+def get_transactions(id):
+   # NOTE query by month must be a value from 1-12
+   query_by_month = int(request.args.get('query_by_month'))
+  
+   user = User.query.get(id)
+   
+   if user:
+    transactions = user.transactions
+    if query_by_month and query_by_month > 0 and query_by_month <= 12:
+      transactions = [t for t in transactions if t.date.month == query_by_month]
+
+    return jsonify({"transactions": [{"amount": t.amount, "description": t.description, "date": t.date, "category": t.category.name} for t in transactions]}), 200
+   
+   return jsonify({"message": "User not found"}), 404

@@ -18,7 +18,7 @@ import DonutChart from "../components/DonutChart";
 import HorizontalBarChart from "../components/HorizontalBarChart";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
-import { fetchCategoryPercentages, fetchTransactions, fetchUserData, postCalculateCategoryPercentages, postNewUser } from "../api/dashboardApi";
+import { fetchCategoryPercentages, fetchTransactions, fetchTrialTransactions, fetchUserData, postCalculateCategoryPercentages, postNewUser } from "../api/dashboardApi";
 import { formattedDate } from '../utils/util';
 
 ChartJS.register(
@@ -87,19 +87,21 @@ const Dashboard = ({ isTrialDashboard }) => {
     };
 
     const fetchTrialUser = async () => {
-      setTransactions(state?.transactions || []);
+      const isStateSet = state ? true : false;
+      setUserData(isStateSet);
+      // setTransactions(state?.transactions || []);
 
-      const { data: postCategoryPercentages } = await postCalculateCategoryPercentages(
-        state?.transactions || [],
-      );
-      setCategoryPercentages(postCategoryPercentages);
+      // const { data: postCategoryPercentages } = await postCalculateCategoryPercentages(
+      //   state?.transactions || [],
+      // );
+      // setCategoryPercentages(postCategoryPercentages);
 
-      const totalAmount = Object.values(postCategoryPercentages)
-        .reduce((acc, curr) => acc + curr, 0)
-        .toFixed(2);
+      // const totalAmount = Object.values(postCategoryPercentages)
+      //   .reduce((acc, curr) => acc + curr, 0)
+      //   .toFixed(2);
 
-      setAmountSpent(totalAmount);
-      setMonthlyRevenue(state?.income || 0);
+      // setAmountSpent(totalAmount);
+      // setMonthlyRevenue(state?.income || 0);
     }
 
     // Only fetch if not trial dashboard
@@ -128,6 +130,22 @@ const Dashboard = ({ isTrialDashboard }) => {
         } catch (err) {
           console.error(err)
         }
+      } else {
+        const { data: newTransactions } = await fetchTrialTransactions(state?.transactions || [], month);
+        setTransactions(newTransactions.transactions || []);
+        console.log(state)
+
+        const { data: postCategoryPercentages } = await postCalculateCategoryPercentages(
+          newTransactions.transactions || [],
+        );
+        setCategoryPercentages(postCategoryPercentages);
+  
+        const totalAmount = Object.values(postCategoryPercentages)
+          .reduce((acc, curr) => acc + curr, 0)
+          .toFixed(2);
+  
+        setAmountSpent(totalAmount);
+        setMonthlyRevenue(state?.income || 0);
       }
     }
     
@@ -271,7 +289,7 @@ const TransactionTable = ({ transactions }) => (
           {transactions.map((transaction, index) => (
             <tr key={index}>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {formattedDate(transaction.date)}
+                {formattedDate(new Date(transaction.date))}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                 {transaction.description}

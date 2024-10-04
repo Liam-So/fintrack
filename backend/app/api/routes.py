@@ -9,7 +9,7 @@ from Crypto.Cipher import PKCS1_OAEP, AES
 from Crypto.Util.Padding import unpad
 
 from app.models.db_models import User, Category, Transaction
-
+from datetime import datetime
 import traceback
 
 import tempfile
@@ -58,6 +58,22 @@ def categories(id):
     round(transactions_by_category[category], 2)
   
   return transactions_by_category, 200
+
+
+@bp.route('/trial/transactions', methods=['POST'])
+def trial_transactions():
+    data = request.get_json(silent=True) or {}
+    transactions = data.get('transactions', [])
+    month = int(data.get('month', None))
+
+    transactions_to_return = []
+
+    for transaction in transactions:
+      parsed_date = datetime.strptime(transaction['date'],"%Y-%m-%dT%H:%M:%S.%fZ")
+      if month and parsed_date.month == month:
+        transactions_to_return.append(transaction)
+  
+    return jsonify({"transactions": transactions_to_return}), 200
 
 
 @bp.route('/trial/categories/percentages', methods=['POST'])
@@ -126,7 +142,6 @@ def extract():
 
            cleaned_response = clean_response(parsed_items, categories, descriptions, chunk_of_transactions)
            transactions_to_return.extend(cleaned_response)
-
         return jsonify({"transactions": [t.__dict__ for t in transactions]}), 200
       except Exception as e:
         print(f"Error processing PDF file: {str(e)}")

@@ -39,14 +39,16 @@ def get_public_key():
     return public_key.decode(), 200
 
 
-@bp.route('/user/<id>/categories/percentages', methods=['GET'])
+@bp.route('/user/<id>/categories/percentages', methods=['POST'])
 def categories(id):
-  user = User.query.get(id)
-  transactions_by_category = {}
+  data = request.get_json(silent=True) or {}
 
-  for transaction in user.transactions:
-    category = transaction.category.name
-    amount = transaction.amount
+  transactions_by_category = {}
+  transactions = data.get("transactions", [])
+
+  for transaction in transactions:
+    category = transaction['category']
+    amount = transaction['amount']
 
     if category not in transactions_by_category:
       transactions_by_category[category] = amount

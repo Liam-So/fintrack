@@ -1,7 +1,5 @@
 TODO:
-[] Retry mechanism
-[] Table edits
-[] Send categories
+[] SecureFileUpload- make it dynamic for trials. If not a trial, run a GET for categories to see if they exist.
 [] React count-up for values
 [] Chart visualization via Chart.js
 

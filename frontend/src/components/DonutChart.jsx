@@ -3,11 +3,12 @@ import { Doughnut } from 'react-chartjs-2';
 
 const DonutChart = ({ categoryPercentages }) => {
   function generateRandomColors(numColors) {
-    return Array.from(
-      { length: numColors },
-      () =>
-        `rgb(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)})`,
-    );
+    return Array.from({ length: numColors }, () => {
+      const hue = Math.floor(Math.random() * 360);
+      const saturation = Math.floor(Math.random() * 25) + 70; // 70-95%
+      const lightness = Math.floor(Math.random() * 15) + 75; // 75-90%
+      return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    });
   }
 
   const doughnutData = (categoryPercentages) => {

@@ -271,3 +271,11 @@ def get_transactions(id):
     return jsonify({"transactions": [{"amount": t.amount, "description": t.description, "date": t.date, "category": t.category.name} for t in transactions]}), 200
    
    return jsonify({"message": "User not found"}), 404
+
+
+@bp.route('/users/<id>/categories', methods=['GET'])
+def get_categories(id):
+    user = User.query.get(id)
+    if user:
+        return jsonify({"categories": [category.name for category in user.categories]}), 200
+    return jsonify({"message": "User not found"}), 404

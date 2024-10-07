@@ -10,16 +10,28 @@ const SecureFileUpload = ({ isTrial }) => {
   const [uploading, setUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
   const [transactions, setTransactions] = useState([]);
+  const [categories, setCategories] = useState([]);
 
   const location = useLocation();
+  const { id } = useParams();
 
   // Access the state
   const { state } = location;
 
   useEffect(() => {
-    api.get('/get-public-key')
-      .then(response => setPublicKey(response.data))
-      .catch(error => console.error('Error fetching public key:', error));
+    if (isTrial) {
+      setCategories(state.selectedCategories);
+    } else {
+      const fetchUserCategories = async () => {
+        try {
+          const { data } = await api.get(`/users/${id}/categories`);
+          setCategories(data.categories);
+        } catch (error) {
+          console.error(error);
+        }
+      }
+      fetchUserCategories();
+    }
   }, []);
 
   const encryptAndUploadFile = async () => {
@@ -30,7 +42,7 @@ const SecureFileUpload = ({ isTrial }) => {
     const formData = new FormData();
     formData.append('pdf', file);
 
-    const jsonMetadata = { categories: state.selectedCategories };
+    const jsonMetadata = { categories: categories };
     formData.append('json', JSON.stringify(jsonMetadata));
 
     try {
@@ -67,9 +79,9 @@ const SecureFileUpload = ({ isTrial }) => {
     {(transactions.length > 0 && uploadComplete) ? (
      <TransactionReview 
         transactions={transactions}
-        categories={state.selectedCategories} 
+        categories={categories} 
         isTrialFlow={isTrial}
-        income={state.income}
+        income={state?.income}
      /> 
     ): (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">

@@ -50,3 +50,5 @@ export const postTransactions = (transactions, id) => (
     transactions: transactions
   })
 );
+
+export const getUserCategories = (id) => (api.get(`/users/${id}/categories`));

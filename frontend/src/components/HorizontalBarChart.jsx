@@ -2,6 +2,8 @@ import React from 'react';
 import { Bar } from 'react-chartjs-2';
 
 const HorizontalBarChart = ({ amountSpent, monthlyRevenue }) => {
+  const hasValues = amountSpent && monthlyRevenue;
+
   const barData = {
     labels: ["Sep"],
     datasets: [
@@ -39,10 +41,16 @@ const HorizontalBarChart = ({ amountSpent, monthlyRevenue }) => {
 
 
   return (
-    <Bar
-      data={barData}
-      options={{ ...barOptions, maintainAspectRatio: false }}
-    />
+    <>
+    {hasValues ? (
+      <Bar
+        data={barData}
+        options={{ ...barOptions, maintainAspectRatio: false }}
+      />
+    ) : (
+      <div className='flex items-center justify-center p-8'>No data to display</div>
+    )}
+    </>
   )
 }
 

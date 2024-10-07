@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import SecureFileUpload from "./pages/SecureFileUpload";
 import {
   RouterProvider,
@@ -6,11 +6,11 @@ import {
   Navigate
 } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
-import Dashboard from "./pages/Dashboard";
 import TrialDashboard from "./pages/TrialDashboard";
 import OnboardingFlow from "./pages/OnboardingFlow";
 import { useAuth0 } from "@auth0/auth0-react";
 import Profile from "./pages/Profile";
+import OfficialDashboard from "./pages/OfficialDashboard";
 
 const Callback = () => {
   const { isAuthenticated, isLoading } = useAuth0();
@@ -48,7 +48,7 @@ const router = createBrowserRouter([
   // Can we refactor protected routes?
   {
     path: "/dashboard",
-    element: <ProtectedRoute><Dashboard /></ProtectedRoute>
+    element: <ProtectedRoute><OfficialDashboard /></ProtectedRoute>
   },
   {
     path: "/profile",
@@ -73,7 +73,7 @@ const router = createBrowserRouter([
   {
     path: "/trial/dashboard/:id",
     element: <TrialDashboard />,
-  },
+  }
 ]);
 
 export default function App() {

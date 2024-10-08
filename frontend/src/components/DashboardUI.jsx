@@ -17,6 +17,7 @@ import {
   Legend,
 } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
+import TransactionTable from './TransactionTable';
 
 ChartJS.register(
   ArcElement,
@@ -31,7 +32,7 @@ ChartJS.register(
   ChartDataLabels,
 );
 
-const DashboardUI = ({ transactions, categoryPercentages, amountSpent, monthlyRevenue, userData, logout, setMonth, month }) => {
+const DashboardUI = ({ transactions, categoryPercentages, amountSpent, monthlyRevenue, userData, logout, setMonth, month, handleSaveAction, handleDeleteAction, handleAddAction }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
@@ -50,6 +51,9 @@ const DashboardUI = ({ transactions, categoryPercentages, amountSpent, monthlyRe
               monthlyRevenue={monthlyRevenue}
               month={month}
               setMonth={setMonth}
+              handleSaveAction={handleSaveAction}
+              handleDeleteAction={handleDeleteAction}
+              handleAddAction={handleAddAction}
             />
         </main>
       </div>
@@ -57,7 +61,7 @@ const DashboardUI = ({ transactions, categoryPercentages, amountSpent, monthlyRe
   )
 }
 
-const DashboardContent = ({ transactions, categoryPercentages, amountSpent, monthlyRevenue, month, setMonth }) => (
+const DashboardContent = ({ transactions, categoryPercentages, amountSpent, monthlyRevenue, month, setMonth, handleSaveAction, handleDeleteAction, handleAddAction }) => (
   <div className="container mx-auto px-6 py-8">
     <div className="flex pb-4">
       <select
@@ -116,7 +120,13 @@ const DashboardContent = ({ transactions, categoryPercentages, amountSpent, mont
     </div>
 
     {/* Additional content */}
-    <TransactionTable transactions={transactions} />
+    <TransactionTable 
+      postedTransactions={transactions} 
+      categories={Object.keys(categoryPercentages)}
+      handleSaveAction={handleSaveAction}
+      handleDeleteAction={handleDeleteAction}
+      handleAddAction={handleAddAction}
+    />
   </div>
 )
 
@@ -131,60 +141,6 @@ const StatCard = ({ title, value }) => (
   </div>
 </div>
 );
-
-const TransactionTable = ({ transactions }) => (
-  <div className="mt-8 bg-white rounded-lg shadow-sm p-6">
-    <h2 className="text-xl font-semibold mb-4 text-gray-700">
-      Recent Transactions
-    </h2>
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Date
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Description
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Amount
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Status
-            </th>
-          </tr>
-        </thead>
-        {transactions && transactions.length > 0 ? (
-        <tbody className="bg-white divide-y divide-gray-200">
-          {transactions.map((transaction, index) => (
-            <tr key={index}>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {formattedDate(new Date(transaction?.date))}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                {transaction?.description}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                ${transaction?.amount}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <span
-                  className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800`}
-                >
-                  {transaction?.category}
-                </span>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-        ) : (
-          <div>No data to display</div>
-        )}
-      </table>
-    </div>
-  </div>
-)
 
 const Header = ({ setSidebarOpen, logout }) => (
 <header className="bg-white shadow-sm">

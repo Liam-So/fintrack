@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth0 } from "@auth0/auth0-react";
-import { fetchCategoryPercentages, fetchTransactions, fetchUserData } from '../api/dashboardApi';
+import { deleteTransaction, fetchCategoryPercentages, fetchTransactions, fetchUserData, postTransactions, updateTransaction } from '../api/dashboardApi';
 import DashboardUI from '../components/DashboardUI';
 
 const OfficialDashboard = () => {
@@ -47,8 +47,6 @@ const OfficialDashboard = () => {
           setTransactions(fetchedTransactions);
 
           const { data: getCategoryPercentages } = await fetchCategoryPercentages(userId, fetchedTransactions);
-          console.log(getCategoryPercentages);
-          
           setCategoryPercentages(getCategoryPercentages);
 
           const totalAmount = Object.values(getCategoryPercentages).reduce((acc, curr) => acc + curr, 0).toFixed(2);
@@ -64,6 +62,40 @@ const OfficialDashboard = () => {
     }
   }, [userData, month]);
 
+  const deleteUserTransaction = async (id) => {
+    try {
+      const response = await deleteTransaction(id);
+      if (response.status === 200) {
+        console.log('Transaction deleted successfully');
+      }
+    } catch (error) {
+      console.error('Error deleting transaction:', error);
+    }
+  }
+
+  const updateUserTransaction = async (id, updatedAttributes) => {
+    try {
+      const response = await updateTransaction(id, updatedAttributes);
+      if (response.status === 200) {
+        console.log('Transaction updated successfully');
+      }
+    } catch (error) {
+      console.error('Error updating transaction:', error);
+    }
+  }
+
+
+  const addUserTransaction = async (newTransaction) => {
+    try {
+      const response = await postTransactions([newTransaction], userData.id);
+      if (response.status === 200) {
+        console.log('Transaction added successfully');
+      }
+    } catch (error) {
+      console.error('Error adding transaction:', error);
+    }
+  }
+
   return (
     <>
     {loading ? (
@@ -78,6 +110,9 @@ const OfficialDashboard = () => {
         logout={logout}
         month={month}
         setMonth={setMonth}
+        handleSaveAction={updateUserTransaction}
+        handleDeleteAction={deleteUserTransaction}
+        handleAddAction={addUserTransaction}
       />
     )}
     </>

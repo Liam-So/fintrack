@@ -254,6 +254,35 @@ def post_transactions(id):
           user.transactions.append(Transaction(user_id=id, category_id=category.id, amount=amount, date=date, description=description))
       db.session.commit()
       return jsonify({"message": "Transactions added successfully"}), 200
+   
+
+@bp.route('/transactions/<id>', methods=['DELETE'])
+def delete_transactions(id):
+    transaction = Transaction.query.get(id)
+    if transaction:
+        db.session.delete(transaction)
+        db.session.commit()
+        return jsonify({"message": "Transaction deleted successfully"}), 200
+
+    return jsonify({"message": "Transaction not found"}), 404
+
+
+@bp.route('/transactions/<id>', methods=['PUT'])
+def update_transaction(id):
+    data = request.get_json(silent=True) or {}
+
+    transaction = Transaction.query.get(id)
+    category = Category.query.filter_by(name=data.get("category")).first()
+    print(category.name)
+
+    if transaction and category:
+        transaction.amount = data.get("amount", transaction.amount)
+        transaction.date = data.get("date", transaction.date)
+        transaction.description = data.get("description", transaction.description)
+        transaction.category_id = category.id
+        db.session.commit()
+        return jsonify({"message": "Transaction updated successfully"}), 200
+    return jsonify({"message": "Transaction not found"}), 404
 
 
 @bp.route('/users/<id>/transactions', methods=['GET'])
@@ -268,7 +297,7 @@ def get_transactions(id):
     if query_by_month and query_by_month > 0 and query_by_month <= 12:
       transactions = [t for t in transactions if t.date.month == query_by_month]
 
-    return jsonify({"transactions": [{"amount": t.amount, "description": t.description, "date": t.date, "category": t.category.name} for t in transactions]}), 200
+    return jsonify({"transactions": [{"id": t.id, "amount": t.amount, "description": t.description, "date": t.date, "category": t.category.name} for t in transactions]}), 200
    
    return jsonify({"message": "User not found"}), 404
 

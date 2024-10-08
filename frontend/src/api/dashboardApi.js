@@ -29,6 +29,8 @@ export const postCalculateCategoryPercentages = (transactions) => (
   })
 );
 
+export const getUserCategories = (id) => (api.get(`/users/${id}/categories`));
+
 export const postNewUser = (user) => (
   api.post("/user", {
     username: user.nickname,
@@ -51,4 +53,6 @@ export const postTransactions = (transactions, id) => (
   })
 );
 
-export const getUserCategories = (id) => (api.get(`/users/${id}/categories`));
+export const deleteTransaction = (id) => (api.delete(`/transactions/${id}`));
+
+export const updateTransaction = (id, updatedAttributes) => (api.put(`/transactions/${id}`, updatedAttributes));

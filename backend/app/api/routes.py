@@ -16,6 +16,9 @@ import tempfile
 import os
 import uuid
 import json
+import pandas as pd
+import numpy as np
+import math
 
 bp = Blueprint('api', __name__)
 
@@ -308,3 +311,90 @@ def get_categories(id):
     if user:
         return jsonify({"categories": [category.name for category in user.categories]}), 200
     return jsonify({"message": "User not found"}), 404
+
+
+@bp.route('/extract_csv', methods=['POST'])
+def extract_csv():
+    sample_path = '/Users/liam.so/Personal/fintrack_Liam-So/backend/app/api/activity.csv'
+    user_id = 'c029af26-ea61-4d36-bb53-d879aca81c29'
+    user = User.query.get(user_id)
+    categories = {cat.id: cat.name for cat in user.categories}
+
+    df = pd.read_csv(sample_path, parse_dates=['Date'])
+
+    chunk_size = math.ceil((len(df))/10)
+    list_df = np.array_split(df, chunk_size)
+
+    for i, chunk in enumerate(list_df):
+      print('Processing chunk...', i)
+      descriptions = {idx: desc for idx, desc in chunk['Description'].items()}
+      prompt = create_prompt(categories, descriptions)
+      model = 'mistral'
+      prompt_request = PromptRequest(prompt=prompt, model=model)
+
+      retries = 7
+
+      for idx in range(retries):
+        print(f'Try number: {idx}')
+        try:
+          # invoke LLM to categorize transactions
+          parsed_items = generate_response(prompt_request)
+
+          if len(parsed_items) == len(chunk):
+            for item in parsed_items:
+               new_category = int(parsed_items[item])
+               if new_category in categories:
+                  row_data = chunk.loc[int(item)]
+                  amount = row_data['Amount']
+                  date = row_data['Date']
+                  description = row_data['Description']
+
+                  print(f'{description}: {categories[new_category]}')
+               else:
+                  raise ValueError(f'Category {new_category} not found')
+            break
+          else:
+            print("retrying...")
+        except Exception as e:
+          print(f"Error generating response: {str(e)}")
+          print(traceback.format_exc())
+
+    return {"message": "CSV extracted successfully"}, 200
+
+
+def create_prompt(categories, descriptions):
+    enumerated_descriptions = ""
+    enumerated_categories = ""
+
+    for id in descriptions:
+      enumerated_descriptions += f"{id}. {descriptions[id]}\n"
+    for id in categories:
+      enumerated_categories += f"{id}. {categories[id]}\n"
+
+    return f'''
+You are the most precise and accurate financial advisor. Your task is to categorize the following transactions into the correct categories.
+
+Categories:
+{enumerated_categories}
+
+Transactions:
+{enumerated_descriptions}
+
+## IMPORTANT ##
+Only use the categories provided above. If unsure, choose the closest match.
+
+
+Output a JSON where the key is the index of the transaction and the value is the category index.
+{{
+  "1": 4,
+  "2": 8,
+  "3": 7,
+  "4": 2,
+  "5": 8
+  ...
+}}
+
+If I provide 10 transactions, you should provide 10 categories.
+Only output the JSON, nothing else.
+The value of the JSON should be the category name nothing else.
+'''

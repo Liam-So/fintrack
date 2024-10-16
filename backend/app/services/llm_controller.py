@@ -35,7 +35,7 @@ def send_to_ollama(prompt, model="llama2"):
 
 def parse_json_response(response: str) -> List[dict]:
     # Find the JSON list in the response
-    match = re.search(r'\[.*\]', response, re.DOTALL)
+    match = re.search(r'\{.*\}', response, re.DOTALL)
     if not match:
         raise ValueError("No JSON list found in the response")
     

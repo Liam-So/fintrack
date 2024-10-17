@@ -253,10 +253,13 @@ def post_transactions(id):
 
   transactions_to_send = []
 
-  # TODO specify chunk size for bulk insert
+  chunk_size = 100
 
-  if user and len(transactions) > 0:
-    for transaction in transactions:
+  print(f'Processing {len(transactions)} transactions...')
+
+  for i in range(0, len(transactions), chunk_size):
+    chunk = transactions[i:i+chunk_size]
+    for transaction in chunk:
       amount = transaction.get("amount", 0)
       date = transaction.get("date", None)
       description = transaction.get("description", "")

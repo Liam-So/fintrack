@@ -25,7 +25,7 @@ const SecureFileUpload = ({ isTrial }) => {
       const fetchUserCategories = async () => {
         try {
           const { data } = await api.get(`/users/${id}/categories`);
-          setCategories(data.categories);
+          setCategories(data);
         } catch (error) {
           console.error(error);
         }
@@ -40,14 +40,11 @@ const SecureFileUpload = ({ isTrial }) => {
     }
 
     const formData = new FormData();
-    formData.append('pdf', file);
-
-    const jsonMetadata = { categories: categories };
-    formData.append('json', JSON.stringify(jsonMetadata));
-
+    formData.append('file', file);
     try {
       setUploading(true);
-      const { data } = await api.post("/extract", formData, {
+
+      const { data } = await api.post(`/extract_csv/${id}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }

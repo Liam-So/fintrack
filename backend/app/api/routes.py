@@ -3,12 +3,15 @@ from app.services.pdf_extractor import PDFExtractor, Institution
 from app.services.transaction_extractor import TransactionExtractor
 from app.services.llm_controller import generate_response, PromptRequest, get_transaction_prompt, parse_json_response, clean_response
 from app import db
+from werkzeug.exceptions import BadRequest
+from werkzeug.utils import secure_filename
 
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP, AES
 from Crypto.Util.Padding import unpad
 
 from app.models.db_models import User, Category, Transaction
+from app.models.transaction import UserTransaction
 from datetime import datetime
 import traceback
 
@@ -19,6 +22,7 @@ import json
 import pandas as pd
 import numpy as np
 import math
+
 
 bp = Blueprint('api', __name__)
 
@@ -242,21 +246,30 @@ def onboard_user(id):
 
 @bp.route('/transactions/<id>', methods=['POST'])
 def post_transactions(id):
-   data = request.get_json(silent=True) or {}
-   transactions = data.get("transactions", [])
-   user = User.query.get(id)
+  data = request.get_json(silent=True) or {}
+  transactions = data.get("transactions", [])
+  user = User.query.get(id)
+  categories = {cat.id: cat.name for cat in user.categories}
 
-   if user and len(transactions) > 0:
-      for transaction in transactions:
-        amount = transaction.get("amount", 0)
-        date = transaction.get("date", None)
-        description = transaction.get("description", "")
+  transactions_to_send = []
 
-        category = Category.query.filter_by(name=transaction['category']).first()
-        if category:
-          user.transactions.append(Transaction(user_id=id, category_id=category.id, amount=amount, date=date, description=description))
-      db.session.commit()
-      return jsonify({"message": "Transactions added successfully"}), 200
+  # TODO specify chunk size for bulk insert
+
+  if user and len(transactions) > 0:
+    for transaction in transactions:
+      amount = transaction.get("amount", 0)
+      date = transaction.get("date", None)
+      description = transaction.get("description", "")
+      category_id = int(transaction.get("category_id", None))
+
+      if category_id in categories:
+        user_transaction = Transaction(
+            user_id=id, date=date, amount=amount, description=description, category_id=category_id)
+        transactions_to_send.append(user_transaction)
+
+  db.session.bulk_save_objects(transactions_to_send)
+  db.session.commit()
+  return jsonify({"message": "Transactions added successfully"}), 200
    
 
 @bp.route('/transactions/<id>', methods=['DELETE'])
@@ -309,57 +322,98 @@ def get_transactions(id):
 def get_categories(id):
     user = User.query.get(id)
     if user:
-        return jsonify({"categories": [category.name for category in user.categories]}), 200
+        # return jsonify({"categories": [category.name for category in user.categories]}), 200
+        return jsonify({ cat.id: cat.name for cat in user.categories }), 200
     return jsonify({"message": "User not found"}), 404
 
 
-@bp.route('/extract_csv', methods=['POST'])
-def extract_csv():
-    sample_path = '/Users/liam.so/Personal/fintrack_Liam-So/backend/app/api/activity.csv'
-    user_id = 'c029af26-ea61-4d36-bb53-d879aca81c29'
-    user = User.query.get(user_id)
-    categories = {cat.id: cat.name for cat in user.categories}
+@bp.route('/extract_csv/<id>', methods=['POST'])
+def extract_csv(id):
+    temp_file_path = None
+    try:
+      if 'file' not in request.files:
+        return 'No file part', 400
 
-    df = pd.read_csv(sample_path, parse_dates=['Date'])
+      file = request.files['file']
+      filename = secure_filename(file.filename)
+      temp_file_path = os.path.join("/tmp", filename)
+      file.save(temp_file_path)
 
-    chunk_size = math.ceil((len(df))/10)
-    list_df = np.array_split(df, chunk_size)
+      if file.filename == '':
+         raise BadRequest('No selected file')
+      
+      if not file.filename.endswith('.csv') or file.filename.endswith('.xlsx'):
+        raise BadRequest('Invalid file format. Please upload a CSV file.')
+      
+      # sample_path = '/Users/liam.so/Personal/fintrack_Liam-So/backend/app/api/activity.csv'
+      # user_id = 'c029af26-ea61-4d36-bb53-d879aca81c29'
+      user = User.query.get(id)
+      categories = {cat.id: cat.name for cat in user.categories}
 
-    for i, chunk in enumerate(list_df):
-      print('Processing chunk...', i)
-      descriptions = {idx: desc for idx, desc in chunk['Description'].items()}
-      prompt = create_prompt(categories, descriptions)
-      model = 'mistral'
-      prompt_request = PromptRequest(prompt=prompt, model=model)
+      df = pd.read_csv(temp_file_path, parse_dates=['Date'])
 
-      retries = 7
+      chunk_size = math.ceil((len(df))/10)
+      list_df = np.array_split(df, chunk_size)
 
-      for idx in range(retries):
-        print(f'Try number: {idx}')
-        try:
-          # invoke LLM to categorize transactions
-          parsed_items = generate_response(prompt_request)
+      new_transactions = []
 
-          if len(parsed_items) == len(chunk):
-            for item in parsed_items:
-               new_category = int(parsed_items[item])
-               if new_category in categories:
-                  row_data = chunk.loc[int(item)]
-                  amount = row_data['Amount']
-                  date = row_data['Date']
-                  description = row_data['Description']
+      for i, chunk in enumerate(list_df):
+        print('Processing chunk...', i)
+        descriptions = {idx: desc for idx, desc in chunk['Description'].items()}
+        prompt = create_prompt(categories, descriptions)
+        model = 'mistral'
+        prompt_request = PromptRequest(prompt=prompt, model=model)
 
-                  print(f'{description}: {categories[new_category]}')
-               else:
-                  raise ValueError(f'Category {new_category} not found')
-            break
-          else:
-            print("retrying...")
-        except Exception as e:
-          print(f"Error generating response: {str(e)}")
-          print(traceback.format_exc())
+        retries = 3
 
-    return {"message": "CSV extracted successfully"}, 200
+
+        for idx in range(1, retries + 1):
+          print(f'Try number: {idx}')
+          transactions_to_append = []
+
+          try:
+            # invoke LLM to categorize transactions
+            parsed_items = generate_response(prompt_request)
+
+            if len(parsed_items) == len(chunk):
+              for item in parsed_items:
+                new_category = int(parsed_items[item])
+                if new_category in categories:
+                    category = new_category
+                else:
+                    if idx == retries:
+                      category = -1
+                    else:
+                      raise ValueError(f'Category {new_category} not found')
+                    
+                row_data = chunk.loc[int(item)]
+                amount = row_data['Amount']
+                date = row_data['Date']
+                description = row_data['Description']
+
+                new_transaction = UserTransaction(id=str(uuid.uuid4()), date=date, amount=amount, description=description, category_id=category)
+                print(f'{description}: {new_transaction.category_id}')
+
+                transactions_to_append.append(UserTransaction(id=str(uuid.uuid4()), date=date, amount=amount, description=description, category_id=category))
+              
+              new_transactions.extend(transactions_to_append)
+              break
+            else:
+              print("retrying...")
+          except Exception as e:
+            print(f"Error generating response: {str(e)}")
+            print(traceback.format_exc())
+      
+      return jsonify({"transactions": [t.__dict__ for t in new_transactions]}), 200
+    except Exception as e:
+      print(f"Error processing CSV file: {str(e)}")
+      print(traceback.format_exc())
+      return str(e), 500
+    finally:
+      if temp_file_path and os.path.exists(temp_file_path):
+        print(f"Deleting CSV file: {filename} in location: {temp_file_path}")
+        os.remove(temp_file_path)
+
 
 
 def create_prompt(categories, descriptions):

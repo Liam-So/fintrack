@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Upload, Lock, CheckCircle } from 'lucide-react';
-import TransactionReview from '../components/TransactionReview';
 import { api } from '../axios';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import TransactionTable from '../components/TransactionTable';

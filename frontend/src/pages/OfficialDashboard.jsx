@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth0 } from "@auth0/auth0-react";
-import { deleteTransaction, fetchCategoryPercentages, fetchTransactions, fetchUserData, postTransactions, updateTransaction } from '../api/dashboardApi';
+import { deleteTransaction, fetchCategoryPercentages, fetchTransactions, fetchUserData, getUserCategories, postTransactions, updateTransaction } from '../api/dashboardApi';
 import DashboardUI from '../components/DashboardUI';
 
 const OfficialDashboard = () => {
@@ -13,6 +13,7 @@ const OfficialDashboard = () => {
   const [monthlyExpenses, setMonthlyExpenses] = useState(0);
   const [transactions, setTransactions] = useState([]);
   const [categoryPercentages, setCategoryPercentages] = useState([]);
+  const [categories, setCategories] = useState({});
   const [month, setMonth] = useState(new Date().getMonth() + 1); // pass this to DashboardUI
 
   useEffect(() => {
@@ -20,6 +21,9 @@ const OfficialDashboard = () => {
       if (isAuthenticated && user) {
         try {
           const { data: userData } = await fetchUserData(user);
+          const { data: categories } = await getUserCategories(userData.id);
+
+          setCategories(categories);
           setUserData(userData);
         } catch (error) {
           console.error('Error fetching user data:', error);
@@ -47,6 +51,7 @@ const OfficialDashboard = () => {
           setTransactions(fetchedTransactions);
 
           const { data: getCategoryPercentages } = await fetchCategoryPercentages(userId, fetchedTransactions);
+          
           setCategoryPercentages(getCategoryPercentages);
 
           const totalAmount = Object.values(getCategoryPercentages).reduce((acc, curr) => acc + curr, 0).toFixed(2);
@@ -113,6 +118,7 @@ const OfficialDashboard = () => {
         handleSaveAction={updateUserTransaction}
         handleDeleteAction={deleteUserTransaction}
         handleAddAction={addUserTransaction}
+        categories={categories}
       />
     )}
     </>

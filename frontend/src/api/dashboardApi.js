@@ -23,9 +23,10 @@ export const fetchCategoryPercentages = (id, transactions) => (
   })
 );
 
-export const postCalculateCategoryPercentages = (transactions) => (
+export const postCalculateCategoryPercentages = (transactions, categories) => (
   api.post("/trial/categories/percentages", {
-    transactions: transactions
+    transactions: transactions,
+    categories: categories
   })
 );
 

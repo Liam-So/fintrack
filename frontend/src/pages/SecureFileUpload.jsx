@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Upload, Lock, CheckCircle } from 'lucide-react';
 import TransactionReview from '../components/TransactionReview';
 import { api } from '../axios';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
+import TransactionTable from '../components/TransactionTable';
+import { postTransactions } from '../api/dashboardApi';
 
 const SecureFileUpload = ({ isTrial }) => {
   const [publicKey, setPublicKey] = useState('');
@@ -11,6 +13,7 @@ const SecureFileUpload = ({ isTrial }) => {
   const [uploadComplete, setUploadComplete] = useState(false);
   const [transactions, setTransactions] = useState([]);
   const [categories, setCategories] = useState([]);
+  const navigate = useNavigate();
 
   const location = useLocation();
   const { id } = useParams();
@@ -41,6 +44,10 @@ const SecureFileUpload = ({ isTrial }) => {
 
     const formData = new FormData();
     formData.append('file', file);
+
+    const jsonMetadata = { categories: categories };
+    formData.append('json', JSON.stringify(jsonMetadata));
+
     try {
       setUploading(true);
 
@@ -71,15 +78,30 @@ const SecureFileUpload = ({ isTrial }) => {
     }
   };
 
+  const handleSubmit = async () => {
+    if (isTrial) {
+      const { income } = state;
+      navigate(`/trial/dashboard/${id}`, { state: { transactions, income, categories } });
+    } else {
+      await postTransactions(transactions, id);
+      navigate('/dashboard');
+    }
+  };
+
   return (
     <>
     {(transactions.length > 0 && uploadComplete) ? (
-     <TransactionReview 
-        transactions={transactions}
-        categories={categories} 
-        isTrialFlow={isTrial}
-        income={state?.income}
-     /> 
+      <TransactionTable
+        postedTransactions={transactions}
+        categories={categories}
+        handleSubmit={handleSubmit}
+      />
+    //  <TransactionReview 
+    //     transactions={transactions}
+    //     categories={categories} 
+    //     isTrialFlow={isTrial}
+    //     income={state?.income}
+    //  /> 
     ): (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="max-w-md w-full space-y-8">

@@ -54,7 +54,7 @@ def categories(id):
   transactions = data.get("transactions", [])
 
   for transaction in transactions:
-    category = transaction['category']
+    category = transaction['category_id']
     amount = transaction['amount']
 
     if category not in transactions_by_category:
@@ -88,16 +88,17 @@ def trial_categories():
    request_data = json.loads(request.data)
 
    transactions = request_data['transactions']
+   categories = request_data['categories']
 
    categories = {}
 
    for transaction in transactions:
-      if transaction['category'] not in categories:
-         categories[transaction['category']] = float(transaction['amount'])
+      if transaction['category_id'] not in categories:
+        categories[transaction['category_id']] = float(transaction['amount'])
       else:
-         categories[transaction['category']] += float(transaction['amount'])
+        categories[transaction['category_id']] += float(transaction['amount'])
 
-      categories[transaction['category']] = round(categories[transaction['category']], 2)
+      categories[transaction['category_id']] = round(categories[transaction['category_id']], 2)
 
    return categories, 200
 
@@ -316,7 +317,7 @@ def get_transactions(id):
     if query_by_month and query_by_month > 0 and query_by_month <= 12:
       transactions = [t for t in transactions if t.date.month == query_by_month]
 
-    return jsonify({"transactions": [{"id": t.id, "amount": t.amount, "description": t.description, "date": t.date, "category": t.category.name} for t in transactions]}), 200
+    return jsonify({"transactions": [{"id": t.id, "amount": t.amount, "description": t.description, "date": t.date, "category_id": t.category_id} for t in transactions]}), 200
    
    return jsonify({"message": "User not found"}), 404
 
@@ -347,11 +348,21 @@ def extract_csv(id):
       
       if not file.filename.endswith('.csv') or file.filename.endswith('.xlsx'):
         raise BadRequest('Invalid file format. Please upload a CSV file.')
-      
-      # sample_path = '/Users/liam.so/Personal/fintrack_Liam-So/backend/app/api/activity.csv'
-      # user_id = 'c029af26-ea61-4d36-bb53-d879aca81c29'
-      user = User.query.get(id)
-      categories = {cat.id: cat.name for cat in user.categories}
+
+      is_trial = 'temp' in id and 'json' in request.form
+
+      if is_trial:
+        try:
+            json_data = json.loads(request.form['json'])
+            # TODO: we should standardize the JSON format so we don't have to keep casting the keys to int
+            json_data['categories'] = {int(key): value for key, value in json_data['categories'].items()}
+            categories = json_data['categories']
+            print(categories)
+        except Exception as e:
+            return jsonify({"Error processing JSON": str(e)}), 400
+      else:
+        user = User.query.get(id)
+        categories = {cat.id: cat.name for cat in user.categories}
 
       df = pd.read_csv(temp_file_path, parse_dates=['Date'])
 
@@ -369,7 +380,7 @@ def extract_csv(id):
 
         retries = 3
 
-
+        # TODO: to prevent the LLM from returning a lot of -1, create a dictionary to keep track of past categorizations
         for idx in range(1, retries + 1):
           print(f'Try number: {idx}')
           transactions_to_append = []

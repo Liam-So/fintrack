@@ -18,11 +18,12 @@ const TrialDashboard = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        setMonthlyIncome(state.income);
-        const { data: newTransactions } = await fetchTrialTransactions(state.transactions, month);
+        const { income, categories, transactions } = state;
+        setMonthlyIncome(income);
+        const { data: newTransactions } = await fetchTrialTransactions(transactions, month);
         setTransactions(newTransactions.transactions);
 
-        const { data: postCategoryPercentages } = await postCalculateCategoryPercentages(newTransactions.transactions);
+        const { data: postCategoryPercentages } = await postCalculateCategoryPercentages(newTransactions.transactions, categories);
         setCategoryPercentages(postCategoryPercentages);
 
         const totalAmount = Object.values(postCategoryPercentages).reduce((acc, curr) => acc + curr, 0).toFixed(2);
@@ -44,6 +45,7 @@ const TrialDashboard = () => {
       monthlyRevenue={monthlyIncome}
       month={month}
       setMonth={setMonth}
+      categories={state.categories}
     />
   )
 }

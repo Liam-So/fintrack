@@ -1,7 +1,7 @@
 import React from "react";
 import { Doughnut } from 'react-chartjs-2';
 
-const DonutChart = ({ categoryPercentages }) => {
+const DonutChart = ({ categoryPercentages, categories }) => {
   function generateRandomColors(numColors) {
     return Array.from({ length: numColors }, () => {
       const hue = Math.floor(Math.random() * 360);
@@ -15,7 +15,7 @@ const DonutChart = ({ categoryPercentages }) => {
     const colors = generateRandomColors(Object.entries(categoryPercentages).length);
 
     return {
-      labels: Object.keys(categoryPercentages),
+      labels: [].concat(Object.keys(categoryPercentages)).map((category_id) => categories[category_id]),
       datasets: [
         {
           data: Object.values(categoryPercentages),

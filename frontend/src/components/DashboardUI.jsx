@@ -32,7 +32,7 @@ ChartJS.register(
   ChartDataLabels,
 );
 
-const DashboardUI = ({ transactions, categoryPercentages, amountSpent, monthlyRevenue, userData, logout, setMonth, month, handleSaveAction, handleDeleteAction, handleAddAction }) => {
+const DashboardUI = ({ categories, transactions, categoryPercentages, amountSpent, monthlyRevenue, userData, logout, setMonth, month, handleSaveAction, handleDeleteAction, handleAddAction }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
@@ -47,6 +47,7 @@ const DashboardUI = ({ transactions, categoryPercentages, amountSpent, monthlyRe
             <DashboardContent 
               transactions={transactions}
               categoryPercentages={categoryPercentages}
+              categories={categories}
               amountSpent={amountSpent}
               monthlyRevenue={monthlyRevenue}
               month={month}
@@ -61,7 +62,7 @@ const DashboardUI = ({ transactions, categoryPercentages, amountSpent, monthlyRe
   )
 }
 
-const DashboardContent = ({ transactions, categoryPercentages, amountSpent, monthlyRevenue, month, setMonth, handleSaveAction, handleDeleteAction, handleAddAction }) => (
+const DashboardContent = ({ transactions, categoryPercentages, amountSpent, monthlyRevenue, month, setMonth, handleSaveAction, handleDeleteAction, handleAddAction, categories }) => (
   <div className="container mx-auto px-6 py-8">
     <div className="flex pb-4">
       <select
@@ -100,7 +101,7 @@ const DashboardContent = ({ transactions, categoryPercentages, amountSpent, mont
         </h2>
         <div className="flex-grow flex items-center justify-center">
           <div className="aspect-square">
-            <DonutChart categoryPercentages={categoryPercentages} />
+            <DonutChart categoryPercentages={categoryPercentages} categories={categories} />
           </div>
         </div>
       </div>
@@ -122,7 +123,7 @@ const DashboardContent = ({ transactions, categoryPercentages, amountSpent, mont
     {/* Additional content */}
     <TransactionTable 
       postedTransactions={transactions} 
-      categories={Object.keys(categoryPercentages)}
+      categories={categories}
       handleSaveAction={handleSaveAction}
       handleDeleteAction={handleDeleteAction}
       handleAddAction={handleAddAction}

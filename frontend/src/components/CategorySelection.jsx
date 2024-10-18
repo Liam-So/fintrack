@@ -1,31 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Check, Plus, X } from 'lucide-react';
 
 const initialCategories = [
-  { id: 'rent', name: 'Rent', icon: '🏠' },
-  { id: 'restaurants', name: 'Restaurants', icon: '🍽️' },
-  { id: 'drinks', name: 'Drinks', icon: '🍷' },
-  { id: 'groceries', name: 'Groceries', icon: '🛒' },
-  { id: 'transport', name: 'Transportation', icon: '🚗' },
-  { id: 'utilities', name: 'Utilities', icon: '💡' },
-  { id: 'entertainment', name: 'Entertainment', icon: '🎭' },
-  { id: 'shopping', name: 'Shopping', icon: '🛍️' },
-  { id: 'health', name: 'Health', icon: '💪' },
-  { id: 'travel', name: 'Travel', icon: '✈️' },
-  { id: 'education', name: 'Education', icon: '📚' },
+  { id: 1, name: 'Rent', icon: '🏠' },
+  { id: 2, name: 'Restaurants', icon: '🍽️' },
+  { id: 3, name: 'Drinks', icon: '🍷' },
+  { id: 4, name: 'Groceries', icon: '🛒' },
+  { id: 5, name: 'Transportation', icon: '🚗' },
+  { id: 6, name: 'Utilities', icon: '💡' },
+  { id: 7, name: 'Entertainment', icon: '🎭' },
+  { id: 8, name: 'Shopping', icon: '🛍️' },
+  { id: 9, name: 'Health', icon: '💪' },
+  { id: 10, name: 'Travel', icon: '✈️' },
+  { id: 11, name: 'Education', icon: '📚' },
 ];
 
 const CategorySelection = ({ onComplete }) => {
   const [categories, setCategories] = useState(initialCategories);
-  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState({});
   const [newCategory, setNewCategory] = useState('');
 
-  const toggleCategory = (categoryId) => {
-    setSelectedCategories(prev =>
-      prev.includes(categoryId)
-        ? prev.filter(id => id !== categoryId)
-        : [...prev, categoryId]
-    );
+  useEffect(() => {
+    console.log(selectedCategories);
+  }, [selectedCategories])
+
+  const toggleCategory = (categoryId, categoryName) => {
+    setSelectedCategories(prevCategories => {
+      const isCategorySelected = !!prevCategories[categoryId];
+  
+      if (isCategorySelected) {
+        // remove category from selectedCategories
+        const { [categoryId]: _, ...remainingCategories } = prevCategories;
+        return remainingCategories;
+      }
+  
+      return { ...prevCategories, [categoryId]: categoryName };
+    });
   };
 
   const handleSubmit = (e) => {
@@ -57,16 +67,16 @@ const CategorySelection = ({ onComplete }) => {
               <button
                 key={category.id}
                 type="button"
-                onClick={() => toggleCategory(category.id)}
+                onClick={() => toggleCategory(category.id, category.name)}
                 className={`relative px-6 py-4 border-2 rounded-lg text-left focus:outline-none transition-all duration-200 ease-in-out ${
-                  selectedCategories.includes(category.id)
+                  category.id in selectedCategories
                     ? 'bg-white bg-opacity-20 border-white text-white'
                     : 'border-white border-opacity-30 text-white text-opacity-70 hover:bg-white hover:bg-opacity-10'
                 }`}
               >
                 <span className="text-2xl mr-2">{category.icon}</span>
                 {category.name}
-                {selectedCategories.includes(category.id) && (
+                {category.id in selectedCategories && (
                   <Check className="absolute top-2 right-2 h-5 w-5 text-white" />
                 )}
               </button>

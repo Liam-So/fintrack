@@ -3,40 +3,36 @@ import MonthlyIncomeInput from '../components/MonthlyIncomeInput';
 import CategorySelection from '../components/CategorySelection';
 import { useNavigate, useParams } from 'react-router-dom';
 import { postOnboardUser, updateUser } from '../api/dashboardApi';
+import { useUser } from '../context/UserContext';
 
 const OnboardingFlow = ({ isTrial }) => {
   const [step, setStep] = useState('income');
-  const [income, setIncome] = useState(null);
-  const [categories, setCategories] = useState([]);
+  const { user, updateUserCategories, updateUserIncome } = useUser();
 
   const navigate = useNavigate();
   const { id } = useParams();
 
   const handleNext = (income) => {
-    setIncome(income);
+    updateUserIncome(income);
     setStep('categories');
   }
 
   const handleComplete = async (selectedCategories) => {
-    setCategories(selectedCategories);
+    updateUserCategories(selectedCategories);
+    const income = user.income;
 
     if (isTrial) {
-      navigate(`/trial/upload/${id}`, {
-        state: {
-          selectedCategories,
-          income
-        }
-      })
+      navigate(`/trial/upload/${id}`);
     } else {
-      // Update user AND add categories to user_categories
-      const updatedUser = await updateUser({ id, updatedAttributes: { monthly_income: income } });
-      const onboardUser = await postOnboardUser({ id, selectedCategories, income });
-      navigate(`/upload/${id}`, {
-        state: {
-          selectedCategories,
-          income
-        }
-      })
+      try {
+        // Update user AND add categories to user_categories
+        await updateUser({ id, updatedAttributes: { monthly_income: income } });
+        await postOnboardUser({ id, selectedCategories, income });
+        navigate(`/upload/${id}`);
+      }
+      catch (error) {
+        console.error('Error onboarding user:', error);
+      }
     }
   }
 

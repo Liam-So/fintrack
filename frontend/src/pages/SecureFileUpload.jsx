@@ -4,6 +4,7 @@ import { api } from '../axios';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import TransactionTable from '../components/TransactionTable';
 import { postTransactions } from '../api/dashboardApi';
+import { useUser } from '../context/UserContext';
 
 const SecureFileUpload = ({ isTrial }) => {
   const [publicKey, setPublicKey] = useState('');
@@ -11,30 +12,10 @@ const SecureFileUpload = ({ isTrial }) => {
   const [uploading, setUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
   const [transactions, setTransactions] = useState([]);
-  const [categories, setCategories] = useState([]);
   const navigate = useNavigate();
 
-  const location = useLocation();
   const { id } = useParams();
-
-  // Access the state
-  const { state } = location;
-
-  useEffect(() => {
-    if (isTrial) {
-      setCategories(state.selectedCategories);
-    } else {
-      const fetchUserCategories = async () => {
-        try {
-          const { data } = await api.get(`/users/${id}/categories`);
-          setCategories(data);
-        } catch (error) {
-          console.error(error);
-        }
-      }
-      fetchUserCategories();
-    }
-  }, []);
+  const { user } = useUser();
 
   const encryptAndUploadFile = async () => {
     if (!file) {
@@ -44,7 +25,7 @@ const SecureFileUpload = ({ isTrial }) => {
     const formData = new FormData();
     formData.append('file', file);
 
-    const jsonMetadata = { categories: categories };
+    const jsonMetadata = { categories: user.categories };
     formData.append('json', JSON.stringify(jsonMetadata));
 
     try {
@@ -79,8 +60,7 @@ const SecureFileUpload = ({ isTrial }) => {
 
   const handleSubmit = async () => {
     if (isTrial) {
-      const { income } = state;
-      navigate(`/trial/dashboard/${id}`, { state: { transactions, income, categories } });
+      navigate(`/trial/dashboard/${id}`, { state: { transactions } });
     } else {
       await postTransactions(transactions, id);
       navigate('/dashboard');
@@ -92,7 +72,6 @@ const SecureFileUpload = ({ isTrial }) => {
     {(transactions.length > 0 && uploadComplete) ? (
       <TransactionTable
         postedTransactions={transactions}
-        categories={categories}
         handleSubmit={handleSubmit}
       />
     ): (

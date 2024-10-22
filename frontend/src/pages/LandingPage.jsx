@@ -1,12 +1,11 @@
 import React from 'react';
 import { MoveRight } from 'lucide-react';
 import { useAuth0 } from "@auth0/auth0-react";
-import Profile from './Profile';
 import { api } from '../axios';
 import { useNavigate } from 'react-router-dom';
 
 const LandingPage = () => {
-  const { loginWithRedirect, logout, isAuthenticated } = useAuth0();
+  const { loginWithRedirect } = useAuth0();
   const navigate = useNavigate();
 
   const handleTrialSession = async () => {

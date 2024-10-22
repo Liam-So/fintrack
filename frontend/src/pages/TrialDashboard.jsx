@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react'
 import { useLocation } from "react-router-dom";
 import { fetchTrialTransactions, postCalculateCategoryPercentages } from '../api/dashboardApi';
 import DashboardUI from '../components/DashboardUI';
+import { useUser } from '../context/UserContext';
 
 const TrialDashboard = () => {
   const location = useLocation();
   const { state } = location;
+  
+  const { user } = useUser();
 
-  const [monthlyIncome, setMonthlyIncome] = useState(0);
   const [transactions, setTransactions] = useState([]);
   const [categoryPercentages, setCategoryPercentages] = useState([]);
   const [amountSpent, setAmountSpent] = useState(0);
@@ -18,8 +20,8 @@ const TrialDashboard = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const { income, categories, transactions } = state;
-        setMonthlyIncome(income);
+        const { categories } = user;
+        const { transactions } = state;
         const { data: newTransactions } = await fetchTrialTransactions(transactions, month);
         setTransactions(newTransactions.transactions);
 
@@ -42,10 +44,8 @@ const TrialDashboard = () => {
       transactions={transactions}
       categoryPercentages={categoryPercentages}
       amountSpent={amountSpent}
-      monthlyRevenue={monthlyIncome}
       month={month}
       setMonth={setMonth}
-      categories={state.categories}
     />
   )
 }

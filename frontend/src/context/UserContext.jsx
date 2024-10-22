@@ -13,6 +13,7 @@ export const UserProvider = ({ children }) => {
   });
 
   useEffect(() => {
+    // Should we add user id for trial?
     if (isAuthenticated && user) {
       // Fetch additional user info from your backend
       const fetchAdditionalInfo = async () => {

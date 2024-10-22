@@ -60,7 +60,7 @@ const OfficialDashboard = () => {
 
   const addUserTransaction = async (newTransaction) => {
     try {
-      const response = await postTransactions([newTransaction], userData.id);
+      const response = await postTransactions([newTransaction], user.id);
       if (response.status === 200) {
         console.log('Transaction added successfully');
       }

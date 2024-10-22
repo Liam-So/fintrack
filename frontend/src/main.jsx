@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { Auth0Provider } from '@auth0/auth0-react';
 import App from './App';
 import './index.css';
+import { UserProvider } from './context/UserContext';
 
 const root = createRoot(document.getElementById('root'));
 
@@ -18,6 +19,8 @@ root.render(
       redirect_uri: callbackUrl
     }}
   >
-    <App />
+    <UserProvider>
+      <App />
+    </UserProvider>
   </Auth0Provider>,
 );

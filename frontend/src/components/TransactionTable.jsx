@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { PlusCircle, Send, Pencil, Trash2 } from 'lucide-react';
 import AddTransactionModal from './AddTransactionModal';
 import { formattedDate } from '../utils/util';
+import { useUser } from '../context/UserContext';
 
 // Assign these colours to higher-order components
 const CategoryBadge = ({ category }) => {
@@ -21,10 +22,13 @@ const CategoryBadge = ({ category }) => {
   );
 };
 
-const TransactionTable = ({ postedTransactions = [], categories = [], handleSubmit, handleSaveAction = () => {}, handleDeleteAction = () => {}, handleAddAction = () => {}}) => {
+const TransactionTable = ({ postedTransactions = [], handleSubmit, handleSaveAction = () => {}, handleDeleteAction = () => {}, handleAddAction = () => {}}) => {
   const [editingId, setEditingId] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [transactions, setTransactions] = useState(postedTransactions);
+
+  const { user } = useUser();
+  const categories = user?.categories;
 
   useEffect(() => {
     setTransactions(postedTransactions);

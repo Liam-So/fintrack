@@ -292,8 +292,7 @@ def update_transaction(id):
     data = request.get_json(silent=True) or {}
 
     transaction = Transaction.query.get(id)
-    category = Category.query.filter_by(name=data.get("category")).first()
-    print(category.name)
+    category = Category.query.get(data.get("category_id"))
 
     if transaction and category:
         transaction.amount = data.get("amount", transaction.amount)

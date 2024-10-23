@@ -16,10 +16,12 @@ const AddTransactionModal = ({ isOpen, onClose, onAdd, categories }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
     onAdd({
       ...transaction,
       amount: parseFloat(transaction.amount),
-      id: Date.now() // Simple way to generate a unique id
+      id: Date.now(), // Simple way to generate a unique id
+      category_id: transaction.category_id
     });
     onClose();
   };

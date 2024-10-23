@@ -11,6 +11,7 @@ const OfficialDashboard = () => {
   const [transactions, setTransactions] = useState([]);
   const [categoryPercentages, setCategoryPercentages] = useState([]);
   const [month, setMonth] = useState(new Date().getMonth() + 1); // pass this to DashboardUI
+  const [isTransactionsUpdated, setIsTransactionsUpdated] = useState(false);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -34,11 +35,12 @@ const OfficialDashboard = () => {
     if (user) {
       fetchDashboardData();
     }
-  }, [user, month]);
+  }, [user, month, isTransactionsUpdated]);
 
   const deleteUserTransaction = async (id) => {
     try {
       const response = await deleteTransaction(id);
+      setIsTransactionsUpdated(prev => !prev);
       if (response.status === 200) {
         console.log('Transaction deleted successfully');
       }
@@ -50,6 +52,7 @@ const OfficialDashboard = () => {
   const updateUserTransaction = async (id, updatedAttributes) => {
     try {
       const response = await updateTransaction(id, updatedAttributes);
+      setIsTransactionsUpdated(prev => !prev);
       if (response.status === 200) {
         console.log('Transaction updated successfully');
       }
@@ -61,6 +64,7 @@ const OfficialDashboard = () => {
   const addUserTransaction = async (newTransaction) => {
     try {
       const response = await postTransactions([newTransaction], user.id);
+      setIsTransactionsUpdated(prev => !prev);
       if (response.status === 200) {
         console.log('Transaction added successfully');
       }

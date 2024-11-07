@@ -1,9 +1,9 @@
 import { api } from "../axios";
 
-export const fetchUserData = (user) => (api.get(`user/${user.email}`));
+export const fetchUserData = (user) => (api.get(`/user/${user.email}`));
 
 export const fetchTransactions = async (id, month) => (
-  api.get(`/users/${id}/transactions`, {
+  api.get(`/transactions/${id}`, {
     params: {
       query_by_month: month
     }
@@ -18,7 +18,7 @@ export const fetchTrialTransactions = async (transactions, month) => (
 );
 
 export const fetchCategoryPercentages = (id, transactions) => (
-  api.post(`/user/${id}/categories/percentages`, {
+  api.post(`/user/categories/percentages/${id}`, {
     transactions: transactions
   })
 );
@@ -30,7 +30,7 @@ export const postCalculateCategoryPercentages = (transactions, categories) => (
   })
 );
 
-export const getUserCategories = (id) => (api.get(`/users/${id}/categories`));
+export const getUserCategories = (id) => (api.get(`/user/categories/${id}`));
 
 export const postNewUser = (user) => (
   api.post("/user", {

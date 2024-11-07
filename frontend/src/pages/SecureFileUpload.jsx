@@ -31,7 +31,7 @@ const SecureFileUpload = ({ isTrial }) => {
     try {
       setUploading(true);
 
-      const { data } = await api.post(`/extract_csv/${id}`, formData, {
+      const { data } = await api.post(`/extraction/${id}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }

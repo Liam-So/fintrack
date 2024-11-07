@@ -2,7 +2,7 @@ import uuid
 import re
 from typing import List
 from app.models.transaction import Transaction
-from typing import Dict, List, Optional
+from typing import Dict, List
 from datetime import datetime
 
 class TransactionExtractor:

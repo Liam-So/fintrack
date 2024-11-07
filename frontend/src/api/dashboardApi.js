@@ -1,11 +1,17 @@
 import { api } from "../axios";
 
+export const fetchTransactionDates = (id) => (api.get(`/transactions/dates/${id}`, {
+  params: {
+    id: id
+  }
+}));
+
 export const fetchUserData = (user) => (api.get(`/user/${user.email}`));
 
 export const fetchTransactions = async (id, month) => (
   api.get(`/transactions/${id}`, {
     params: {
-      query_by_month: month
+      query_by_date: month
     }
   })
 )

@@ -33,7 +33,7 @@ ChartJS.register(
   ChartDataLabels,
 );
 
-const DashboardUI = ({ transactions, categoryPercentages, amountSpent, setMonth, month, handleSaveAction, handleDeleteAction, handleAddAction }) => {
+const DashboardUI = ({ transactions, categoryPercentages, amountSpent, setMonth, month, handleSaveAction, handleDeleteAction, handleAddAction, transactionDates=[] }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
@@ -54,6 +54,7 @@ const DashboardUI = ({ transactions, categoryPercentages, amountSpent, setMonth,
               handleSaveAction={handleSaveAction}
               handleDeleteAction={handleDeleteAction}
               handleAddAction={handleAddAction}
+              transactionDates={transactionDates}
             />
         </main>
       </div>
@@ -61,7 +62,7 @@ const DashboardUI = ({ transactions, categoryPercentages, amountSpent, setMonth,
   )
 }
 
-const DashboardContent = ({ transactions, categoryPercentages, amountSpent, month, setMonth, handleSaveAction, handleDeleteAction, handleAddAction }) => {
+const DashboardContent = ({ transactions, transactionDates, categoryPercentages, amountSpent, month, setMonth, handleSaveAction, handleDeleteAction, handleAddAction }) => {
   const { user } = useUser();
   const monthlyRevenue = user?.income;
 
@@ -71,22 +72,17 @@ const DashboardContent = ({ transactions, categoryPercentages, amountSpent, mont
         <select
             id="month"
             value={month}
-            onChange={(e) => setMonth(e.target.value)}
+            onChange={(e) => {
+              setMonth(e.target.value);
+              console.log(e.target.value);
+              
+            }}
             className="p-0.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-          <option value="">Month</option>
-          <option value="01">January</option>
-          <option value="02">February</option>
-          <option value="03">March</option>
-          <option value="04">April</option>
-          <option value="05">May</option>
-          <option value="06">June</option>
-          <option value="07">July</option>
-          <option value="08">August</option>
-          <option value="09">September</option>
-          <option value="10">October</option>
-          <option value="11">November</option>
-          <option value="12">December</option>
+          <option value="">Date</option>
+          {transactionDates.map((date, index) => (
+            <option key={index} value={date}>{date}</option>
+          ))}
         </select>
       </div>
 

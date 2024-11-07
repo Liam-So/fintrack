@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { deleteTransaction, fetchCategoryPercentages, fetchTransactions, postTransactions, updateTransaction } from '../api/dashboardApi';
+import { deleteTransaction, fetchCategoryPercentages, fetchTransactionDates, fetchTransactions, postTransactions, updateTransaction } from '../api/dashboardApi';
 import DashboardUI from '../components/DashboardUI';
 import { useUser } from '../context/UserContext';
 
@@ -10,14 +10,15 @@ const OfficialDashboard = () => {
   const [monthlyExpenses, setMonthlyExpenses] = useState(0);
   const [transactions, setTransactions] = useState([]);
   const [categoryPercentages, setCategoryPercentages] = useState([]);
-  const [month, setMonth] = useState(new Date().getMonth() + 1); // pass this to DashboardUI
+  const [date, setDate] = useState(null); // pass this to DashboardUI
   const [isTransactionsUpdated, setIsTransactionsUpdated] = useState(false);
+  const [transactionDates, setTransactionDates] = useState([]);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       if (user && user?.id) {
         try {
-          const { data: getTransactions } = await fetchTransactions(user.id, month);
+          const { data: getTransactions } = await fetchTransactions(user.id, date);
           const { transactions: fetchedTransactions } = getTransactions;
           setTransactions(fetchedTransactions);
 
@@ -26,6 +27,9 @@ const OfficialDashboard = () => {
 
           const totalAmount = Object.values(getCategoryPercentages).reduce((acc, curr) => acc + curr, 0).toFixed(2);
           setMonthlyExpenses(totalAmount);
+
+          const { data: dates } = await fetchTransactionDates(user.id);
+          setTransactionDates(dates);
         } catch (error) {
           console.error('Error fetching transactions:', error);
         }
@@ -35,7 +39,7 @@ const OfficialDashboard = () => {
     if (user) {
       fetchDashboardData();
     }
-  }, [user, month, isTransactionsUpdated]);
+  }, [user, date, isTransactionsUpdated]);
 
   const deleteUserTransaction = async (id) => {
     try {
@@ -79,11 +83,12 @@ const OfficialDashboard = () => {
         transactions={transactions}
         categoryPercentages={categoryPercentages}
         amountSpent={monthlyExpenses}
-        month={month}
-        setMonth={setMonth}
+        month={date}
+        setMonth={setDate}
         handleSaveAction={updateUserTransaction}
         handleDeleteAction={deleteUserTransaction}
         handleAddAction={addUserTransaction}
+        transactionDates={transactionDates}
       />
     </>
   )

@@ -9,11 +9,12 @@ transaction_bp = Blueprint('transaction', __name__)
 @transaction_bp.route('/<id>', methods=['GET'])
 def get_transactions(id):
   try:
-    transactions = TransactionService.get_transactions(id, int(request.args.get('query_by_month', -1)))
+    date_range = request.args.get('query_by_date', None)
+    transactions = TransactionService.get_transactions(id, date_range)
     return jsonify(transactions), HTTPStatus.OK
   except Exception as e:
     return jsonify({"error": "Internal server error"}), HTTPStatus.INTERNAL_SERVER_ERROR
-  
+
 
 @transaction_bp.route('/<id>', methods=['POST'])
 def post_transactions(id):
@@ -47,5 +48,15 @@ def update_transactions(id):
     return jsonify({"message": "Transaction updated successfully"}), HTTPStatus.OK
   except ValueError as e:
     return jsonify({"error": str(e)}), HTTPStatus.NOT_FOUND
+  except Exception as e:
+    return jsonify({"error": "Internal server error"}), HTTPStatus.INTERNAL_SERVER_ERROR
+
+
+@transaction_bp.route('/dates/<id>', methods=['GET'])  
+def get_dates(id):
+  try:
+    id = request.args.get('id', -1)
+    formatted_months = TransactionService.get_transaction_dates(id)
+    return jsonify(formatted_months), HTTPStatus.OK
   except Exception as e:
     return jsonify({"error": "Internal server error"}), HTTPStatus.INTERNAL_SERVER_ERROR

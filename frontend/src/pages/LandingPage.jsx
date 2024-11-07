@@ -9,7 +9,7 @@ const LandingPage = () => {
   const navigate = useNavigate();
 
   const handleTrialSession = async () => {
-    api.get('/generate_temp_session').then((response) => {
+    api.get('/trial/session').then((response) => {
       if (response.data.session_id) {
         navigate(`/trial/onboard/${response.data.session_id}`);
       }

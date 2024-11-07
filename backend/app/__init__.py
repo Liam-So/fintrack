@@ -17,10 +17,8 @@ def create_app():
 
     CORS(app)
 
-    # from app.api import routes
     from app.api.routes import user_routes, transaction_routes, extraction_routes, trial_routes
 
-    # app.register_blueprint(routes.bp)
     app.register_blueprint(user_routes.user_bp, url_prefix='/api/user')
     app.register_blueprint(transaction_routes.transaction_bp, url_prefix='/api/transactions')
     app.register_blueprint(extraction_routes.extraction_bp, url_prefix='/api/extraction')

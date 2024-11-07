@@ -2,15 +2,14 @@ from flask import Blueprint, request, jsonify
 from app.models.db_models import User, Category, Transaction
 from app import db
 from http import HTTPStatus
+from app.services.user_services import UserService
 
 user_bp = Blueprint('user', __name__)
 
 @user_bp.route('/<email>', methods=['GET'])
 def get_user(email):
   try:
-    user = User.query.filter_by(email=email).first()
-    if not user:
-      raise ValueError(f'User {email} not found')
+    user = UserService.get_user_by_email(email)
     return jsonify({"id": user.id, "username": user.username, "email": user.email, "monthly_income": user.monthly_income}), HTTPStatus.OK
   except ValueError as e:
     return jsonify({"error": str(e)}), HTTPStatus.NOT_FOUND
@@ -19,15 +18,9 @@ def get_user(email):
 
 
 @user_bp.route('/<id>', methods=['PUT'])
-def update_user(id):
+def update_user_route(id):
    try:
-    user = User.query.get(id)
-    if not user:
-      raise ValueError(f'User {id} not found')
-    data = request.get_json(silent=True) or {}
-    user.email = data.get("email", user.email)
-    user.monthly_income = data.get("monthly_income", user.monthly_income)
-    db.session.commit()
+    UserService.update_user(id, request.get_json(silent=True) or {})
     return jsonify({"message": "User updated successfully"}), HTTPStatus.OK
    except ValueError as e:
     return jsonify({"error": str(e)}), HTTPStatus.NOT_FOUND
@@ -39,10 +32,7 @@ def update_user(id):
 def create_user():
   try:
     data = request.get_json(silent=True) or {}
-    monthly_income = data.get("monthly_income", None)
-    new_user = User(username=data['username'], email=data['email'], monthly_income=monthly_income)
-    db.session.add(new_user)
-    db.session.commit()
+    UserService.create_user(data)
     return jsonify({"message": "User created successfully"}), HTTPStatus.CREATED
   except Exception as e:
     return jsonify({"error": "Internal server error"}), HTTPStatus.INTERNAL_SERVER_ERROR
@@ -97,10 +87,8 @@ def onboard_user(id):
 @user_bp.route('/categories/<id>', methods=['GET'])
 def get_user_categories(id):
   try:
-    user = User.query.get(id)
-    if not user:
-        raise ValueError(f'User {id} not found')
-    return jsonify({ cat.id: cat.name for cat in user.categories }), HTTPStatus.OK
+    categories = UserService.get_user_categories(id)
+    return jsonify(categories), HTTPStatus.OK
   except ValueError as e:
     return jsonify({"error": str(e)}), HTTPStatus.NOT_FOUND
   except Exception as e:
@@ -110,19 +98,8 @@ def get_user_categories(id):
 @user_bp.route('/categories/percentages/<id>', methods=['POST'])
 def get_category_percentages(id):
   data = request.get_json(silent=True) or {}
-
-  transactions_by_category = {}
   transactions = data.get("transactions", [])
 
-  for transaction in transactions:
-    category = transaction['category_id']
-    amount = transaction['amount']
-
-    if category not in transactions_by_category:
-      transactions_by_category[category] = amount
-    else:
-      transactions_by_category[category] += amount
-
-    round(transactions_by_category[category], 2)
+  transactions_by_category = UserService.get_categories_by_percentages(transactions)
   
   return transactions_by_category, HTTPStatus.OK

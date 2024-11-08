@@ -72,11 +72,7 @@ const DashboardContent = ({ transactions, transactionDates, categoryPercentages,
         <select
             id="month"
             value={month}
-            onChange={(e) => {
-              setMonth(e.target.value);
-              console.log(e.target.value);
-              
-            }}
+            onChange={(e) => setMonth(e.target.value)}
             className="p-0.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
           <option value="">Date</option>

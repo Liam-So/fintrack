@@ -12,21 +12,28 @@ def generate_temp_session():
   return jsonify({"session_id": f"temp_{str(uuid.uuid4())}"}), HTTPStatus.OK
 
 
-@trial_bp.route('/transactions', methods=['POST'])
-def trial_transactions():
-  data = request.get_json(silent=True) or {}
-  transactions = data.get('transactions', [])
-  month = int(data.get('month', None))
+@trial_bp.route('/transactions/dates', methods=['POST'])
+def trial_transaction_dates():
+   data = request.get_json(silent=True) or {}
+   transactions = data.get('transactions', [])
+   date = data.get('date', None)
 
-  transactions_to_return = []
+   if date:
+     print(f"DATE: {date}")
+     return jsonify(transactions), HTTPStatus.OK
 
-  for transaction in transactions:
-      parsed_date = datetime.strptime(transaction['date'],"%Y-%m-%dT%H:%M:%S.%fZ")
-      if month and parsed_date.month == month:
-          transactions_to_return.append(transaction)
+   dates = {}
 
-  return jsonify({"transactions": transactions_to_return}), HTTPStatus.OK
+   for transaction in transactions:
+    parsed_date = datetime.strptime(transaction['date'],"%Y-%m-%dT%H:%M:%S.%fZ")
+    date_str = parsed_date.strftime('%b %Y')
+    if date_str not in dates:
+      dates[date_str] = [transaction]
+    else:
+      dates[date_str].append(transaction)
 
+   return jsonify(dates), HTTPStatus.OK
+      
 
 @trial_bp.route('/categories/percentages', methods=['POST'])
 def trial_categories():

@@ -16,12 +16,11 @@ export const fetchTransactions = async (id, month) => (
   })
 )
 
-export const fetchTrialTransactions = async (transactions, month) => (
-  api.post(`/trial/transactions`, {
-    transactions: transactions,
-    month: month
+export const fetchTrialTransactions = async (transactions) => (
+  api.post(`/trial/transactions/dates`, {
+    transactions: transactions
   })
-);
+)
 
 export const fetchCategoryPercentages = (id, transactions) => (
   api.post(`/user/categories/percentages/${id}`, {

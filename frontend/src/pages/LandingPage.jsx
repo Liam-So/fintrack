@@ -11,6 +11,7 @@ const LandingPage = () => {
   const handleTrialSession = async () => {
     api.get('/trial/session').then((response) => {
       if (response.data.session_id) {
+        window.sessionStorage.setItem('session', response.data.session_id);
         navigate(`/trial/onboard/${response.data.session_id}`);
       }
     }).catch((error) => {

@@ -64,7 +64,9 @@ const DashboardUI = ({ transactions, categoryPercentages, amountSpent, setMonth,
 
 const DashboardContent = ({ transactions, transactionDates, categoryPercentages, amountSpent, month, setMonth, handleSaveAction, handleDeleteAction, handleAddAction }) => {
   const { user } = useUser();
-  const monthlyRevenue = user?.income;
+
+  const monthlyRevenue = user?.income || window.sessionStorage.getItem("income");
+  const amountSaved = monthlyRevenue - amountSpent;
 
   return (
     <div className="container mx-auto px-6 py-8">
@@ -85,7 +87,7 @@ const DashboardContent = ({ transactions, transactionDates, categoryPercentages,
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Basic monthly stats */}
         <div className="flex flex-col gap-6">
-          <StatCard title="Total Revenue" value={monthlyRevenue} percentage="5.4%" />
+          <StatCard title="Total Saved" value={amountSaved} percentage="5.4%" />
           <StatCard title="Total Expenses" value={amountSpent} percentage="3.5%"  />
         </div>
 

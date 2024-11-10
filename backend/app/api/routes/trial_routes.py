@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from datetime import datetime
 from http import HTTPStatus
+import traceback
 
 import json
 import uuid
@@ -24,13 +25,18 @@ def trial_transaction_dates():
 
    dates = {}
 
-   for transaction in transactions:
-    parsed_date = datetime.strptime(transaction['date'],"%Y-%m-%dT%H:%M:%S.%fZ")
-    date_str = parsed_date.strftime('%b %Y')
-    if date_str not in dates:
-      dates[date_str] = [transaction]
-    else:
-      dates[date_str].append(transaction)
+   try:
+    for transaction in transactions:
+      parsed_date = datetime.strptime(transaction['date'], "%Y-%m-%d")
+      date_str = parsed_date.strftime('%b %Y')
+      if date_str not in dates:
+        dates[date_str] = [transaction]
+      else:
+        dates[date_str].append(transaction)
+   except Exception as e:
+    print(traceback.format_exc())
+    return jsonify({"Error processing JSON": str(e)}), 400
+
 
    return jsonify(dates), HTTPStatus.OK
       
@@ -44,12 +50,17 @@ def trial_categories():
 
   categories = {}
 
-  for transaction in transactions:
-    if transaction['category_id'] not in categories:
-      categories[transaction['category_id']] = float(transaction['amount'])
-    else:
-      categories[transaction['category_id']] += float(transaction['amount'])
+  # TODO: refactor so we don't have to cast it each time
+  try:
+    for transaction in transactions:
+      if transaction['category_id'] not in categories:
+        categories[int(transaction['category_id'])] = float(transaction['amount'])
+      else:
+        categories[int(transaction['category_id'])] += float(transaction['amount'])
 
-    categories[transaction['category_id']] = round(categories[transaction['category_id']], 2)
+      categories[int(transaction['category_id'])] = round(categories[int(transaction['category_id'])], 2)
+  except Exception as e:
+    print(traceback.format_exc())
+    return jsonify({"Error processing JSON": str(e)}), 400
 
   return categories, HTTPStatus.OK

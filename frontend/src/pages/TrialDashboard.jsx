@@ -6,24 +6,43 @@ import { useUser } from '../context/UserContext';
 
 const TrialDashboard = () => {
   const location = useLocation();
-  const { state } = location;
+  // const { state } = location;
   
-  const { user } = useUser();
+  // const { user } = useUser();
 
   const [transactions, setTransactions] = useState([]);
   const [categoryPercentages, setCategoryPercentages] = useState([]);
   const [amountSpent, setAmountSpent] = useState(0);
+  const [shouldRefetchData, setShouldRefetchData] = useState(0);
 
   // Add one to month because it is zero indexed
-  const [month, setMonth] = useState(null);
+  const [month, setMonth] = useState("");
   const [transactionDates, setTransactionDates] = useState([]);
+
+  const handleDeleteAction = (id) => {
+    const transactions = JSON.parse(sessionStorage.getItem("transactions"));
+    window.sessionStorage.setItem("transactions", JSON.stringify(transactions.filter(t => t.id !== id)));
+    setShouldRefetchData(prev => prev + 1);
+  }
+
+  const handleSaveAction = (id, transaction) => {
+    // NOTE: There seems to be a casting issue with the transaction
+    const transactions = JSON.parse(sessionStorage.getItem("transactions"));
+    const newTransactions = transactions.map(t => t.id === id ? { ...t, ...transaction } : t);
+    window.sessionStorage.setItem("transactions", JSON.stringify(newTransactions));
+    setShouldRefetchData(prev => prev + 1);
+  }
+
+  console.log(JSON.parse(window.sessionStorage.getItem("transactions")));
+  
+
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const { categories } = user;
-        const { transactions } = state;
-
+        const categories = JSON.parse(window.sessionStorage.getItem("categories"));
+        const transactions = JSON.parse(sessionStorage.getItem("transactions"));
+        
         const { data: sampleTransactions } = await fetchTrialTransactions(transactions);
         setTransactionDates(Object.keys(sampleTransactions));
 
@@ -48,7 +67,7 @@ const TrialDashboard = () => {
     }
     
     fetchDashboardData();
-  }, [state, month]);
+  }, [month, shouldRefetchData]);
   
 
   return (
@@ -59,6 +78,8 @@ const TrialDashboard = () => {
       month={month}
       setMonth={setMonth}
       transactionDates={transactionDates}
+      handleSaveAction={handleSaveAction}
+      handleDeleteAction={handleDeleteAction}
     />
   )
 }

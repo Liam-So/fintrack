@@ -6,7 +6,7 @@ const AddTransactionModal = ({ isOpen, onClose, onAdd, categories }) => {
     date: '',
     description: '',
     amount: '',
-    category_id: categories[1]
+    category_id: categories && categories[1]
   });
 
   const handleChange = (e) => {

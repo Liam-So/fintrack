@@ -1,6 +1,6 @@
 from app.models.db_models import User, Category, Transaction
 from app import db
-from sqlalchemy import extract
+from sqlalchemy import extract, desc
 from datetime import datetime, date, timedelta
 
 class TransactionService:
@@ -23,6 +23,7 @@ class TransactionService:
         .filter_by(user_id=id)
         .filter(extract("month", Transaction.date) == month)
         .filter(extract("year", Transaction.date) == int(year))
+        .order_by(desc(Transaction.date))
         .all()
     )
 
@@ -33,7 +34,7 @@ class TransactionService:
                 "id": t.id,
                 "amount": t.amount,
                 "description": t.description,
-                "date": t.date,
+                "date": t.date.strftime('%Y-%m-%d'),
                 "category_id": t.category_id
             }
             for t in transactions

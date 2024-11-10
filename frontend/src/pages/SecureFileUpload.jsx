@@ -25,7 +25,9 @@ const SecureFileUpload = ({ isTrial }) => {
     const formData = new FormData();
     formData.append('file', file);
 
-    const jsonMetadata = { categories: user.categories };
+    const categories = isTrial ? JSON.parse(window.sessionStorage.getItem("categories")) : user.categories;
+    
+    const jsonMetadata = { categories: categories };
     formData.append('json', JSON.stringify(jsonMetadata));
 
     try {
@@ -40,7 +42,8 @@ const SecureFileUpload = ({ isTrial }) => {
       // Decrypt the transactions
       data.transactions.map(transaction => {
         let newDate = new Date(transaction.date);
-        transaction.date = newDate;
+        let formattedDate = newDate.toISOString().split('T')[0];
+        transaction.date = formattedDate;
       })
 
       setTransactions(data.transactions)
@@ -60,6 +63,7 @@ const SecureFileUpload = ({ isTrial }) => {
 
   const handleSubmit = async () => {
     if (isTrial) {
+      window.sessionStorage.setItem("transactions", JSON.stringify(transactions));
       navigate(`/trial/dashboard/${id}`, { state: { transactions } });
     } else {
       await postTransactions(transactions, id);

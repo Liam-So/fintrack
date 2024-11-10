@@ -4,6 +4,9 @@ import { useUser } from "../context/UserContext";
 
 const DonutChart = ({ categoryPercentages }) => {
   const { user } = useUser();
+  const categories = Object.keys(user?.categories).length > 0 
+    ? user.categories 
+    : JSON.parse(window.sessionStorage.getItem('categories'));
   
   function generateRandomColors(numColors) {
     return Array.from({ length: numColors }, () => {
@@ -18,7 +21,7 @@ const DonutChart = ({ categoryPercentages }) => {
     const colors = generateRandomColors(Object.entries(categoryPercentages).length);
 
     return {
-      labels: [].concat(Object.keys(categoryPercentages)).map((category_id) => user?.categories[category_id]),
+      labels: [].concat(Object.keys(categoryPercentages)).map((category_id) => categories[category_id]),
       datasets: [
         {
           data: Object.values(categoryPercentages),

@@ -8,7 +8,7 @@ const UserContext = createContext();
 export const UserProvider = ({ children }) => {
   const { user, isAuthenticated, isLoading, logout } = useAuth0();
   const [additionalUserInfo, setAdditionalUserInfo] = useState({
-    categories: [],
+    categories: {},
     income: null
   });
 
@@ -32,44 +32,57 @@ export const UserProvider = ({ children }) => {
       };
 
       fetchAdditionalInfo();
+    } else if (!isAuthenticated) {
+      const isTrial = window.sessionStorage.getItem("session");
+      console.log("Is trial:", isTrial);
     }
   }, [isAuthenticated, user]);
 
   const updateUserCategories = async (newCategories) => {
-    try {
-      // Here you would typically send an API request to update the backend
-      // await fetch(`/api/user/${user.sub}/categories`, {
-      //   method: 'PUT',
-      //   body: JSON.stringify({ categories: newCategories }),
-      //   headers: { 'Content-Type': 'application/json' }
-      // });
+    if (isAuthenticated && user) {
+      try {
+        // Here you would typically send an API request to update the backend
+        // await fetch(`/api/user/${user.sub}/categories`, {
+        //   method: 'PUT',
+        //   body: JSON.stringify({ categories: newCategories }),
+        //   headers: { 'Content-Type': 'application/json' }
+        // });
 
-      // If the API call is successful, update the local state
-      setAdditionalUserInfo(prevInfo => ({
-        ...prevInfo,
-        categories: newCategories
-      }));
-    } catch (error) {
-      console.error('Error updating user categories:', error);
+        // If the API call is successful, update the local state
+        setAdditionalUserInfo(prevInfo => ({
+          ...prevInfo,
+          categories: newCategories
+        }));
+      } catch (error) {
+        console.error('Error updating user categories:', error);
+      }
+    } else if (!isAuthenticated && window.sessionStorage.getItem("session")) {
+      console.log("Updating categories for trial user", newCategories);
+      window.sessionStorage.setItem("categories", JSON.stringify(newCategories));
     }
   };
 
   const updateUserIncome = async (newIncome) => {
-    try {
-      // Here you would typically send an API request to update the backend
-      // await fetch(`/api/user/${user.sub}/income`, {
-      //   method: 'PUT',
-      //   body: JSON.stringify({ income: newIncome }),
-      //   headers: { 'Content-Type': 'application/json' }
-      // });
+    if (isAuthenticated && user) {
+      try {
+        // Here you would typically send an API request to update the backend
+        // await fetch(`/api/user/${user.sub}/income`, {
+        //   method: 'PUT',
+        //   body: JSON.stringify({ income: newIncome }),
+        //   headers: { 'Content-Type': 'application/json' }
+        // });
 
-      // If the API call is successful, update the local state
-      setAdditionalUserInfo(prevInfo => ({
-        ...prevInfo,
-        income: newIncome
-      }));
-    } catch (error) {
-      console.error('Error updating user income:', error);
+        // If the API call is successful, update the local state
+        setAdditionalUserInfo(prevInfo => ({
+          ...prevInfo,
+          income: newIncome
+        }));
+      } catch (error) {
+        console.error('Error updating user income:', error);
+      }
+    } else if (!isAuthenticated && window.sessionStorage.getItem("session")) {
+      console.log("Updating income for trial user", newIncome);
+      window.sessionStorage.setItem("income", newIncome);
     }
   };
 

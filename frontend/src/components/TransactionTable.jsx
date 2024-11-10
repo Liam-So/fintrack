@@ -28,7 +28,11 @@ const TransactionTable = ({ postedTransactions = [], handleSubmit, handleSaveAct
   const [transactions, setTransactions] = useState(postedTransactions);
 
   const { user } = useUser();
-  const categories = user?.categories;
+  
+  const categories = Object.keys(user?.categories).length > 0 
+    ? user.categories 
+    : JSON.parse(window.sessionStorage.getItem('categories'));
+  
 
   useEffect(() => {
     setTransactions(postedTransactions);

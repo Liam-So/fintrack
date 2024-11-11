@@ -20,10 +20,6 @@ const CategorySelection = ({ onComplete }) => {
   const [selectedCategories, setSelectedCategories] = useState({});
   const [newCategory, setNewCategory] = useState('');
 
-  useEffect(() => {
-    console.log(selectedCategories);
-  }, [selectedCategories])
-
   const toggleCategory = (categoryId, categoryName) => {
     setSelectedCategories(prevCategories => {
       const isCategorySelected = !!prevCategories[categoryId];

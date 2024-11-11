@@ -11,6 +11,7 @@ import OnboardingFlow from "./pages/OnboardingFlow";
 import { useAuth0 } from "@auth0/auth0-react";
 import Profile from "./pages/Profile";
 import OfficialDashboard from "./pages/OfficialDashboard";
+import TrialFileUploaderPage from "./pages/TrialFileUploaderPage";
 
 const Callback = () => {
   const { isAuthenticated, isLoading } = useAuth0();
@@ -22,6 +23,7 @@ const Callback = () => {
   return isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/" />;
 };
 
+// TODO: protected trial routes?
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth0();
 
@@ -64,7 +66,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/trial/upload/:id",
-    element: <SecureFileUpload isTrial />,
+    element: <TrialFileUploaderPage />,
   },
   {
     path: "/trial/onboard/:id",

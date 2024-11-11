@@ -7,7 +7,7 @@ const DonutChart = ({ categoryPercentages }) => {
   const categories = Object.keys(user?.categories).length > 0 
     ? user.categories 
     : JSON.parse(window.sessionStorage.getItem('categories'));
-  
+
   function generateRandomColors(numColors) {
     return Array.from({ length: numColors }, () => {
       const hue = Math.floor(Math.random() * 360);

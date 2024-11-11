@@ -14,11 +14,24 @@ import OfficialDashboard from "./pages/OfficialDashboard";
 import TrialFileUploaderPage from "./pages/TrialFileUploaderPage";
 import OfficialFileUploader from "./pages/OfficialFileUploader";
 
+
+const FunLoadingPage = () => {
+  return (
+    <div className="flex items-center justify-center h-screen bg-custom">
+      <div className="text-center">
+        <div className="text-8xl font-bold text-gray-700 animate-bounce">🚀</div>
+        <h1 className="text-4xl font-bold text-gray-700 mt-4 animate-pulse">Loading...</h1>
+        <p className="text-lg text-gray-700 mt-2 animate-bounce">Hang on, we're blasting off!</p>
+      </div>
+    </div>
+  );
+};
+
 const Callback = () => {
   const { isAuthenticated, isLoading } = useAuth0();
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <FunLoadingPage />;
   }
 
   return isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/" />;
@@ -29,7 +42,7 @@ const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth0();
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <FunLoadingPage />;
   }
 
   return isAuthenticated ? children : <Navigate to="/" />;

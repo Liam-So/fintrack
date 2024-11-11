@@ -68,7 +68,7 @@ const TransactionTable = ({ postedTransactions = [], handleSubmit, handleSaveAct
   };
 
   return (
-    <div className="container mx-auto p-6 mt-4 bg-white rounded-lg shadow-sm">
+    <div className="container mx-auto p-6 mt-4 rounded-lg shadow-sm outline outline-1 outline-stone-200">
       <div className='flex justify-between pb-2 h-10'>
         <h1 className="text-2xl font-semibold mb-4 text-gray-700">Review Transactions</h1>
         <button
@@ -80,7 +80,7 @@ const TransactionTable = ({ postedTransactions = [], handleSubmit, handleSaveAct
       </div>
       <div className="overflow-x-auto pt-2">
         <table className="min-w-full">
-          <thead className="bg-gray-50">
+          <thead>
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Date</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Description</th>
@@ -89,7 +89,7 @@ const TransactionTable = ({ postedTransactions = [], handleSubmit, handleSaveAct
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Actions</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="divide-y divide-gray-200">
             {transactions.map(transaction => (
               <tr key={transaction.id}> 
                 <td className="px-6 py-4 whitespace-nowrap border-b">

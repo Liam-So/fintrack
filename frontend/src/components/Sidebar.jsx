@@ -22,7 +22,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             <SidebarItem icon={Upload} text="Upload" link={`/upload/${user?.id}`} />
             <SidebarItem icon={Settings} text="Settings" />
             <SidebarItem icon={User} text="Profile" link={"/profile"} />
-            <SidebarItem icon={HelpCircle} text="Help" />
           </ul>
         </nav>
       </aside>

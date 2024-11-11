@@ -12,22 +12,32 @@ const TrialDashboard = () => {
   const [month, setMonth] = useState("");
   const [transactionDates, setTransactionDates] = useState([]);
 
+  // Create a reviver function to parse the amount as a float
+  const getStoredTransactions = () => {
+    return JSON.parse(sessionStorage.getItem("transactions"), (key, value) => {
+      if (key === "amount") {
+        return parseFloat(value);
+      }
+      return value;
+    });
+  }
+
   const handleDeleteAction = (id) => {
-    const transactions = JSON.parse(sessionStorage.getItem("transactions"));
+    const transactions = getStoredTransactions();
     window.sessionStorage.setItem("transactions", JSON.stringify(transactions.filter(t => t.id !== id)));
     setShouldRefetchData(prev => prev + 1);
   }
 
   const handleSaveAction = (id, transaction) => {
     // NOTE: There seems to be a casting issue with the transaction
-    const transactions = JSON.parse(sessionStorage.getItem("transactions"));
+    const transactions = getStoredTransactions();
     const newTransactions = transactions.map(t => t.id === id ? { ...t, ...transaction } : t);
     window.sessionStorage.setItem("transactions", JSON.stringify(newTransactions));
     setShouldRefetchData(prev => prev + 1);
   }
 
   const handleAddAction = (transaction) => {
-    const transactions = JSON.parse(sessionStorage.getItem("transactions"));
+    const transactions = getStoredTransactions();
     window.sessionStorage.setItem("transactions", JSON.stringify([...transactions, transaction]));
     setShouldRefetchData(prev => prev + 1);
   }
@@ -36,7 +46,7 @@ const TrialDashboard = () => {
     const fetchDashboardData = async () => {
       try {
         const categories = JSON.parse(window.sessionStorage.getItem("categories"));
-        const transactions = JSON.parse(sessionStorage.getItem("transactions"));
+        const transactions = getStoredTransactions();
         
         const { data: sampleTransactions } = await fetchTrialTransactions(transactions);
         setTransactionDates(Object.keys(sampleTransactions));

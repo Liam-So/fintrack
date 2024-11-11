@@ -12,6 +12,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import Profile from "./pages/Profile";
 import OfficialDashboard from "./pages/OfficialDashboard";
 import TrialFileUploaderPage from "./pages/TrialFileUploaderPage";
+import OfficialFileUploader from "./pages/OfficialFileUploader";
 
 const Callback = () => {
   const { isAuthenticated, isLoading } = useAuth0();
@@ -62,7 +63,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/upload/:id",
-    element: <ProtectedRoute><SecureFileUpload /></ProtectedRoute>
+    element: <ProtectedRoute><OfficialFileUploader /></ProtectedRoute>
   },
   {
     path: "/trial/upload/:id",

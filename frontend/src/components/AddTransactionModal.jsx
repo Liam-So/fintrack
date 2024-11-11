@@ -6,7 +6,7 @@ const AddTransactionModal = ({ isOpen, onClose, onAdd, categories }) => {
     date: '',
     description: '',
     amount: '',
-    category_id: categories && categories[1]
+    category_id: categories && Object.keys(categories)[0]
   });
 
   const handleChange = (e) => {
@@ -16,7 +16,7 @@ const AddTransactionModal = ({ isOpen, onClose, onAdd, categories }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     onAdd({
       ...transaction,
       amount: parseFloat(transaction.amount),

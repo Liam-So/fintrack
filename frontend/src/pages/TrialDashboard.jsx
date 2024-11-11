@@ -1,15 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import { useLocation } from "react-router-dom";
 import { fetchTrialTransactions, postCalculateCategoryPercentages } from '../api/dashboardApi';
 import DashboardUI from '../components/DashboardUI';
-import { useUser } from '../context/UserContext';
 
 const TrialDashboard = () => {
-  const location = useLocation();
-  // const { state } = location;
-  
-  // const { user } = useUser();
-
   const [transactions, setTransactions] = useState([]);
   const [categoryPercentages, setCategoryPercentages] = useState([]);
   const [amountSpent, setAmountSpent] = useState(0);
@@ -32,10 +25,6 @@ const TrialDashboard = () => {
     window.sessionStorage.setItem("transactions", JSON.stringify(newTransactions));
     setShouldRefetchData(prev => prev + 1);
   }
-
-  console.log(JSON.parse(window.sessionStorage.getItem("transactions")));
-  
-
 
   useEffect(() => {
     const fetchDashboardData = async () => {

@@ -57,18 +57,10 @@ const TransactionTable = ({ postedTransactions = [], handleSubmit, handleSaveAct
     setTransactions(transactions.map(t => 
       t.id === id ? { ...t, [field]: value } : t
     ));
-
   };
 
   const handleAddTransaction = (newTransaction) => {
-    // Convert newTransaction.date to a Date object and format it
-    const newDate = new Date(newTransaction.date).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      timeZone: "UTC"
-    });
-
+    const newDate = new Date(newTransaction.date).toISOString().split('T')[0];
     newTransaction.date = newDate;
     setTransactions([...transactions, newTransaction]);
     handleAddAction(newTransaction);

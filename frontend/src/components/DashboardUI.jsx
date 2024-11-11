@@ -66,7 +66,7 @@ const DashboardContent = ({ transactions, transactionDates, categoryPercentages,
   const { user } = useUser();
 
   const monthlyRevenue = user?.income || window.sessionStorage.getItem("income");
-  const amountSaved = monthlyRevenue - amountSpent;
+  const amountSaved = Math.round((monthlyRevenue - amountSpent) * 100)/100;
 
   return (
     <div className="container mx-auto px-6 py-8">

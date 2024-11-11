@@ -86,6 +86,8 @@ const NewDashboard = ({ transactions, transactionDates, categoryPercentages, amo
   const { user } = useUser();
   const monthlyRevenue = user?.income || window.sessionStorage.getItem("income");
   const amountSaved = Math.round((monthlyRevenue - amountSpent) * 100)/100;
+  const amountSpentPercentage = Math.round(amountSpent / monthlyRevenue * 100);
+  
 
   return (
     <div className='flex min-h-screen bg-custom'>
@@ -135,13 +137,13 @@ const NewDashboard = ({ transactions, transactionDates, categoryPercentages, amo
               </Card>
               <Card>
                 <h2 className="text-xl font-semibold mb-4 text-gray-700">{"Revenue Expense Breakdown"}</h2>
-                {/* TODO: Add a progress bar */}
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-3xl font-bold text-gray-700">{"CA$4423.21"}</p>
-                    <p className="text-sm text-gray-500">vs last month</p>
+                  <div className="flex justify-between mb-1">
+                    <span className="text-base font-medium text-gray-700 dark:text-white">Monthly Revenue</span>
+                    <span className="text-sm font-medium text-gray-700 dark:text-white">${monthlyRevenue}</span>
                   </div>
-                </div>
+                  <div className="w-full bg-gray-200 rounded-full dark:bg-gray-700">
+                    <div className="bg-slate-700 text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full" style={{width: `${amountSpentPercentage}%`}}> {amountSpentPercentage}%</div>
+                  </div>
               </Card>
             </div>
 

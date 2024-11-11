@@ -16,8 +16,11 @@ import {
   Title,
   Tooltip,
   Legend,
+  Filler
 } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
+import LineChart from '../components/LineChart';
+import SelectTransaction from '../components/SelectTransaction';
 
 ChartJS.register(
   ArcElement,
@@ -30,6 +33,7 @@ ChartJS.register(
   Tooltip,
   Legend,
   ChartDataLabels,
+  Filler
 );
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
@@ -88,7 +92,6 @@ const NewDashboard = ({ transactions, transactionDates, categoryPercentages, amo
   const amountSaved = Math.round((monthlyRevenue - amountSpent) * 100)/100;
   const amountSpentPercentage = Math.round(amountSpent / monthlyRevenue * 100);
   
-
   return (
     <div className='flex min-h-screen bg-custom'>
       <Sidebar setSidebarOpen={setSidebarOpen} sidebarOpen={sidebarOpen} />
@@ -102,6 +105,7 @@ const NewDashboard = ({ transactions, transactionDates, categoryPercentages, amo
             </h2>
 
             {/* TODO: Make this cleaner */}
+            {/* <SelectTransaction /> */}
             <select
               id="month"
               value={month || ""}
@@ -161,6 +165,7 @@ const NewDashboard = ({ transactions, transactionDates, categoryPercentages, amo
 
               <Card>
                 <h2 className="text-xl font-semibold mb-4 text-gray-700">{"Transaction Trend"}</h2>
+                <LineChart transactions={transactions} />
               </Card>
 
             </div>

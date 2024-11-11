@@ -26,6 +26,12 @@ const TrialDashboard = () => {
     setShouldRefetchData(prev => prev + 1);
   }
 
+  const handleAddAction = (transaction) => {
+    const transactions = JSON.parse(sessionStorage.getItem("transactions"));
+    window.sessionStorage.setItem("transactions", JSON.stringify([...transactions, transaction]));
+    setShouldRefetchData(prev => prev + 1);
+  }
+
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
@@ -69,6 +75,7 @@ const TrialDashboard = () => {
       transactionDates={transactionDates}
       handleSaveAction={handleSaveAction}
       handleDeleteAction={handleDeleteAction}
+      handleAddAction={handleAddAction}
     />
   )
 }

@@ -39,6 +39,11 @@ ChartJS.register(
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const { user, logout } = useUser();
 
+  const handleLogout = () => {
+    sessionStorage.clear();
+    logout();
+  }
+
   return (
     <>
       {/* Mobile Menu Button */}
@@ -65,7 +70,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             <SidebarItem icon={Upload} link={`/upload/${user?.id}`} />
             <SidebarItem icon={Settings} />
             <SidebarItem icon={User} link={"/profile"} />
-            <div onClick={() => logout()}>
+            <div onClick={handleLogout}>
               <SidebarItem icon={LogOut} />
             </div>
           </ul>

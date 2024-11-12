@@ -22,6 +22,7 @@ const OnboardingFlow = ({ isTrial }) => {
     const income = user.income;
 
     if (isTrial) {
+      window.sessionStorage.setItem("categories", JSON.stringify(selectedCategories));
       navigate(`/trial/upload/${id}`);
     } else {
       try {

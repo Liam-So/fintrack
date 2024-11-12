@@ -1,5 +1,4 @@
 import React from "react";
-import SecureFileUpload from "./pages/SecureFileUpload";
 import {
   RouterProvider,
   createBrowserRouter,
@@ -48,6 +47,11 @@ const ProtectedRoute = ({ children }) => {
   return isAuthenticated ? children : <Navigate to="/" />;
 };
 
+const ProtectedTrialRoute = ({ children }) => {
+  const sessionId = window.sessionStorage.getItem("session");
+  return sessionId ? children : <Navigate to="/" />;
+}
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -80,15 +84,15 @@ const router = createBrowserRouter([
   },
   {
     path: "/trial/upload/:id",
-    element: <TrialFileUploaderPage />,
+    element: <ProtectedTrialRoute><TrialFileUploaderPage /></ProtectedTrialRoute>,
   },
   {
     path: "/trial/onboard/:id",
-    element: <OnboardingFlow isTrial />,
+    element:  <ProtectedTrialRoute><OnboardingFlow isTrial /></ProtectedTrialRoute>,
   },
   {
     path: "/trial/dashboard/:id",
-    element: <TrialDashboard />,
+    element: <ProtectedTrialRoute><TrialDashboard /></ProtectedTrialRoute>,
   }
 ]);
 

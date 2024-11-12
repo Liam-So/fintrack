@@ -9,7 +9,7 @@ const TrialDashboard = () => {
   const [shouldRefetchData, setShouldRefetchData] = useState(0);
 
   // Add one to month because it is zero indexed
-  const [date, setDate] = useState("");
+  const [date, setDate] = useState("1M");
   const [transactionDates, setTransactionDates] = useState([]);
 
   // Create a reviver function to parse the amount as a float
@@ -47,17 +47,16 @@ const TrialDashboard = () => {
       try {
         const categories = JSON.parse(window.sessionStorage.getItem("categories"));
         const transactions = getStoredTransactions();
+        const { data: sampleTransactions } = await fetchTrialTransactions(transactions, date);
         
-        const { data: sampleTransactions } = await fetchTrialTransactions(transactions);
         setTransactionDates(Object.keys(sampleTransactions));
 
         let newTransactions;
 
-        if (date) {
-          newTransactions = sampleTransactions[date];
+        if (["1M", "3M", "6M", "1Y"].includes(date)) {
+          newTransactions = [].concat.apply([], Object.values(sampleTransactions));
         } else {
-          // truncate to 50 transactions
-          newTransactions = [].concat.apply([], Object.values(sampleTransactions)).slice(0, 50);
+          newTransactions = sampleTransactions[date];
         }
 
         setTransactions(newTransactions);

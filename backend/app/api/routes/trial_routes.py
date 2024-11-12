@@ -1,10 +1,13 @@
 from flask import Blueprint, request, jsonify
 from datetime import datetime
 from http import HTTPStatus
+from datetime import datetime, date, timedelta
 import traceback
 
 import json
 import uuid
+
+LARGE_PERIODS = ["1M", "3M", "6M", "1Y"] # make this a constant
 
 trial_bp = Blueprint('trial', __name__)
 
@@ -19,9 +22,17 @@ def trial_transaction_dates():
    transactions = data.get('transactions', [])
    date = data.get('date', None)
 
-   if date:
-     print(f"DATE: {date}")
-     return jsonify(transactions), HTTPStatus.OK
+   if date in LARGE_PERIODS:
+     if date == "1M":
+       start_date = datetime.now() - timedelta(days=30)
+     elif date == "3M":
+        start_date = datetime.now() - timedelta(days=90)
+     elif date == "6M":
+        start_date = datetime.now() - timedelta(days=180)
+     elif date == "1Y":
+        start_date = datetime.now() - timedelta(days=365)
+
+     transactions = [transaction for transaction in transactions if datetime.strptime(transaction['date'], "%Y-%m-%d") >= start_date]
 
    dates = {}
 

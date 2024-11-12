@@ -3,29 +3,46 @@ from app import db
 from sqlalchemy import extract, desc
 from datetime import datetime, date, timedelta
 
+LARGE_PERIODS = ["1M", "3M", "6M", "1Y"]
+
 class TransactionService:
   @staticmethod
   def get_transactions(id, query_by_date):
-    if not query_by_date:
-      transactions = Transaction.query.filter_by(user_id=id).all()
-      query_by_date = datetime.now().strftime('%b %Y')
+    if query_by_date in LARGE_PERIODS:
+      if query_by_date == "1M":
+        start_date = date.today() - timedelta(days=30)
+      elif query_by_date == "3M":
+        start_date = date.today() - timedelta(days=90)
+      elif query_by_date == "6M":
+        start_date = date.today() - timedelta(days=180)
+      elif query_by_date == "1Y":
+        start_date = date.today() - timedelta(days=365)
 
-    month_str, year = query_by_date.split()
-    month = {
-        "Jan": 1, "Feb": 2, "Mar": 3, "Apr": 4,
-        "May": 5, "Jun": 6, "Jul": 7, "Aug": 8,
-        "Sep": 9, "Oct": 10, "Nov": 11, "Dec": 12
-    }[month_str]
-    
-    # Query transactions by user ID and filter by month and year
-    transactions = (
+      transactions = (
         Transaction.query
         .filter_by(user_id=id)
-        .filter(extract("month", Transaction.date) == month)
-        .filter(extract("year", Transaction.date) == int(year))
+        .filter(Transaction.date >= start_date)
         .order_by(desc(Transaction.date))
         .all()
-    )
+      )
+    # TODO: handle custom date range
+    else:
+      month_str, year = query_by_date.split()
+      month = {
+          "Jan": 1, "Feb": 2, "Mar": 3, "Apr": 4,
+          "May": 5, "Jun": 6, "Jul": 7, "Aug": 8,
+          "Sep": 9, "Oct": 10, "Nov": 11, "Dec": 12
+      }[month_str]
+      
+      # Query transactions by user ID and filter by month and year
+      transactions = (
+          Transaction.query
+          .filter_by(user_id=id)
+          .filter(extract("month", Transaction.date) == month)
+          .filter(extract("year", Transaction.date) == int(year))
+          .order_by(desc(Transaction.date))
+          .all()
+      )
 
     # Format the result
     return {
@@ -116,4 +133,3 @@ class TransactionService:
     formatted_months.sort(key=lambda x: datetime.strptime(x, "%b %Y"))
 
     return formatted_months
-

@@ -9,7 +9,7 @@ const TrialDashboard = () => {
   const [shouldRefetchData, setShouldRefetchData] = useState(0);
 
   // Add one to month because it is zero indexed
-  const [month, setMonth] = useState("");
+  const [date, setDate] = useState("");
   const [transactionDates, setTransactionDates] = useState([]);
 
   // Create a reviver function to parse the amount as a float
@@ -53,8 +53,8 @@ const TrialDashboard = () => {
 
         let newTransactions;
 
-        if (month) {
-          newTransactions = sampleTransactions[month];
+        if (date) {
+          newTransactions = sampleTransactions[date];
         } else {
           // truncate to 50 transactions
           newTransactions = [].concat.apply([], Object.values(sampleTransactions)).slice(0, 50);
@@ -72,7 +72,7 @@ const TrialDashboard = () => {
     }
     
     fetchDashboardData();
-  }, [month, shouldRefetchData]);
+  }, [date, shouldRefetchData]);
   
 
   return (
@@ -80,8 +80,8 @@ const TrialDashboard = () => {
       transactions={transactions}
       categoryPercentages={categoryPercentages}
       amountSpent={amountSpent}
-      month={month}
-      setMonth={setMonth}
+      date={date}
+      setDate={setDate}
       transactionDates={transactionDates}
       handleSaveAction={handleSaveAction}
       handleDeleteAction={handleDeleteAction}

@@ -1,17 +1,30 @@
 import React, { useMemo } from 'react';
 import { Line } from "react-chartjs-2";
 
-const LineChart = ({ transactions }) => {
+const GROUP_BY_MONTHS = ["3M", "6M", "1Y"]; // maybe custom as well?
+
+const LineChart = ({ transactions, date }) => {
   // Helper function to convert date to local timezone
   const toLocalDate = (dateStr) => {
     const date = new Date(dateStr);
     return date.toISOString().slice(0, 10);
   };
 
+  const toLocalMonth = (dateStr) => {
+    const date = new Date(dateStr);
+    const formattedDate = new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      year: 'numeric',
+      timeZone: 'UTC'
+    }).format(date);
+    
+    return formattedDate;
+  }
+
   // Aggregate data by date
   const aggregatedData = useMemo(() => {
     const grouped = transactions.reduce((acc, transaction) => {
-      const dateKey = toLocalDate(transaction.date);
+      const dateKey = GROUP_BY_MONTHS.includes(date) ? toLocalMonth(transaction.date) : toLocalDate(transaction.date);
       
       if (!acc[dateKey]) {
         acc[dateKey] = {
@@ -32,12 +45,14 @@ const LineChart = ({ transactions }) => {
   }, [transactions]);
 
   const formatDate = (dateStr) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', {
+    const formattedDate = new Date(dateStr).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
-      timeZone: 'UTC'  // Ensure consistent timezone rendering
-    });
+      year: GROUP_BY_MONTHS.includes(date) ? 'numeric' : undefined,
+      timeZone: 'UTC'
+    })
+
+    return formattedDate;
   };
 
   const formatCurrency = (value) => {

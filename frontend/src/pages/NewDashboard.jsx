@@ -103,7 +103,6 @@ const NewDashboard = ({ transactions, transactionDates, categoryPercentages, amo
             <h2 className='text-2xl italic font-semibold text-gray-800'>
               Income Tracking
             </h2>
-
             <SelectTransaction 
               availableMonths={transactionDates}
               setDate={setDate} 

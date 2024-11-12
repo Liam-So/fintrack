@@ -1,8 +1,7 @@
 from flask import Blueprint, request, jsonify
-from app.models.db_models import User, Category, Transaction
-from app import db
 from http import HTTPStatus
 from app.services.transaction_services import TransactionService
+import traceback
 
 transaction_bp = Blueprint('transaction', __name__)
 
@@ -13,6 +12,7 @@ def get_transactions(id):
     transactions = TransactionService.get_transactions(id, date_range)
     return jsonify(transactions), HTTPStatus.OK
   except Exception as e:
+    print(traceback.format_exc())
     return jsonify({"error": "Internal server error"}), HTTPStatus.INTERNAL_SERVER_ERROR
 
 

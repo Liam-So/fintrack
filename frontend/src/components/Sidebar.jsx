@@ -1,41 +1,79 @@
-import React from 'react'
-import { Menu, Home, Settings, HelpCircle, User, Upload } from 'lucide-react';
+import { Home, User, Upload, LogOut, PanelLeftOpen, PanelRightOpen } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
-  const { user } = useUser();
+  const { user, logout, isAuthenticated } = useUser();
+  
+  const handleLogout = () => {
+    sessionStorage.clear();
+    logout();
+  };
 
   return (
     <>
-      {/* Sidebar */}
-      <aside className={`bg-white text-gray-800 w-64 space-y-6 py-7 px-2 absolute inset-y-0 left-0 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 transition duration-200 ease-in-out border-r border-gray-200`}>
-        <nav className="space-y-3 px-4">
-          <div className="flex items-center justify-between mb-6">
-            <span className="text-2xl font-bold text-gray-800">FinDash</span>
-            <button onClick={() => setSidebarOpen(false)} className="md:hidden text-gray-500 hover:text-gray-800">
-              <Menu size={24} />
-            </button>
+      {/* Mobile Menu Button */}
+      {!sidebarOpen && (
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="md:hidden fixed top-4 left-4 z-50 text-gray-500 hover:text-gray-800"
+        >
+          <PanelLeftOpen size={24} />
+        </button>
+      )}
+      
+      {/* Sticky Sidebar */}
+      <aside className={`flex flex-col text-gray-800 py-7 px-2 fixed md:sticky top-0 h-screen overflow-y-auto transform ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      } md:translate-x-0 transition duration-200 ease-in-out border-r border-gray-200 bg-amber-50 md:bg-transparent`}>
+        {/* Main Content Container */}
+        <div className="flex flex-col h-full min-h-0">
+          {/* Top Section */}
+          <div className="px-4">
+            <div className="flex flex-col items-center justify-between mb-6 gap-4">
+              <button onClick={() => setSidebarOpen(false)} className="md:hidden text-gray-500 hover:text-gray-800">
+                <PanelRightOpen size={24} />
+              </button>
+              <span className="text-4xl font-bold text-gray-800">💸</span>
+            </div>
+            
+            {/* Main Navigation */}
+            <nav>
+              <ul className="space-y-6">
+                <SidebarItem icon={Home} link={`/dashboard`} />
+                <SidebarItem icon={Upload} link={`/upload/${user?.id}`} />
+                {isAuthenticated && <SidebarItem icon={User} link="/profile" />}
+              </ul>
+            </nav>
           </div>
-          <ul>
-            <SidebarItem icon={Home} text="Dashboard" />
-            <SidebarItem icon={Upload} text="Upload" link={`/upload/${user?.id}`} />
-            <SidebarItem icon={Settings} text="Settings" />
-            <SidebarItem icon={User} text="Profile" link={"/profile"} />
-          </ul>
-        </nav>
+
+          {/* Logout Button (Bottom) */}
+          <div className="mt-auto px-4 pb-4">
+            <ul>
+              <div onClick={handleLogout} className="cursor-pointer">
+                <SidebarItem icon={LogOut} />
+              </div>
+            </ul>
+          </div>
+        </div>
       </aside>
     </>
-  )
-}
+  );
+};
 
-const SidebarItem = ({ icon: Icon, text, link = "#" }) => (
-  <li className="mb-6">
-    <Link to={link} className="flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg p-2 transition-colors duration-200">
-      <Icon className="mr-4" size={24} />
-      <span className="text-lg">{text}</span>
-    </Link>
-  </li>
-);
+// Modified SidebarItem to handle logout case differently
+const SidebarItem = ({ icon: Icon, link = "#" }) => {
+  const content = (
+    <div className="flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg p-2 transition-colors duration-200">
+      <Icon size={24} />
+    </div>
+  );
 
-export default Sidebar
+  return (
+    <li>
+      {link === "#" ? content : <Link to={link}>{content}</Link>}
+    </li>
+  );
+};
+
+export default Sidebar;

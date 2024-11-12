@@ -22,6 +22,7 @@ import ChartDataLabels from "chartjs-plugin-datalabels";
 import LineChart from '../components/LineChart';
 import SelectTransaction from '../components/SelectTransaction';
 import { formatCurrency } from '../utils/util';
+import { GROUP_BY_MONTHS } from '../utils/constants';
 
 ChartJS.register(
   ArcElement,
@@ -102,8 +103,9 @@ const NewDashboard = ({ transactions, transactionDates, categoryPercentages, amo
 
   const getMonthlyRevenue = () => {
     let monthlyRevenue = user?.income ?? window.sessionStorage.getItem("income");
-    if (user?.income && dateMultipliers[date]) {
-      monthlyRevenue = user.income * dateMultipliers[date];
+    
+    if (GROUP_BY_MONTHS.includes(date)) {
+      monthlyRevenue *= dateMultipliers[date];
     }
 
     return monthlyRevenue;

@@ -10,7 +10,7 @@ const OfficialDashboard = () => {
   const [monthlyExpenses, setMonthlyExpenses] = useState(0);
   const [transactions, setTransactions] = useState([]);
   const [categoryPercentages, setCategoryPercentages] = useState([]);
-  const [date, setDate] = useState("3M"); // TODO: change this to "1M" later
+  const [date, setDate] = useState("1M");
   const [isTransactionsUpdated, setIsTransactionsUpdated] = useState(false);
   const [transactionDates, setTransactionDates] = useState([]);
 

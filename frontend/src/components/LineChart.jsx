@@ -1,26 +1,9 @@
 import React, { useMemo } from 'react';
 import { Line } from "react-chartjs-2";
-
-const GROUP_BY_MONTHS = ["3M", "6M", "1Y"]; // maybe custom as well?
+import { toLocalDate, toLocalMonth, formatCurrency } from '../utils/util';
+import { GROUP_BY_MONTHS } from '../utils/constants';
 
 const LineChart = ({ transactions, date }) => {
-  // Helper function to convert date to local timezone
-  const toLocalDate = (dateStr) => {
-    const date = new Date(dateStr);
-    return date.toISOString().slice(0, 10);
-  };
-
-  const toLocalMonth = (dateStr) => {
-    const date = new Date(dateStr);
-    const formattedDate = new Intl.DateTimeFormat('en-US', {
-      month: 'short',
-      year: 'numeric',
-      timeZone: 'UTC'
-    }).format(date);
-    
-    return formattedDate;
-  }
-
   // Aggregate data by date
   const aggregatedData = useMemo(() => {
     const grouped = transactions.reduce((acc, transaction) => {
@@ -44,6 +27,7 @@ const LineChart = ({ transactions, date }) => {
       .sort((a, b) => new Date(a.date) - new Date(b.date));
   }, [transactions]);
 
+
   const formatDate = (dateStr) => {
     const formattedDate = new Date(dateStr).toLocaleDateString('en-US', {
       month: 'short',
@@ -53,15 +37,6 @@ const LineChart = ({ transactions, date }) => {
     })
 
     return formattedDate;
-  };
-
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(value);
   };
 
   const data = {

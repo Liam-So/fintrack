@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, Send, Pencil, Trash2 } from 'lucide-react';
 import AddTransactionModal from './AddTransactionModal';
-import { formattedDate } from '../utils/util';
+import { formattedDate, formatCurrency } from '../utils/util';
 import { useUser } from '../context/UserContext';
 
 // Assign these colours to higher-order components
@@ -125,7 +125,7 @@ const TransactionTable = ({ postedTransactions = [], handleSubmit, handleSaveAct
                       className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   ) : (
-                    `$${transaction.amount}`
+                    `${formatCurrency(transaction.amount)}`
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap border-b">

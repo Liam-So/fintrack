@@ -21,6 +21,7 @@ import {
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import LineChart from '../components/LineChart';
 import SelectTransaction from '../components/SelectTransaction';
+import { formatCurrency } from '../utils/util';
 
 ChartJS.register(
   ArcElement,
@@ -91,9 +92,24 @@ const SidebarItem = ({ icon: Icon, link = "#" }) => (
 
 const NewDashboard = ({ transactions, transactionDates, categoryPercentages, amountSpent, date, setDate, handleSaveAction, handleDeleteAction, handleAddAction }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
   const { user } = useUser();
-  const monthlyRevenue = user?.income || window.sessionStorage.getItem("income");
+
+  const dateMultipliers = {
+    "3M": 3,
+    "6M": 6,
+    "1Y": 12,
+  };
+
+  const getMonthlyRevenue = () => {
+    let monthlyRevenue = user?.income ?? window.sessionStorage.getItem("income");
+    if (user?.income && dateMultipliers[date]) {
+      monthlyRevenue = user.income * dateMultipliers[date];
+    }
+
+    return monthlyRevenue;
+  }
+
+  const monthlyRevenue = getMonthlyRevenue();
   const amountSaved = Math.round((monthlyRevenue - amountSpent) * 100)/100;
   const amountSpentPercentage = Math.round(amountSpent / monthlyRevenue * 100);
 
@@ -121,7 +137,7 @@ const NewDashboard = ({ transactions, transactionDates, categoryPercentages, amo
                 <h2 className="text-xl font-semibold mb-4 text-gray-700">{"Total Saved"}</h2>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-3xl font-bold text-gray-700">${amountSaved}</p>
+                    <p className="text-3xl font-bold text-gray-700">{formatCurrency(amountSaved)}</p>
                     <p className="text-sm text-gray-500">vs last month</p>
                   </div>
                 </div>
@@ -130,7 +146,7 @@ const NewDashboard = ({ transactions, transactionDates, categoryPercentages, amo
                 <h2 className="text-xl font-semibold mb-4 text-gray-700">{"Total Expenses"}</h2>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-3xl font-bold text-gray-700">${amountSpent}</p>
+                    <p className="text-3xl font-bold text-gray-700">{formatCurrency(amountSpent)}</p>
                     <p className="text-sm text-gray-500">vs last month</p>
                   </div>
                 </div>
@@ -138,8 +154,8 @@ const NewDashboard = ({ transactions, transactionDates, categoryPercentages, amo
               <Card>
                 <h2 className="text-xl font-semibold mb-4 text-gray-700">{"Revenue Expense Breakdown"}</h2>
                   <div className="flex justify-between mb-1">
-                    <span className="text-base font-medium text-gray-700 dark:text-white">Monthly Revenue</span>
-                    <span className="text-sm font-medium text-gray-700 dark:text-white">${monthlyRevenue}</span>
+                    <span className="text-base font-medium text-gray-700 dark:text-white">Total Revenue</span>
+                    <span className="text-sm font-medium text-gray-700 dark:text-white">{formatCurrency(monthlyRevenue)}</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full dark:bg-gray-700">
                     <div className="bg-slate-700 text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full" style={{width: `${amountSpentPercentage}%`}}> {amountSpentPercentage}%</div>

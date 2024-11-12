@@ -1,0 +1,1 @@
+export const GROUP_BY_MONTHS = ["3M", "6M", "1Y"];

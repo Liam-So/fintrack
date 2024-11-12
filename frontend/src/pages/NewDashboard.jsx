@@ -84,14 +84,14 @@ const SidebarItem = ({ icon: Icon, link = "#" }) => (
 );
 
 
-const NewDashboard = ({ transactions, transactionDates, categoryPercentages, amountSpent, month, setMonth, handleSaveAction, handleDeleteAction, handleAddAction }) => {
+const NewDashboard = ({ transactions, transactionDates, categoryPercentages, amountSpent, date, setDate, handleSaveAction, handleDeleteAction, handleAddAction }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const { user } = useUser();
   const monthlyRevenue = user?.income || window.sessionStorage.getItem("income");
   const amountSaved = Math.round((monthlyRevenue - amountSpent) * 100)/100;
   const amountSpentPercentage = Math.round(amountSpent / monthlyRevenue * 100);
-  
+
   return (
     <div className='flex min-h-screen bg-custom'>
       <Sidebar setSidebarOpen={setSidebarOpen} sidebarOpen={sidebarOpen} />
@@ -104,19 +104,11 @@ const NewDashboard = ({ transactions, transactionDates, categoryPercentages, amo
               Income Tracking
             </h2>
 
-            {/* TODO: Make this cleaner */}
-            {/* <SelectTransaction /> */}
-            <select
-              id="month"
-              value={month || ""}
-              onChange={(e) => setMonth(e.target.value)}
-              className="p-0.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Date</option>
-              {transactionDates.map((date, index) => (
-                <option key={index} value={date}>{date}</option>
-              ))}
-            </select>
+            <SelectTransaction 
+              availableMonths={transactionDates}
+              setDate={setDate} 
+              date={date}
+            />
           </div>
 
           <div className="flex flex-col gap-6">

@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
-import { fetchUserData, getUserCategories } from '../api/dashboardApi';
-import { useLocation } from "react-router-dom";
+import { fetchUserData, getUserCategories, updateUser } from '../api/dashboardApi';
 
 const UserContext = createContext();
 
@@ -65,12 +64,12 @@ export const UserProvider = ({ children }) => {
   const updateUserIncome = async (newIncome) => {
     if (isAuthenticated && user) {
       try {
-        // Here you would typically send an API request to update the backend
-        // await fetch(`/api/user/${user.sub}/income`, {
-        //   method: 'PUT',
-        //   body: JSON.stringify({ income: newIncome }),
-        //   headers: { 'Content-Type': 'application/json' }
-        // });
+        await updateUser({
+          id: additionalUserInfo.id,
+          updatedAttributes: {
+            monthly_income: newIncome
+          }
+        })
 
         // If the API call is successful, update the local state
         setAdditionalUserInfo(prevInfo => ({

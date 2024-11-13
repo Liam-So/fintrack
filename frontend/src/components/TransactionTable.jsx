@@ -68,7 +68,7 @@ const TransactionTable = ({ postedTransactions = [], handleSubmit, handleSaveAct
   };
 
   return (
-    <div className="container mx-auto p-6 mt-4 rounded-lg shadow-sm outline outline-1 outline-stone-200">
+    <div className="container mx-auto p-6 rounded-lg shadow-sm outline outline-1 outline-stone-200">
       <div className='flex justify-between pb-2 h-10'>
         <h1 className="text-2xl font-semibold mb-4 text-gray-700">Review Transactions</h1>
         <button

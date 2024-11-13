@@ -130,13 +130,15 @@ const NewDashboard = ({ transactions, transactionDates, categoryPercentages, amo
               </Card>
 
             </div>
-
-            <TransactionTable 
-              postedTransactions={transactions} 
-              handleSaveAction={handleSaveAction}
-              handleDeleteAction={handleDeleteAction}
-              handleAddAction={handleAddAction}
-            />
+            {/* To prevent having a huge table. We can do pagination down the line */}
+            {!GROUP_BY_MONTHS.includes(date) && (
+              <TransactionTable 
+                postedTransactions={transactions} 
+                handleSaveAction={handleSaveAction}
+                handleDeleteAction={handleDeleteAction}
+                handleAddAction={handleAddAction}
+              />
+            )}
           </div>
         </div>
 

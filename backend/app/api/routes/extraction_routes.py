@@ -1,130 +1,123 @@
 import os
 import json
-import pandas as pd
 import numpy as np
 import math
 import uuid
 import traceback
 
 from flask import Blueprint, request, jsonify
-from werkzeug.exceptions import BadRequest
-from werkzeug.utils import secure_filename
 from app.models.db_models import User, Category, Transaction
 from app.services.llm_controller import generate_response, PromptRequest, get_transaction_prompt, parse_json_response, clean_response
 from app.models.transaction import UserTransaction
+from app.services.csv_extractor_services import CSVExtractorService
+from http import HTTPStatus
+from werkzeug.exceptions import BadRequest
 
 extraction_bp = Blueprint('extraction', __name__)
 
+MAX_RETRIES = 3
+MODEL= 'mistral'
 
 @extraction_bp.route('/<id>', methods=['POST'])
 def extract_csv(id):
   temp_file_path = None
   try:
     if 'file' not in request.files:
-      return 'No file part', 400
-
-    file = request.files['file']
-    filename = secure_filename(file.filename)
-    temp_file_path = os.path.join("/tmp", filename)
-    file.save(temp_file_path)
-
-    if file.filename == '':
-        raise BadRequest('No selected file')
-    
-    if not file.filename.endswith('.csv') or file.filename.endswith('.xlsx'):
-      raise BadRequest('Invalid file format. Please upload a CSV file.')
+      return 'No file part', HTTPStatus.BAD_REQUEST
 
     is_trial = 'temp' in id and 'json' in request.form
 
     if is_trial:
-      try:
-          json_data = json.loads(request.form['json'])
-          # TODO: we should standardize the JSON format so we don't have to keep casting the keys to int
-          json_data['categories'] = {int(key): value for key, value in json_data['categories'].items()}
-          categories = json_data['categories']
-          print(categories)
-      except Exception as e:
-          return jsonify({"Error processing JSON": str(e)}), 400
+      json_data = json.loads(request.form['json'])
+      categories = {value: int(key) for key, value in json_data['categories'].items()}
     else:
       user = User.query.get(id)
-      categories = {cat.id: cat.name for cat in user.categories}
-
-    df = pd.read_csv(temp_file_path, parse_dates=['Date'])
+      categories = {cat.name : cat.id for cat in user.categories}
+    
+    temp_file_path, df = CSVExtractorService.load_csv_file(request.files['file'])
 
     chunk_size = math.ceil((len(df))/10)
-    list_df = np.array_split(df, chunk_size)
-
     new_transactions = []
+    
+    # Create a new transaction for each row in the CSV
+    for _, row in df.iterrows():
+      new_transaction = UserTransaction(id=str(uuid.uuid4()), date=row["Date"], amount=row["Amount"], description=row["Description"], category_id=-1)
+      new_transactions.append(new_transaction)
+    
+    list_df = np.array_split(new_transactions, chunk_size)
 
+    # From the list of transactions, categorize each one
     for i, chunk in enumerate(list_df):
       print('Processing chunk...', i)
-      descriptions = {idx: desc for idx, desc in chunk['Description'].items()}
-      prompt = create_prompt(categories, descriptions)
-      model = 'mistral'
-      prompt_request = PromptRequest(prompt=prompt, model=model)
 
-      retries = 3
+      # Pass categories and descriptions to create a prompt
+      descriptions = [t.description for t in chunk]
+      category_list = list(categories.keys())
 
-      # TODO: to prevent the LLM from returning a lot of -1, create a dictionary to keep track of past categorizations
-      for idx in range(1, retries + 1):
+      # Create the prompt
+      prompt = create_prompt(category_list, descriptions)
+      prompt_request = PromptRequest(prompt=prompt, model=MODEL)
+
+      # LLM's response is not always accurate, so we will retry a few times
+      for idx in range(1, MAX_RETRIES + 1):
         print(f'Try number: {idx}')
-        transactions_to_append = []
 
         try:
           # invoke LLM to categorize transactions
           parsed_items = generate_response(prompt_request)
+          llm_hit = len(parsed_items) == len(chunk)
 
-          if len(parsed_items) == len(chunk):
+          if llm_hit:
+            print(json.dumps(parsed_items, indent=4))
+
+            is_complete = True
+
             for item in parsed_items:
-              new_category = int(parsed_items[item])
-              if new_category in categories:
-                  category = new_category
+              row_data = chunk[int(item)-1]
+              new_category = parsed_items[item]
+
+              # Assign the category if not yet classified and the category is in the sample categories
+              if row_data.category_id == -1 and new_category in categories:
+                row_data.category_id = categories[new_category]
               else:
-                  if idx == retries:
-                    category = -1
-                  else:
-                    raise ValueError(f'Category {new_category} not found')
-                  
-              row_data = chunk.loc[int(item)]
-              amount = row_data['Amount']
-              date = row_data['Date']
-              description = row_data['Description']
-
-              new_transaction = UserTransaction(id=str(uuid.uuid4()), date=date, amount=amount, description=description, category_id=category)
-              print(f'{description}: {new_transaction.category_id}')
-
-              transactions_to_append.append(UserTransaction(id=str(uuid.uuid4()), date=date, amount=amount, description=description, category_id=category))
+                is_complete = False
             
-            new_transactions.extend(transactions_to_append)
+            if not is_complete:
+              # invoke a retry
+              raise ValueError('Some transactions were not categorized')
+
             break
-          else:
-            print("retrying...")
+        except ValueError as e:
+          print(f"Error generating response: {str(e)}")
+          print(traceback.format_exc())
         except Exception as e:
           print(f"Error generating response: {str(e)}")
           print(traceback.format_exc())
-    
+
     return jsonify({"transactions": [t.__dict__ for t in new_transactions]}), 200
+  except BadRequest as e:
+    return str(e), HTTPStatus.BAD_REQUEST
   except Exception as e:
     print(f"Error processing CSV file: {str(e)}")
     print(traceback.format_exc())
     return str(e), 500
   finally:
     if temp_file_path and os.path.exists(temp_file_path):
-      print(f"Deleting CSV file: {filename} in location: {temp_file_path}")
+      print(f"Deleting CSV file in location: {temp_file_path}")
       os.remove(temp_file_path)
 
 
-def create_prompt(categories, descriptions):
+def create_prompt(categories: list[str], descriptions: list[str]):
     enumerated_descriptions = ""
     enumerated_categories = ""
 
-    for id in descriptions:
-      enumerated_descriptions += f"{id}. {descriptions[id]}\n"
-    for id in categories:
-      enumerated_categories += f"{id}. {categories[id]}\n"
+    for index, description in enumerate(descriptions):
+      enumerated_descriptions += f"{index+1}. {description}\n"
+    for index, category in enumerate(categories):
+      enumerated_categories += f"{index+1}. {category}\n"
 
     return f'''
-You are the most precise and accurate financial advisor. Your task is to categorize the following transactions into the correct categories.
+You are the most precise and accurate classifier. Your task is to categorize the following transactions into the correct categories.
 
 Categories:
 {enumerated_categories}
@@ -136,19 +129,21 @@ Transactions:
 Only use the categories provided above. If unsure, choose the closest match.
 
 
-Output a JSON where the key is the index of the transaction and the value is the category index.
+Output a JSON where the key is the index of the transaction and the value is the category.
 {{
-  "1": 4,
-  "2": 8,
-  "3": 7,
-  "4": 2,
-  "5": 8
+  "1": {categories[0]},
+  "2": {categories[len(categories)-1]},
   ...
 }}
 
-If I provide 10 transactions, you should provide 10 categories.
+I have provided {len(descriptions)} transactions.
+You MUST return {len(descriptions)} categories.
+
 Only output the JSON, nothing else.
 The value of the JSON should be the category name nothing else.
+
+Before returning, double check that the category you selected is in the list of categories provided above.
+If not, retry,
 '''
 
 

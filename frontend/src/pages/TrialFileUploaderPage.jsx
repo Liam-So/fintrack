@@ -31,7 +31,7 @@ const TrialFileUploaderPage = () => {
   }
 
   return (
-    <>
+    <div className='bg-custom py-4'>
       {session && (
         transactions.length > 0 ? (
           <TransactionTable 
@@ -48,7 +48,7 @@ const TrialFileUploaderPage = () => {
           />
         )
       )}
-    </>
+    </div>
   )
 }
 

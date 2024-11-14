@@ -17,13 +17,16 @@ class PromptRequest(BaseModel):
 @retry(ValueError, tries=3)
 def generate_response(prompt_request: PromptRequest) -> List[dict]:
     raw_response = send_to_ollama(prompt_request.prompt, prompt_request.model)
-    return parse_json_response(raw_response)
+    return json.loads(raw_response)
+    # # print(raw_response)
+    # return parse_json_response(raw_response)
 
 def send_to_ollama(prompt, model="llama2"):
   payload = {
     "model": model,
     "prompt": prompt,
-    "stream": False
+    "stream": False,
+    "format": "json"
   }
 
   try:

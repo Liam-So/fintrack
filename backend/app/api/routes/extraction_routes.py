@@ -12,6 +12,7 @@ from app.models.transaction import UserTransaction
 from app.services.csv_extractor_services import CSVExtractorService
 from http import HTTPStatus
 from werkzeug.exceptions import BadRequest
+from app.services.transaction_categorizer import TransactionCategorizer
 
 extraction_bp = Blueprint('extraction', __name__)
 
@@ -46,53 +47,8 @@ def extract_csv(id):
     
     list_df = np.array_split(new_transactions, chunk_size)
 
-    # From the list of transactions, categorize each one
-    for i, chunk in enumerate(list_df):
-      print('Processing chunk...', i)
-
-      # Pass categories and descriptions to create a prompt
-      descriptions = [t.description for t in chunk]
-      category_list = list(categories.keys())
-
-      # Create the prompt
-      prompt = create_prompt(category_list, descriptions)
-      prompt_request = PromptRequest(prompt=prompt, model=MODEL)
-
-      # LLM's response is not always accurate, so we will retry a few times
-      for idx in range(1, MAX_RETRIES + 1):
-        print(f'Try number: {idx}')
-
-        try:
-          # invoke LLM to categorize transactions
-          parsed_items = generate_response(prompt_request)
-          llm_hit = len(parsed_items) == len(chunk)
-
-          if llm_hit:
-            print(json.dumps(parsed_items, indent=4))
-
-            is_complete = True
-
-            for item in parsed_items:
-              row_data = chunk[int(item)-1]
-              new_category = parsed_items[item]
-
-              # Assign the category if not yet classified and the category is in the sample categories
-              if row_data.category_id == -1 and new_category in categories:
-                row_data.category_id = categories[new_category]
-              else:
-                is_complete = False
-            
-            if not is_complete:
-              # invoke a retry
-              raise ValueError('Some transactions were not categorized')
-
-            break
-        except ValueError as e:
-          print(f"Error generating response: {str(e)}")
-          print(traceback.format_exc())
-        except Exception as e:
-          print(f"Error generating response: {str(e)}")
-          print(traceback.format_exc())
+    categorizer = TransactionCategorizer(categories, MODEL, MAX_RETRIES)
+    categorizer.categorize_all(list_df)
 
     return jsonify({"transactions": [t.__dict__ for t in new_transactions]}), 200
   except BadRequest as e:
@@ -105,46 +61,6 @@ def extract_csv(id):
     if temp_file_path and os.path.exists(temp_file_path):
       print(f"Deleting CSV file in location: {temp_file_path}")
       os.remove(temp_file_path)
-
-
-def create_prompt(categories: list[str], descriptions: list[str]):
-    enumerated_descriptions = ""
-    enumerated_categories = ""
-
-    for index, description in enumerate(descriptions):
-      enumerated_descriptions += f"{index+1}. {description}\n"
-    for index, category in enumerate(categories):
-      enumerated_categories += f"{index+1}. {category}\n"
-
-    return f'''
-You are the most precise and accurate classifier. Your task is to categorize the following transactions into the correct categories.
-
-Categories:
-{enumerated_categories}
-
-Transactions:
-{enumerated_descriptions}
-
-## IMPORTANT ##
-Only use the categories provided above. If unsure, choose the closest match.
-
-
-Output a JSON where the key is the index of the transaction and the value is the category.
-{{
-  "1": {categories[0]},
-  "2": {categories[len(categories)-1]},
-  ...
-}}
-
-I have provided {len(descriptions)} transactions.
-You MUST return {len(descriptions)} categories.
-
-Only output the JSON, nothing else.
-The value of the JSON should be the category name nothing else.
-
-Before returning, double check that the category you selected is in the list of categories provided above.
-If not, retry,
-'''
 
 
 # @extraction_bp.route('/pdf', methods=['POST'])

@@ -1,13 +1,12 @@
 import React, { useMemo } from 'react';
 import { Line } from "react-chartjs-2";
-import { toLocalDate, toLocalMonth, formatCurrency } from '../utils/util';
-import { GROUP_BY_MONTHS } from '../utils/constants';
+import { formatCurrency, toLocaleDateString } from '../utils/util';
 
-const LineChart = ({ transactions, date }) => {
+const LineChart = ({ transactions }) => {
   // Aggregate data by date
   const aggregatedData = useMemo(() => {
     const grouped = transactions.reduce((acc, transaction) => {
-      const dateKey = GROUP_BY_MONTHS.includes(date) ? toLocalMonth(transaction.date) : toLocalDate(transaction.date);
+      const dateKey = toLocaleDateString(transaction.date);
       
       if (!acc[dateKey]) {
         acc[dateKey] = {
@@ -26,18 +25,6 @@ const LineChart = ({ transactions, date }) => {
     return Object.values(grouped)
       .sort((a, b) => new Date(a.date) - new Date(b.date));
   }, [transactions]);
-
-
-  const formatDate = (dateStr) => {
-    const formattedDate = new Date(dateStr).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: GROUP_BY_MONTHS.includes(date) ? 'numeric' : undefined,
-      timeZone: 'UTC'
-    })
-
-    return formattedDate;
-  };
 
   const data = {
     labels: aggregatedData.map(item => item.date),
@@ -78,10 +65,11 @@ const LineChart = ({ transactions, date }) => {
           maxRotation: 45,
           minRotation: 45,
           callback: (value, index, values) => {
+            // if there are more than 20 labels, only display every 3rd label
             if (values.length > 20) {
-              return index % 3 === 0 ? formatDate(data.labels[index]) : '';
+              return index % 3 === 0 ? data.labels[index] : ''
             }
-            return formatDate(data.labels[index]);
+            return data.labels[index];
           }
         }
       }

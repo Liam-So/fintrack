@@ -4,6 +4,7 @@ import numpy as np
 import math
 import uuid
 import traceback
+import time
 
 from flask import Blueprint, request, jsonify
 from app.models.db_models import User, Category, Transaction
@@ -14,6 +15,7 @@ from http import HTTPStatus
 from werkzeug.exceptions import BadRequest
 from app.services.transaction_categorizer import TransactionCategorizer
 
+
 extraction_bp = Blueprint('extraction', __name__)
 
 MAX_RETRIES = 3
@@ -21,10 +23,14 @@ MODEL= 'mistral'
 
 @extraction_bp.route('/<id>', methods=['POST'])
 def extract_csv(id):
+  start = time.time()
   temp_file_path = None
   try:
     if 'file' not in request.files:
       return 'No file part', HTTPStatus.BAD_REQUEST
+    
+    temp_file_path, df = CSVExtractorService.load_csv_file(request.files['file'])
+    print(f"📁 CSV file loaded successfully: {temp_file_path}")
 
     is_trial = 'temp' in id and 'json' in request.form
 
@@ -34,10 +40,8 @@ def extract_csv(id):
     else:
       user = User.query.get(id)
       categories = {cat.name : cat.id for cat in user.categories}
-    
-    temp_file_path, df = CSVExtractorService.load_csv_file(request.files['file'])
 
-    chunk_size = math.ceil((len(df))/10)
+    chunk_size = math.ceil((len(df))/15)
     new_transactions = []
     
     # Create a new transaction for each row in the CSV
@@ -46,6 +50,8 @@ def extract_csv(id):
       new_transactions.append(new_transaction)
     
     list_df = np.array_split(new_transactions, chunk_size)
+
+    print(f"📊 Categorizing {len(new_transactions)} transactions...")
 
     categorizer = TransactionCategorizer(categories, MODEL, MAX_RETRIES)
     categorizer.categorize_all(list_df)
@@ -58,6 +64,8 @@ def extract_csv(id):
     print(traceback.format_exc())
     return str(e), 500
   finally:
+    end = time.time()
+    print(f"⏱️ Elapsed time: {end - start} seconds")
     if temp_file_path and os.path.exists(temp_file_path):
       print(f"Deleting CSV file in location: {temp_file_path}")
       os.remove(temp_file_path)

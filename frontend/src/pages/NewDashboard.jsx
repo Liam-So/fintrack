@@ -126,7 +126,7 @@ const NewDashboard = ({ transactions, transactionDates, categoryPercentages, amo
 
               <Card>
                 <h2 className="text-xl font-semibold mb-4 text-gray-700">{"Transaction Trend"}</h2>
-                <LineChart transactions={transactions} date={date} />
+                <LineChart transactions={transactions} />
               </Card>
 
             </div>

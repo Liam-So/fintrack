@@ -1,12 +1,12 @@
 from app import db
-from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
 
 # Create an association table for many-to-many relationship between users and categories
 user_categories = db.Table('user_categories',
     db.Column('user_id', UUID(as_uuid=True), db.ForeignKey('users.id'), primary_key=True),
-    db.Column('category_id', db.Integer, db.ForeignKey('categories.id'), primary_key=True)
+    db.Column('category_id', db.Integer, db.ForeignKey('categories.id'), primary_key=True),
+    db.Column('essential', db.Boolean, nullable=False, default=False)
 )
 
 class User(db.Model):
@@ -29,7 +29,6 @@ class Category(db.Model):
     __tablename__ = 'categories'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), unique=True, nullable=False)
-    is_predefined = db.Column(db.Boolean, default=False)
 
     transactions = db.relationship('Transaction', backref='category', lazy='dynamic')
 
@@ -41,7 +40,7 @@ class Transaction(db.Model):
     __tablename__ = 'transactions'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
-    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
+    category_id = db.Column(db.Integer, db.ForeignKey('categories.id', ondelete='SET NULL'), nullable=True)
     amount = db.Column(db.Float, nullable=False)
     date = db.Column(db.DateTime, nullable=False)
     description = db.Column(db.String(255), nullable=False)

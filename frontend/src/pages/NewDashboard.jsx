@@ -107,7 +107,7 @@ const NewDashboard = ({ transactions, transactionDates, categoryPercentages, amo
                     <span className="text-sm font-medium text-gray-700 dark:text-white">{formatCurrency(monthlyRevenue)}</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full dark:bg-gray-700">
-                    <div className="bg-slate-700 text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full" style={{width: `${amountSpentPercentage}%`}}> {amountSpentPercentage}%</div>
+                    <div className="bg-slate-700 text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full" style={{width: `${amountSpentPercentage || 0}%`}}> {amountSpentPercentage}%</div>
                   </div>
               </Card>
             </div>

@@ -1,5 +1,6 @@
-from app.models.db_models import User, Category
+from app.models.db_models import User, Category, user_categories
 from app import db
+from uuid import UUID
 
 class UserService:
 
@@ -13,6 +14,68 @@ class UserService:
     db.session.commit()
 
     return user
+  
+  @staticmethod
+  def add_user_categories(id: UUID, categories: list) -> User:
+    user = User.query.get(id)
+    if not user:
+      raise ValueError(f'User {id} not found')
+        
+    try:
+      for category_data in categories:
+        if 'id' in category_data:
+          cat = Category.query.get(category_data['id'])
+          if not cat:
+            raise ValueError(f'Category with id {category_data["id"]} not found')
+        elif 'name' in category_data:
+          cat = Category.query.filter_by(name=category_data['name']).first()
+          if not cat:
+            cat = Category(name=category_data['name'])
+            db.session.add(cat)
+            db.session.flush()  # Get the ID of the new category
+        else:
+          raise ValueError(f'Category {category_data} is invalid')
+        
+        # Check if association already exists
+        assoc = db.session.query(user_categories).filter_by(
+          user_id=user.id,
+          category_id=cat.id
+        ).first()
+        
+        if not assoc:
+          # Add association with essential flag
+          essential = category_data.get('essential', False)
+          stmt = user_categories.insert().values(
+              user_id=user.id,
+              category_id=cat.id,
+              essential=essential
+          )
+          db.session.execute(stmt)
+      
+      db.session.commit()
+      return user
+        
+    except Exception as e:
+        db.session.rollback()
+        raise ValueError(f'Error adding categories: {str(e)}')
+    
+  
+  @staticmethod
+  def delete_user_category(id: UUID, category_id: int) -> User:
+    user = User.query.get(id)
+    if not user:
+      raise ValueError(f'User {id} not found')
+    
+    category = Category.query.get(category_id)
+    if not category:
+      raise ValueError(f'Category {category_id} not found')
+    
+    if category not in user.categories:
+      raise ValueError(f'Category {category_id} not associated with user {id}')
+    else:
+      user.categories.remove(category)
+      db.session.commit()
+
 
   @staticmethod
   def create_user(data: dict) -> User:

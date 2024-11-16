@@ -49,6 +49,8 @@ def onboard_user(id):
     return jsonify({"error": "Internal server error"}), HTTPStatus.INTERNAL_SERVER_ERROR
 
 
+## Categories ##
+
 @user_bp.route('/categories/<id>', methods=['GET'])
 def get_user_categories(id):
   try:
@@ -58,6 +60,30 @@ def get_user_categories(id):
     return jsonify({"error": str(e)}), HTTPStatus.NOT_FOUND
   except Exception as e:
     return jsonify({"error": "Internal server error"}), HTTPStatus.INTERNAL_SERVER_ERROR
+
+
+@user_bp.route('/categories/<id>', methods=['POST'])
+def post_user_categories(id):
+  try:
+    data = request.get_json(silent=True) or {}
+    categories = data.get("categories", [])
+    UserService.add_user_categories(id, categories)
+    return "Success", HTTPStatus.OK
+  except ValueError as e:
+    return jsonify({"error": str(e)}), HTTPStatus.NOT_FOUND
+  except Exception as e:
+    return jsonify({"error": "Internal server error"}), HTTPStatus.INTERNAL_SERVER_ERROR
+
+
+@user_bp.route('/categories/<id>', methods=['DELETE'])
+def delete_user_category(id):
+  try:
+    data = request.get_json(silent=True) or {}
+    category_id = data.get("category_id", None)
+    UserService.delete_user_category(id, category_id)
+    return jsonify({"message": "Successfully deleted category."}), HTTPStatus.OK
+  except ValueError as e:
+    return jsonify({"error": str(e)}), HTTPStatus.NOT_FOUND
 
 
 @user_bp.route('/categories/percentages/<id>', methods=['POST'])

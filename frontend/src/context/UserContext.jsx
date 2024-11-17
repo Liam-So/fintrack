@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
-import { fetchUserData, getUserCategories, updateUser } from '../api/dashboardApi';
+import { deleteCategory, fetchUserData, getUserCategories, postCategories, updateUser } from '../api/dashboardApi';
 
 const UserContext = createContext();
 
@@ -19,6 +19,8 @@ export const UserProvider = ({ children }) => {
         try {
           const { data: userData } = await fetchUserData(user);
           const { data: categories } = await getUserCategories(userData.id);
+
+          console.log(userData.id);
           
           setAdditionalUserInfo({
             id: userData.id,
@@ -37,20 +39,33 @@ export const UserProvider = ({ children }) => {
     }
   }, [isAuthenticated, user]);
 
+
+  const deleteUserCategory = async (category) => {
+    if (isAuthenticated && user) {
+      try {
+        const { data } = await deleteCategory(additionalUserInfo.id, category);
+        setAdditionalUserInfo(prevInfo => ({
+          ...prevInfo,
+          categories: data.categories
+        }));
+      } catch (error) {
+        console.error('Error deleting user category:', error);
+      }
+    } else {
+      // TODO: handle case for trial user
+    }
+  }
+
+
   const updateUserCategories = async (newCategories) => {
     if (isAuthenticated && user) {
       try {
-        // Here you would typically send an API request to update the backend
-        // await fetch(`/api/user/${user.sub}/categories`, {
-        //   method: 'PUT',
-        //   body: JSON.stringify({ categories: newCategories }),
-        //   headers: { 'Content-Type': 'application/json' }
-        // });
+        const { data } = await postCategories(additionalUserInfo.id, newCategories);
 
         // If the API call is successful, update the local state
         setAdditionalUserInfo(prevInfo => ({
           ...prevInfo,
-          categories: newCategories
+          categories: data.categories
         }));
       } catch (error) {
         console.error('Error updating user categories:', error);
@@ -91,7 +106,8 @@ export const UserProvider = ({ children }) => {
     isLoading,
     logout,
     updateUserCategories,
-    updateUserIncome
+    updateUserIncome,
+    deleteUserCategory
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

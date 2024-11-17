@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import Sidebar from '../components/Sidebar';
 import { Edit2, Plus } from 'lucide-react';
@@ -8,7 +8,7 @@ import { formatCurrency } from "../utils/util";
 
 const Profile = () => {
   const { isLoading } = useAuth0();
-  const { user, updateUserIncome } = useUser();
+  const { user, updateUserIncome, deleteUserCategory, updateUserCategories } = useUser();
 
   if (isLoading) {
     return <div>Loading ...</div>;
@@ -18,6 +18,8 @@ const Profile = () => {
   const [newIncome, setNewIncome] = useState(user.income);
   const [newCategory, setNewCategory] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [categories, setCategories] = useState({});
+  const [isEssential, setIsEssential] = useState(true);
 
   const handleIncomeSubmit = () => {
     try {
@@ -27,6 +29,31 @@ const Profile = () => {
       console.error('Error updating user income:', error);
     }
   };
+
+  const handleAddCategory = () => {
+    try {
+      updateUserCategories([{
+        name: newCategory,
+        essential: isEssential
+      }]);
+      setNewCategory('');
+    } catch (error) {
+      console.error('Error adding category:', error);
+    }
+  }
+
+  const handleRemoveCategory = (category) => {
+    try {
+      deleteUserCategory(category);
+    } catch (error) {
+      console.error('Error deleting category:', error);
+    }
+  }
+
+  useEffect(() => {
+    setCategories(user.categories);
+  }, [user]);
+  
 
   return (
     <div className='flex min-h-screen bg-custom'>
@@ -103,32 +130,41 @@ const Profile = () => {
               <div className="flex flex-col">
                 <label className="text-sm text-gray-500 mb-2">Transaction Categories</label>
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {Object.values(user.categories).map(category => (
-                    <div
-                      key={category}
-                      className="bg-blue-100 px-3 py-1 rounded-full flex items-center gap-2"
+                {Object.entries(categories).map(([key, value]) => (
+                  <div
+                    key={key}
+                    className="bg-blue-100 px-3 py-1 rounded-full flex items-center gap-2"
+                  >
+                    <span>{value}</span>
+                    <button
+                      onClick={() => handleRemoveCategory(Number(key))}
+                      className="text-blue-500 hover:text-blue-700"
                     >
-                      <span>{category}</span>
-                      <button
-                        // onClick={() => handleRemoveCategory(category)}
-                        className="text-blue-500 hover:text-blue-700"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
+                      ×
+                    </button>
+                  </div>
+                ))}
                 </div>
                 <div className="flex items-center gap-2">
                   <input
                     type="text"
                     value={newCategory}
-                    // onChange={(e) => setNewCategory(e.target.value)}
+                    onChange={(e) => setNewCategory(e.target.value)}
                     placeholder="Add new category"
                     className="border rounded p-2 flex-1"
                   />
+                  <select
+                    value={isEssential}
+                    onChange={(e) => setIsEssential(e.target.value === 'true')}
+                    className="px-4 py-2 rounded border bg-transparent border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="true">Essential</option>
+                    <option value="false">Non-Essential</option>
+                  </select>
                   <button
-                    // onClick={handleAddCategory}
-                    className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    onClick={handleAddCategory}
+                    className={`p-2 text-white rounded bg-slate-300 ${newCategory && ('bg-gray-900 hover:bg-gray-600 ')}`}
+                    disabled={!newCategory}
                   >
                     <Plus size={20} />
                   </button>

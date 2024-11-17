@@ -28,10 +28,13 @@ const TransactionTable = ({ postedTransactions = [], handleSubmit, handleSaveAct
   const [transactions, setTransactions] = useState(postedTransactions);
 
   const { user } = useUser();
-  
+
   const categories = Object.keys(user?.categories).length > 0 
     ? user.categories 
-    : JSON.parse(window.sessionStorage.getItem('categories'));
+    : JSON.parse(window.sessionStorage.getItem('categories')).reduce((acc, item) => {
+      acc[item.id] = item.name;
+      return acc;
+    }, {});
   
 
   useEffect(() => {

@@ -2,25 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { X, Plus, ArrowRight, ArrowLeft } from 'lucide-react';
 import { getUserCategories } from '../api/dashboardApi';
 
-// const categories = [
-//   { id: 1, name: '🛒 Groceries', essential: true },
-//   { id: 2, name: '🏠 Rent', essential: true },
-//   { id: 3, name: '💡 Utilities', essential: true },
-//   { id: 4, name: '🍽️ Dining Out', essential: false },
-//   { id: 5, name: '🎭 Entertainment', essential: false },
-//   { id: 6, name: '🛍️ Shopping', essential: false },
-//   { id: 7, name: '🚗 Transportation', essential: true },
-//   { id: 8, name: '💪🏼 Health', essential: true },
-//   { id: 9, name: '📚 Education', essential: true },
-//   { id: 10, name: '✈️ Travel', essential: false },
-//   { id: 11, name: '📱 Cell Phone', essential: true },
-//   { id: 12, name: '💊 Insurance', essential: true },
-//   { id: 15, name: '🐾 Pet Care', essential: false },
-//   { id: 16, name: '🔧 Repairs', essential: true },
-//   { id: 19, name: '👗 Clothing', essential: false },
-//   { id: 20, name: '📦 Subscriptions', essential: false },
-// ];
-
 const defaultCategories = [
   { "id": 1, "name": "🛒 Groceries", essential: true },
   { "id": 2, "name": "🏠 Rent", essential: true },

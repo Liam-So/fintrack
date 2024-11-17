@@ -29,6 +29,19 @@ export const fetchCategoryPercentages = (id, transactions) => (
   })
 );
 
+export const postCategories = (id, categories) => (
+  api.post(`/user/categories/${id}`, {
+    categories: categories
+  })
+)
+
+export const deleteCategory = (id, category) => (
+  api.delete(`/user/categories/${id}`, { data: {
+      category_id: category
+    }
+  })
+)
+
 export const postCalculateCategoryPercentages = (transactions, categories) => (
   api.post("/trial/categories/percentages", {
     transactions: transactions,

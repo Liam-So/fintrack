@@ -36,7 +36,7 @@ def extract_csv(id):
 
     if is_trial:
       json_data = json.loads(request.form['json'])
-      categories = {value: int(key) for key, value in json_data['categories'].items()}
+      categories = {item['name']: item['id'] for item in json_data['categories']}
     else:
       user = User.query.get(id)
       categories = {cat.name : cat.id for cat in user.categories}

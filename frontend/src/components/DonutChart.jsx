@@ -6,7 +6,10 @@ const DonutChart = ({ categoryPercentages }) => {
   const { user } = useUser();
   const categories = Object.keys(user?.categories).length > 0 
     ? user.categories 
-    : JSON.parse(window.sessionStorage.getItem('categories'));
+    : JSON.parse(window.sessionStorage.getItem('categories')).reduce((acc, item) => {
+      acc[item.id] = item.name;
+      return acc;
+    }, {});
 
   function generateRandomColors(numColors) {
     return Array.from({ length: numColors }, () => {

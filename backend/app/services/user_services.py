@@ -27,10 +27,12 @@ class UserService:
           cat = Category.query.get(category_data['id'])
           if not cat:
             raise ValueError(f'Category with id {category_data["id"]} not found')
+        # If no ID is present, create a new category
         elif 'name' in category_data:
           cat = Category.query.filter_by(name=category_data['name']).first()
           if not cat:
             cat = Category(name=category_data['name'])
+            print(f'Adding category {cat.name}')
             db.session.add(cat)
             db.session.flush()  # Get the ID of the new category
         else:
@@ -45,6 +47,7 @@ class UserService:
         if not assoc:
           # Add association with essential flag
           essential = category_data.get('essential', False)
+          print(f'Adding association with essential flag {essential}')
           stmt = user_categories.insert().values(
               user_id=user.id,
               category_id=cat.id,
@@ -53,7 +56,7 @@ class UserService:
           db.session.execute(stmt)
       
       db.session.commit()
-      return user
+      return { cat.id: cat.name for cat in user.categories }
         
     except Exception as e:
         db.session.rollback()
@@ -62,19 +65,24 @@ class UserService:
   
   @staticmethod
   def delete_user_category(id: UUID, category_id: int) -> User:
-    user = User.query.get(id)
-    if not user:
-      raise ValueError(f'User {id} not found')
-    
-    category = Category.query.get(category_id)
-    if not category:
-      raise ValueError(f'Category {category_id} not found')
-    
-    if category not in user.categories:
-      raise ValueError(f'Category {category_id} not associated with user {id}')
-    else:
-      user.categories.remove(category)
-      db.session.commit()
+    try:
+      user = User.query.get(id)
+      if not user:
+        raise ValueError(f'User {id} not found')
+      
+      category = Category.query.get(category_id)
+      if not category:
+        raise ValueError(f'Category {category_id} not found')
+      
+      if category not in user.categories:
+        raise ValueError(f'Category {category_id} not associated with user {id}')
+      else:
+        user.categories.remove(category)
+        db.session.commit()
+        return { cat.id: cat.name for cat in user.categories }
+    except Exception as e:
+      db.session.rollback()
+      raise ValueError(f'Error deleting category: {str(e)}')
 
 
   @staticmethod
@@ -117,44 +125,3 @@ class UserService:
       round(transactions_by_category[category], 2)
     
     return transactions_by_category
-
-
-  @staticmethod
-  def onboard_user(id, monthly_income, categories):
-    user = User.query.get(id)
-
-    if not user:
-      raise ValueError(f'User {id} not found')
-
-    # if user and monthly_income and len(categories) > 0:
-    if monthly_income:
-      # update user income
-      user.monthly_income = monthly_income
-      db.session.commit()
-
-    if len(categories) > 0:
-        # if user already has existing categories, only update them with the latest ones
-      if len(user.categories) > 0:
-        user.categories = []
-
-      # update categories
-      existing_categories = Category.query.filter(Category.name.in_(categories)).all()
-
-      # can't use set as they are Category objects
-      existing_category_names = {category.name for category in existing_categories}
-
-      # find new categories that need to be created if any
-      new_category_names = set(categories) - existing_category_names
-
-      new_categories = [Category(name=cat_name, is_predefined=False) for cat_name in new_category_names]
-
-      # add new categories to the session
-      if new_categories:
-          db.session.add_all(new_categories)
-          db.session.commit()
-
-      # associate user with all new categories
-      user.categories.extend(existing_categories + new_categories)
-
-      # comit the associations
-      db.session.commit()

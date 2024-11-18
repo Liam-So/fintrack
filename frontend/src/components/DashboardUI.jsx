@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useUser } from '../context/UserContext';
-import Card from '../components/Card';
-import TransactionTable from '../components/TransactionTable';
-import DonutChart from '../components/DonutChart';
+import Card from './Card';
+import TransactionTable from './TransactionTable';
+import DonutChart from './DonutChart';
 import {
   Chart as ChartJS,
   ArcElement,
@@ -17,11 +17,11 @@ import {
   Filler
 } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-import LineChart from '../components/LineChart';
-import SelectTransaction from '../components/SelectTransaction';
+import LineChart from './LineChart';
+import SelectTransaction from './SelectTransaction';
 import { formatCurrency } from '../utils/util';
 import { GROUP_BY_MONTHS } from '../utils/constants';
-import Sidebar from '../components/Sidebar';
+import Sidebar from './Sidebar';
 
 ChartJS.register(
   ArcElement,

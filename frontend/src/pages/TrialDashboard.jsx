@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { fetchTrialTransactions, postCalculateCategoryPercentages } from '../api/dashboardApi';
-import NewDashboard from './NewDashboard';
+import DashboardUI from '../components/DashboardUI';
 
 const TrialDashboard = () => {
   const [transactions, setTransactions] = useState([]);
@@ -75,7 +75,7 @@ const TrialDashboard = () => {
   
 
   return (
-    <NewDashboard 
+    <DashboardUI 
       transactions={transactions}
       categoryPercentages={categoryPercentages}
       amountSpent={amountSpent}

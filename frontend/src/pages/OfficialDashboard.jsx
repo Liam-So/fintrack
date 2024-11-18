@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { deleteTransaction, fetchCategoryPercentages, fetchTransactionDates, fetchTransactions, postTransactions, updateTransaction } from '../api/dashboardApi';
 import { useUser } from '../context/UserContext';
-import NewDashboard from './NewDashboard';
+import DashboardUI from '../components/DashboardUI';
 
 const OfficialDashboard = () => {
   const { user } = useUser();
@@ -79,7 +79,7 @@ const OfficialDashboard = () => {
 
   return (
     <>
-      <NewDashboard
+      <DashboardUI
         transactions={transactions}
         categoryPercentages={categoryPercentages}
         amountSpent={monthlyExpenses}

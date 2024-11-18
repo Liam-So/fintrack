@@ -12,6 +12,7 @@ import Profile from "./pages/Profile";
 import OfficialDashboard from "./pages/OfficialDashboard";
 import TrialFileUploaderPage from "./pages/TrialFileUploaderPage";
 import OfficialFileUploader from "./pages/OfficialFileUploader";
+import UploadPage from "./pages/UploadPage";
 
 
 const FunLoadingPage = () => {
@@ -79,11 +80,11 @@ const router = createBrowserRouter([
   },
   {
     path: "/upload",
-    element: <ProtectedRoute><OfficialFileUploader /></ProtectedRoute>
+    element: <ProtectedRoute><UploadPage /></ProtectedRoute>
   },
   {
     path: "/trial/upload",
-    element: <ProtectedTrialRoute><TrialFileUploaderPage /></ProtectedTrialRoute>,
+    element: <ProtectedTrialRoute><UploadPage isTrial /></ProtectedTrialRoute>,
   },
   {
     path: "/trial/onboard",

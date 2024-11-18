@@ -37,7 +37,8 @@ const LineChart = ({ transactions }) => {
         borderColor: "rgba(30,130,76,0.8)",
         tension: 0.4,
         pointRadius: 3,
-        pointHoverRadius: 6
+        pointHoverRadius: 6,
+        datalabels: { display: false } // we can remove this if we want later...
       }
     ]
   };

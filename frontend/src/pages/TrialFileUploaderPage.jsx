@@ -1,18 +1,17 @@
 import { useState } from 'react'
 import FileUploader from '../components/FileUploader';
 import TransactionTable from '../components/TransactionTable';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const TrialFileUploaderPage = () => {
   const [transactions, setTransactions] = useState([]);
   const session = window.sessionStorage.getItem("session");
   const categories = JSON.parse(window.sessionStorage.getItem("categories"));
   const navigate = useNavigate();
-  const { id } = useParams();
 
   const handleSubmit = () => {
     window.sessionStorage.setItem("transactions", JSON.stringify(transactions));
-    navigate(`/trial/dashboard/${id}`);
+    navigate(`/trial/dashboard`);
   }
 
   const handleDelete = (id) => {

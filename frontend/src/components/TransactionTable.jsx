@@ -28,21 +28,8 @@ const TransactionTable = ({ postedTransactions = [], handleSubmit, handleSaveAct
   const [transactions, setTransactions] = useState(postedTransactions);
 
   const { user } = useUser();
-
-  const getCategories = () => {
-    if (Object.keys(user?.categories).length > 0) {
-      return user.categories;
-    } else {
-      const categories = JSON.parse(window.sessionStorage.getItem('categories')) || [];
-      
-      return categories.reduce((acc, item) => {
-        acc[item.id] = item.name;
-        return acc;
-      }, {});
-    }
-  }
-
-  const categories = getCategories();
+  const { categories } = user;
+  
   
   useEffect(() => {
     setTransactions(postedTransactions);

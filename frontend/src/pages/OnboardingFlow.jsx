@@ -9,7 +9,6 @@ const OnboardingFlow = ({ isTrial }) => {
   const { updateUserCategories, updateUserIncome } = useUser();
 
   const navigate = useNavigate();
-  const { id } = useParams();
 
   const handleNext = (income) => {
     updateUserIncome(income);
@@ -18,7 +17,7 @@ const OnboardingFlow = ({ isTrial }) => {
 
   const handleComplete = async (selectedCategories) => {
     updateUserCategories(selectedCategories);
-    isTrial ? navigate(`/trial/upload/${id}`) : navigate(`/upload/${id}`);
+    isTrial ? navigate(`/trial/upload`) : navigate(`/upload`);
   }
 
   return (

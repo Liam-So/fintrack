@@ -32,7 +32,6 @@ const Callback = () => {
   if (isLoading) {
     return <FunLoadingPage />;
   }
-
   return isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/" />;
 };
 
@@ -79,19 +78,19 @@ const router = createBrowserRouter([
     element: <ProtectedRoute><OnboardingFlow /></ProtectedRoute>
   },
   {
-    path: "/upload/:id",
+    path: "/upload",
     element: <ProtectedRoute><OfficialFileUploader /></ProtectedRoute>
   },
   {
-    path: "/trial/upload/:id",
+    path: "/trial/upload",
     element: <ProtectedTrialRoute><TrialFileUploaderPage /></ProtectedTrialRoute>,
   },
   {
-    path: "/trial/onboard/:id",
+    path: "/trial/onboard",
     element:  <ProtectedTrialRoute><OnboardingFlow isTrial /></ProtectedTrialRoute>,
   },
   {
-    path: "/trial/dashboard/:id",
+    path: "/trial/dashboard",
     element: <ProtectedTrialRoute><TrialDashboard /></ProtectedTrialRoute>,
   }
 ]);

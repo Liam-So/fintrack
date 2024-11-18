@@ -41,7 +41,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             <nav>
               <ul className="space-y-6">
                 <SidebarItem icon={Home} link={`/dashboard`} />
-                <SidebarItem icon={Upload} link={`/upload/${user?.id}`} />
+                <SidebarItem icon={Upload} link={`/upload`} />
                 {isAuthenticated && <SidebarItem icon={User} link="/profile" />}
               </ul>
             </nav>

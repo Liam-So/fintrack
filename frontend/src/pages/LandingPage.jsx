@@ -2,16 +2,19 @@ import React from 'react';
 import { useAuth0 } from "@auth0/auth0-react";
 import { api } from '../axios';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '../context/UserContext';
 
 const LandingPage = () => {
   const { loginWithRedirect } = useAuth0();
   const navigate = useNavigate();
+  const { setTrialSession } = useUser();
 
   const handleTrialSession = async () => {
     api.get('/trial/session').then((response) => {
       if (response.data.session_id) {
         window.sessionStorage.setItem('session', response.data.session_id);
-        navigate(`/trial/onboard/${response.data.session_id}`);
+        setTrialSession(response.data.session_id);
+        navigate(`/trial/onboard`);
       }
     }).catch((error) => {
       console.error('Error generating temp session:', error);

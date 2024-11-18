@@ -31,11 +31,31 @@ export const UserProvider = ({ children }) => {
       };
 
       fetchAdditionalInfo();
-    } else if (!isAuthenticated) {
-      const isTrial = window.sessionStorage.getItem("session");
-      console.log("Is trial:", isTrial);
+    } 
+    // sometimes refresh clears session storage so we need to check if session exists
+    else if (!isAuthenticated && window.sessionStorage.getItem("session")) {
+      const categories = JSON.parse(window.sessionStorage.getItem("categories"));
+      const newCategoriesObj = categories.reduce((acc, item) => {
+        acc[item.id] = item.name;
+          return acc;
+      }, {});
+      const income = window.sessionStorage.getItem("income");
+
+      setAdditionalUserInfo({
+        id: window.sessionStorage.getItem("session"),
+        categories: newCategoriesObj,
+        income: income
+      });
     }
   }, [isAuthenticated, user]);
+
+
+  const setTrialSession = (sessionId) => {
+    window.sessionStorage.setItem('session', sessionId);
+    setAdditionalUserInfo({
+      id: sessionId
+    });
+  }
 
 
   const deleteUserCategory = async (category) => {
@@ -67,8 +87,16 @@ export const UserProvider = ({ children }) => {
         console.error('Error updating user categories:', error);
       }
     } else if (!isAuthenticated && window.sessionStorage.getItem("session")) {
-      console.log("Updating categories for trial user", newCategories);
       window.sessionStorage.setItem("categories", JSON.stringify(newCategories));
+      const newCategoriesObj = newCategories.reduce((acc, item) => {
+        acc[item.id] = item.name;
+          return acc;
+      }, {});
+
+      setAdditionalUserInfo(prevInfo => ({
+        ...prevInfo,
+        categories: newCategoriesObj
+      }));
     }
   };
 
@@ -103,7 +131,8 @@ export const UserProvider = ({ children }) => {
     logout,
     updateUserCategories,
     updateUserIncome,
-    deleteUserCategory
+    deleteUserCategory,
+    setTrialSession
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

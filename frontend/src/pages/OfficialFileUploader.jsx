@@ -7,9 +7,9 @@ import FileUploader from '../components/FileUploader';
 
 const OfficialFileUploader = () => {
   const [transactions, setTransactions] = useState([]);
-
   const { user } = useUser();
-  const { id } = useParams();
+  const { id } = user;
+  
   const navigate = useNavigate();
 
   const categories = user.categories;

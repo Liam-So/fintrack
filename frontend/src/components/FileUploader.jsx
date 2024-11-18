@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { Upload, Lock, CheckCircle } from 'lucide-react';
 import { api } from '../axios';
-import { useParams } from 'react-router-dom';
+import { useUser } from '../context/UserContext';
 
 const FileUploader = ({ categories, setTransactions }) => {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
-  const { id } = useParams();
+  const { user } = useUser();
+  const { id } = user;
 
   const encryptAndUploadFile = async () => {
     if (!file) {

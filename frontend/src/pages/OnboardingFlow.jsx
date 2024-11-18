@@ -1,14 +1,13 @@
 import React, { useState } from 'react'
 import MonthlyIncomeInput from '../components/MonthlyIncomeInput';
 import SampleCategory from '../pages/SampleCategory';
-import { useNavigate, useParams } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
+import TrialFileUploaderPage from './TrialFileUploaderPage';
+import OfficialFileUploader from './OfficialFileUploader';
 
 const OnboardingFlow = ({ isTrial }) => {
   const [step, setStep] = useState('income');
   const { updateUserCategories, updateUserIncome } = useUser();
-
-  const navigate = useNavigate();
 
   const handleNext = (income) => {
     updateUserIncome(income);
@@ -17,13 +16,18 @@ const OnboardingFlow = ({ isTrial }) => {
 
   const handleComplete = async (selectedCategories) => {
     updateUserCategories(selectedCategories);
-    isTrial ? navigate(`/trial/upload`) : navigate(`/upload`);
+    setStep('upload')
   }
 
   return (
     <div className='bg-custom'>
       {step === 'income' && <MonthlyIncomeInput onNext={handleNext} />}
       {step === 'categories' && <SampleCategory onSend={handleComplete} />}
+      {step === 'upload' &&  isTrial ? (
+        <TrialFileUploaderPage />
+      ) : (
+        <OfficialFileUploader />
+      )}
     </div >
   )
 }

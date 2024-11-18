@@ -3,7 +3,10 @@ import { Link } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
-  const { user, logout, isAuthenticated } = useUser();
+  const { logout, isAuthenticated } = useUser();
+
+  const dashboardUrl = isAuthenticated ? '/dashboard' : '/trial/dashboard';
+  const uploadUrl = isAuthenticated ? '/upload' : '/trial/upload';
   
   const handleLogout = () => {
     sessionStorage.clear();
@@ -40,8 +43,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             {/* Main Navigation */}
             <nav>
               <ul className="space-y-6">
-                <SidebarItem icon={Home} link={`/dashboard`} />
-                <SidebarItem icon={Upload} link={`/upload`} />
+                <SidebarItem icon={Home} link={dashboardUrl} />
+                <SidebarItem icon={Upload} link={uploadUrl} />
                 {isAuthenticated && <SidebarItem icon={User} link="/profile" />}
               </ul>
             </nav>

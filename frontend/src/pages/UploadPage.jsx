@@ -3,17 +3,18 @@ import Sidebar from '../components/Sidebar'
 import OfficialFileUploader from './OfficialFileUploader';
 import TrialFileUploaderPage from './TrialFileUploaderPage';
 
-const UploadPage = (isTrial) => {
+const UploadPage = ({ isTrial }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  
   return (
     <div className='flex min-h-screen bg-custom'>
       <Sidebar setSidebarOpen={setSidebarOpen} sidebarOpen={sidebarOpen} />
 
       <div className="flex-1 flex flex-col">
         {isTrial ? (
-        <OfficialFileUploader />
-        ) : (
         <TrialFileUploaderPage />
+        ) : (
+        <OfficialFileUploader />
         )}
       </div> 
     </div> 

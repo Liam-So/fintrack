@@ -7,10 +7,18 @@ const TrialFileUploaderPage = () => {
   const [transactions, setTransactions] = useState([]);
   const session = window.sessionStorage.getItem("session");
   const categories = JSON.parse(window.sessionStorage.getItem("categories"));
+  
   const navigate = useNavigate();
 
   const handleSubmit = () => {
-    window.sessionStorage.setItem("transactions", JSON.stringify(transactions));
+    const getCurrentTransactions = JSON.parse(window.sessionStorage.getItem("transactions"));
+    if (getCurrentTransactions) {
+      // Merge current transactions with new transactions
+      const updatedTransactions = [...getCurrentTransactions, ...transactions];
+      window.sessionStorage.setItem("transactions", JSON.stringify(updatedTransactions));
+    } else {
+      window.sessionStorage.setItem("transactions", JSON.stringify(transactions));
+    }
     navigate(`/trial/dashboard`);
   }
 

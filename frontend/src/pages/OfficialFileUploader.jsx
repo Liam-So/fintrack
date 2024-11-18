@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useUser } from '../context/UserContext';
 import TransactionTable from '../components/TransactionTable';
 import { postTransactions } from '../api/dashboardApi';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import FileUploader from '../components/FileUploader';
 
 const OfficialFileUploader = () => {

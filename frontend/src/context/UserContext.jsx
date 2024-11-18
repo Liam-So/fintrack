@@ -34,6 +34,8 @@ export const UserProvider = ({ children }) => {
     } 
     // sometimes refresh clears session storage so we need to check if session exists
     else if (!isAuthenticated && window.sessionStorage.getItem("session")) {
+      console.log("Setting trial session");
+      
       const categories = JSON.parse(window.sessionStorage.getItem("categories"));
       const newCategoriesObj = categories.reduce((acc, item) => {
         acc[item.id] = item.name;

@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { X, Plus, ArrowRight, ArrowLeft } from 'lucide-react';
-import { getUserCategories } from '../api/dashboardApi';
 
 const defaultCategories = [
   { "id": 1, "name": "🛒 Groceries", essential: true },
@@ -71,15 +70,6 @@ const CategorySelection = ({ availableCategories = defaultCategories, onSend }) 
     }
   };
 
-  useEffect(() => {
-    const fetchUserCategories = async () => {
-      const { data } = await getUserCategories("f1f84f2b-4887-45d6-b6f2-65e865cb3726");
-      console.log(data);
-    }
-
-    fetchUserCategories();
-  }, [])
-  
 
   const renderCategoryList = (isEssential) => (
     <div className="space-y-3">

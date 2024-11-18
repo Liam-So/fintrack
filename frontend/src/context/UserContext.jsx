@@ -19,8 +19,6 @@ export const UserProvider = ({ children }) => {
         try {
           const { data: userData } = await fetchUserData(user);
           const { data: categories } = await getUserCategories(userData.id);
-
-          console.log(userData.id);
           
           setAdditionalUserInfo({
             id: userData.id,
@@ -51,8 +49,6 @@ export const UserProvider = ({ children }) => {
       } catch (error) {
         console.error('Error deleting user category:', error);
       }
-    } else {
-      // TODO: handle case for trial user
     }
   }
 

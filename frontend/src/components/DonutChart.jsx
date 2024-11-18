@@ -4,12 +4,20 @@ import { useUser } from "../context/UserContext";
 
 const DonutChart = ({ categoryPercentages }) => {
   const { user } = useUser();
-  const categories = Object.keys(user?.categories).length > 0 
-    ? user.categories 
-    : JSON.parse(window.sessionStorage.getItem('categories')).reduce((acc, item) => {
-      acc[item.id] = item.name;
-      return acc;
-    }, {});
+  
+  const getCategories = () => {
+    if (Object.keys(user?.categories).length > 0) {
+      return user.categories;
+    } else {
+      const categories = JSON.parse(window.sessionStorage.getItem('categories')) || [];
+      return categories.reduce((acc, item) => {
+        acc[item.id] = item.name;
+        return acc;
+      }, {});
+    }
+  }
+
+  const categories = getCategories();  
 
   function generateRandomColors(numColors) {
     return Array.from({ length: numColors }, () => {

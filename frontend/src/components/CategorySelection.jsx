@@ -1,108 +1,231 @@
-import React, { useState, useEffect } from 'react';
-import { Check, Plus, X } from 'lucide-react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { Calendar, ChevronDown } from 'lucide-react';
+import { toLocaleDateString } from '../utils/util';
 
-const initialCategories = [
-  { id: 1, name: 'Rent', icon: '🏠' },
-  { id: 2, name: 'Restaurants', icon: '🍽️' },
-  { id: 3, name: 'Drinks', icon: '🍷' },
-  { id: 4, name: 'Groceries', icon: '🛒' },
-  { id: 5, name: 'Transportation', icon: '🚗' },
-  { id: 6, name: 'Utilities', icon: '💡' },
-  { id: 7, name: 'Entertainment', icon: '🎭' },
-  { id: 8, name: 'Shopping', icon: '🛍️' },
-  { id: 9, name: 'Health', icon: '💪' },
-  { id: 10, name: 'Travel', icon: '✈️' },
-  { id: 11, name: 'Education', icon: '📚' },
-];
+const daysToPeriodMap = {
+  30: '1M',
+  90: '3M',
+  180: '6M',
+  365: '1Y'
+}
 
-const CategorySelection = ({ onComplete }) => {
-  const [categories, setCategories] = useState(initialCategories);
-  const [selectedCategories, setSelectedCategories] = useState({});
-  const [newCategory, setNewCategory] = useState('');
-
-  const toggleCategory = (categoryId, categoryName) => {
-    setSelectedCategories(prevCategories => {
-      const isCategorySelected = !!prevCategories[categoryId];
+const CategorySelection = ({ availableMonths, setDate, date }) => {
+  const [selectedOption, setSelectedOption] = useState(daysToPeriodMap[date?.period]);
+  const [isCustomOpen, setIsCustomOpen] = useState(false);
+  const [customType, setCustomType] = useState('month');
+  const popoverRef = useRef(null);
   
-      if (isCategorySelected) {
-        // remove category from selectedCategories
-        const { [categoryId]: _, ...remainingCategories } = prevCategories;
-        return remainingCategories;
+  // Date range state
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+  const [dateRangeError, setDateRangeError] = useState('');
+
+  // Close popover when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (popoverRef.current && !popoverRef.current.contains(event.target)) {
+        setIsCustomOpen(false);
       }
-  
-      return { ...prevCategories, [categoryId]: categoryName };
-    });
-  };
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onComplete(selectedCategories);
-  };
+  const periods = [
+    { label: '1M', value: '1M', description: 'Last month' },
+    { label: '3M', value: '3M', description: 'Last 3 months' },
+    { label: '6M', value: '6M', description: 'Last 6 months' },
+    { label: '1Y', value: '1Y', description: 'Last year' },
+    { label: 'Custom', value: 'custom', description: 'Select custom period' }
+  ];
 
-  const addCustomCategory = () => {
-    // TODO: Ensure no duplicates
-    const customCategory = newCategory.trim();
-    if (customCategory) {
-      const newId = customCategory;
-      setCategories([...categories, { id: newId, name: newId, icon: '🔹' }]);
-      setSelectedCategories([...selectedCategories, newId]);
-      setNewCategory('');
+  const periodMap = {
+    '1M': 30,
+    '3M': 90,
+    '6M': 180,
+    '1Y': 365
+  }
+
+  const handlePeriodClick = (value) => {
+    if (value === 'custom') {
+      setIsCustomOpen(true);
+    } else {
+      setIsCustomOpen(false);
+      setSelectedOption(value);
+      
+      setDate({
+        type: 'preset_period',
+        period: periodMap[value]
+      })
     }
   };
 
+  const handleSendMonth = (month) => {
+    setDate({
+      type: 'month',
+      period: month
+    });
+    setIsCustomOpen(false);
+    setSelectedOption('custom');
+  }
+
+  const handleApplyDateRange = () => {
+    if (!startDate || !endDate) {
+      setDateRangeError('Please select both start and end dates');
+      return;
+    }
+
+    if (startDate > endDate) {
+      setDateRangeError('Start date must be before end date');
+      return;
+    }
+
+    setDateRangeError('');
+    setDate({
+      type: 'range',
+      period: `${startDate},${endDate}`
+    })
+    setIsCustomOpen(false);
+  }
+
+  const getCustomDropdownText = () => {
+    if (customType === 'month') {
+      if (date && date.type === 'month') {
+        return date.period; // Adjust based on how months are formatted
+      }
+      return "Select Month";
+    }
+    if (customType === 'range' && selectedOption === 'custom') {
+      return `${toLocaleDateString(startDate) ?? 'Start Date'} - ${toLocaleDateString(endDate) ?? 'End Date'}`;
+    }
+
+    return customType === 'range' ? 'Select Date Range' : 'Select Custom Period';
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-400 via-indigo-500 to-purple-600 flex items-center justify-center px-4">
-      <div className="max-w-4xl w-full space-y-8 bg-white bg-opacity-10 p-10 rounded-2xl shadow-lg backdrop-blur-lg">
-        <div className="text-center">
-          <h2 className="mt-6 text-4xl font-extrabold text-white">Customize Your Expense Tracking</h2>
-          <p className="mt-2 text-sm text-white text-opacity-80">Select or add categories you'd like to monitor</p>
-        </div>
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {categories.map((category) => (
+    <div className="flex items-center gap-2">
+      {/* Main period selector */}
+      <div className="bg-gray-100 p-1 rounded-lg inline-flex">
+        {periods.map((period) => (
+          <button
+            key={period.value}
+            onClick={() => handlePeriodClick(period.value)}
+            className={`
+              px-4 py-2 rounded-md text-sm font-medium transition-all duration-200
+              ${selectedOption === period.value && !isCustomOpen
+                ? 'bg-white shadow-sm text-gray-900'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }
+            `}
+            title={period.description}
+          >
+            {period.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Custom date selection dropdown */}
+      <div className="relative" ref={popoverRef}>
+        <button
+          onClick={() => setIsCustomOpen(!isCustomOpen)}
+          className={`
+            inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200
+            ${isCustomOpen 
+              ? 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }
+          `}
+        >
+          <Calendar className="w-4 h-4" />
+          {getCustomDropdownText()}
+          <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isCustomOpen ? 'rotate-180' : ''}`} />
+        </button>
+
+        {/* Dropdown content */}
+        {isCustomOpen && (
+          <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 p-4 z-50">
+            {/* Toggle between month and range selection */}
+            <div className="flex gap-2 p-1 bg-gray-100 rounded-md mb-4">
               <button
-                key={category.id}
-                type="button"
-                onClick={() => toggleCategory(category.id, category.name)}
-                className={`relative px-6 py-4 border-2 rounded-lg text-left focus:outline-none transition-all duration-200 ease-in-out ${
-                  category.id in selectedCategories
-                    ? 'bg-white bg-opacity-20 border-white text-white'
-                    : 'border-white border-opacity-30 text-white text-opacity-70 hover:bg-white hover:bg-opacity-10'
-                }`}
+                onClick={() => setCustomType('month')}
+                className={`
+                  flex-1 px-3 py-1.5 rounded text-sm font-medium transition-all duration-200
+                  ${customType === 'month'
+                    ? 'bg-white shadow-sm text-gray-900'
+                    : 'text-gray-600 hover:bg-gray-50'
+                  }
+                `}
               >
-                <span className="text-2xl mr-2">{category.icon}</span>
-                {category.name}
-                {category.id in selectedCategories && (
-                  <Check className="absolute top-2 right-2 h-5 w-5 text-white" />
-                )}
+                Month
               </button>
-            ))}
-            <div className="relative">
-              <input
-                type="text"
-                value={newCategory}
-                onChange={(e) => setNewCategory(e.target.value)}
-                placeholder="Add custom category"
-                className="w-full px-6 py-4 border-2 border-white border-opacity-30 rounded-lg bg-transparent text-white placeholder-white placeholder-opacity-50 focus:outline-none focus:border-white"
-              />
               <button
-                type="button"
-                onClick={addCustomCategory}
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white opacity-70 hover:opacity-100"
+                onClick={() => setCustomType('range')}
+                className={`
+                  flex-1 px-3 py-1.5 rounded text-sm font-medium transition-all duration-200
+                  ${customType === 'range'
+                    ? 'bg-white shadow-sm text-gray-900'
+                    : 'text-gray-600 hover:bg-gray-50'
+                  }
+                `}
               >
-                <Plus className="h-6 w-6" />
+                Date Range
               </button>
             </div>
+
+            {/* Month selector */}
+            {customType === 'month' && (
+              <select 
+                className="w-full rounded-md border border-gray-300 py-2 px-3 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                onChange={(e) => {handleSendMonth(e.target.value)}}
+                value={availableMonths.includes(date?.period) ? date.period : ""}
+              >
+                <option value="">Select month...</option>
+                {availableMonths.map((month) => (
+                  <option key={month} value={month}>
+                    {month}
+                  </option>
+                ))}
+              </select>
+            )}
+
+            {/* Date range selector */}
+            {customType === 'range' && (
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Start Date
+                    </label>
+                    <input
+                      type="date"
+                      value={startDate || ""}
+                      className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 px-3 py-2"
+                      onChange={(e) => setStartDate(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      End Date
+                    </label>
+                    <input
+                      type="date"
+                      value={endDate || ""}
+                      className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 px-3 py-2"
+                      onChange={(e) => setEndDate(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <p className="text-red-500 text-sm">{dateRangeError}</p>
+                <button
+                  className="w-full bg-blue-600 text-white rounded-md py-2 text-sm font-medium hover:bg-blue-700 transition-colors duration-200"
+                  onClick={handleApplyDateRange}
+                >
+                  Apply Range
+                </button>
+              </div>
+            )}
           </div>
-          <div>
-            <button
-              type="submit"
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-lg font-medium text-purple-600 bg-white hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white transition duration-150 ease-in-out"
-            >
-              Complete Setup
-            </button>
-          </div>
-        </form>
+        )}
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import MonthlyIncomeInput from '../components/MonthlyIncomeInput';
-import SampleCategory from '../pages/SampleCategory';
+import CategorySelection from '../pages/CategorySelection';
 import { useUser } from '../context/UserContext';
 import TrialFileUploaderPage from './TrialFileUploaderPage';
 import OfficialFileUploader from './OfficialFileUploader';
@@ -22,7 +22,7 @@ const OnboardingFlow = ({ isTrial }) => {
   return (
     <div className='bg-custom'>
       {step === 'income' && <MonthlyIncomeInput onNext={handleNext} />}
-      {step === 'categories' && <SampleCategory onSend={handleComplete} />}
+      {step === 'categories' && <CategorySelection onSend={handleComplete} />}
       {step === 'upload' &&  isTrial ? (
         <TrialFileUploaderPage />
       ) : (

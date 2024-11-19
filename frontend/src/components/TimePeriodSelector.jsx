@@ -9,7 +9,7 @@ const daysToPeriodMap = {
   365: '1Y'
 }
 
-const CategorySelection = ({ availableMonths, setDate, date }) => {
+const TimePeriodSelector = ({ availableMonths, setDate, date }) => {
   const [selectedOption, setSelectedOption] = useState(daysToPeriodMap[date?.period]);
   const [isCustomOpen, setIsCustomOpen] = useState(false);
   const [customType, setCustomType] = useState('month');
@@ -231,4 +231,4 @@ const CategorySelection = ({ availableMonths, setDate, date }) => {
   );
 };
 
-export default CategorySelection;
+export default TimePeriodSelector;

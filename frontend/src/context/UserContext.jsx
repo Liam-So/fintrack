@@ -14,7 +14,7 @@ export const UserProvider = ({ children }) => {
   useEffect(() => {
     // Should we add user id for trial?
     if (isAuthenticated && user) {
-      // Fetch additional user info from your backend
+      // Fetch additional user potnfo from your backend
       const fetchAdditionalInfo = async () => {
         try {
           const { data: userData } = await fetchUserData(user);
@@ -37,11 +37,17 @@ export const UserProvider = ({ children }) => {
       console.log("Setting trial session");
       
       const categories = JSON.parse(window.sessionStorage.getItem("categories"));
+      const income = window.sessionStorage.getItem("income");
+      
       const newCategoriesObj = categories.reduce((acc, item) => {
-        acc[item.id] = item.name;
+        acc[item.id] = {
+          category_id: item.id,
+          name: item.name,
+          essential: item.essential
+          // color: item.color
+        };
           return acc;
       }, {});
-      const income = window.sessionStorage.getItem("income");
 
       setAdditionalUserInfo({
         id: window.sessionStorage.getItem("session"),
@@ -91,8 +97,13 @@ export const UserProvider = ({ children }) => {
     } else if (!isAuthenticated && window.sessionStorage.getItem("session")) {
       window.sessionStorage.setItem("categories", JSON.stringify(newCategories));
       const newCategoriesObj = newCategories.reduce((acc, item) => {
-        acc[item.id] = item.name;
-          return acc;
+        acc[item.id] = {
+          category_id: item.id,
+          name: item.name,
+          essential: item.essential
+          // color:
+        };
+        return acc;
       }, {});
 
       setAdditionalUserInfo(prevInfo => ({

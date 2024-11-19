@@ -8,10 +8,11 @@ export const fetchTransactionDates = (id) => (api.get(`/transactions/dates/${id}
 
 export const fetchUserData = (user) => (api.get(`/user/${user.email}`));
 
-export const fetchTransactions = async (id, date) => (
+export const fetchTransactions = async (id, type, period) => (
   api.get(`/transactions/${id}`, {
     params: {
-      query_by_date: date
+      type: type,
+      period: period
     }
   })
 )

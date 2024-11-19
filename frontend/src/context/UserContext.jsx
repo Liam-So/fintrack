@@ -14,7 +14,7 @@ export const UserProvider = ({ children }) => {
   useEffect(() => {
     // Should we add user id for trial?
     if (isAuthenticated && user) {
-      // Fetch additional user potnfo from your backend
+      // Fetch additional user info from your backend
       const fetchAdditionalInfo = async () => {
         try {
           const { data: userData } = await fetchUserData(user);

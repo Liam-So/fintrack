@@ -5,15 +5,17 @@ import traceback
 
 transaction_bp = Blueprint('transaction', __name__)
 
+
 @transaction_bp.route('/<id>', methods=['GET'])
 def get_transactions(id):
+  type = request.args.get('type', None)
+  period = request.args.get('period', None)
   try:
-    date_range = request.args.get('query_by_date', None)
-    transactions = TransactionService.get_transactions(id, date_range)
-    return jsonify(transactions), HTTPStatus.OK
+    transactions = TransactionService.get_transactions(id, type, period)
   except Exception as e:
     print(traceback.format_exc())
     return jsonify({"error": "Internal server error"}), HTTPStatus.INTERNAL_SERVER_ERROR
+  return jsonify(transactions), HTTPStatus.OK
 
 
 @transaction_bp.route('/<id>', methods=['POST'])

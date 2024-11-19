@@ -1,11 +1,24 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Calendar, ChevronDown } from 'lucide-react';
+import { toLocaleDateString } from '../utils/util';
+
+const daysToPeriodMap = {
+  30: '1M',
+  90: '3M',
+  180: '6M',
+  365: '1Y'
+}
 
 const SelectTransaction = ({ availableMonths, setDate, date }) => {
-  const [selectedOption, setSelectedOption] = useState(date);
+  const [selectedOption, setSelectedOption] = useState(daysToPeriodMap[date?.period]);
   const [isCustomOpen, setIsCustomOpen] = useState(false);
   const [customType, setCustomType] = useState('month');
   const popoverRef = useRef(null);
+  
+  // Date range state
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+  const [dateRangeError, setDateRangeError] = useState('');
 
   // Close popover when clicking outside
   useEffect(() => {
@@ -26,30 +39,67 @@ const SelectTransaction = ({ availableMonths, setDate, date }) => {
     { label: 'Custom', value: 'custom', description: 'Select custom period' }
   ];
 
+  const periodMap = {
+    '1M': 30,
+    '3M': 90,
+    '6M': 180,
+    '1Y': 365
+  }
+
   const handlePeriodClick = (value) => {
     if (value === 'custom') {
       setIsCustomOpen(true);
     } else {
       setIsCustomOpen(false);
       setSelectedOption(value);
-      setDate(value);
+      
+      setDate({
+        type: 'preset_period',
+        period: periodMap[value]
+      })
     }
   };
 
-  const getCustomDropdownText = () => {
-    if (customType === 'month') {
-      if (date && selectedOption === 'custom') {
-        return date;
-      } else {
-        return "Select Month"
-      }
+  const handleSendMonth = (month) => {
+    setDate({
+      type: 'month',
+      period: month
+    });
+    setIsCustomOpen(false);
+    setSelectedOption('custom');
+  }
+
+  const handleApplyDateRange = () => {
+    if (!startDate || !endDate) {
+      setDateRangeError('Please select both start and end dates');
+      return;
     }
 
-    // You'll have to add custom logic down the line...
-    if (customType === 'range') {
-      return "Date Range"
+    if (startDate > endDate) {
+      setDateRangeError('Start date must be before end date');
+      return;
     }
+
+    setDateRangeError('');
+    setDate({
+      type: 'range',
+      period: `${startDate},${endDate}`
+    })
+    setIsCustomOpen(false);
   }
+
+  const getCustomDropdownText = () => {
+    if (customType === 'month') {
+      if (date && date.type === 'month') {
+        return date.period; // Adjust based on how months are formatted
+      }
+      return "Select Month";
+    }
+    if (customType === 'range') {
+      return `${toLocaleDateString(startDate) ?? 'Start Date'} - ${toLocaleDateString(endDate) ?? 'End Date'}`;
+    }
+    return "Custom";
+  };
 
   return (
     <div className="flex items-center gap-2">
@@ -86,7 +136,6 @@ const SelectTransaction = ({ availableMonths, setDate, date }) => {
           `}
         >
           <Calendar className="w-4 h-4" />
-          {/* {customType === 'month' ? 'Select Month' : 'Date Range'} */}
           {getCustomDropdownText()}
           <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isCustomOpen ? 'rotate-180' : ''}`} />
         </button>
@@ -126,12 +175,8 @@ const SelectTransaction = ({ availableMonths, setDate, date }) => {
             {customType === 'month' && (
               <select 
                 className="w-full rounded-md border border-gray-300 py-2 px-3 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                onChange={(e) => {
-                  setDate(e.target.value);
-                  setIsCustomOpen(false);
-                  setSelectedOption("custom")
-                }}
-                value={date || ""}
+                onChange={(e) => {handleSendMonth(e.target.value)}}
+                value={availableMonths.includes(date?.period) ? date.period : ""}
               >
                 <option value="">Select month...</option>
                 {availableMonths.map((month) => (
@@ -153,6 +198,7 @@ const SelectTransaction = ({ availableMonths, setDate, date }) => {
                     <input
                       type="date"
                       className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 px-3 py-2"
+                      onChange={(e) => setStartDate(e.target.value)}
                     />
                   </div>
                   <div>
@@ -162,11 +208,14 @@ const SelectTransaction = ({ availableMonths, setDate, date }) => {
                     <input
                       type="date"
                       className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 px-3 py-2"
+                      onChange={(e) => setEndDate(e.target.value)}
                     />
                   </div>
                 </div>
+                <p className="text-red-500 text-sm">{dateRangeError}</p>
                 <button
                   className="w-full bg-blue-600 text-white rounded-md py-2 text-sm font-medium hover:bg-blue-700 transition-colors duration-200"
+                  onClick={handleApplyDateRange}
                 >
                   Apply Range
                 </button>

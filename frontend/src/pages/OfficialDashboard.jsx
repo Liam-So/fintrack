@@ -10,7 +10,7 @@ const OfficialDashboard = () => {
   const [monthlyExpenses, setMonthlyExpenses] = useState(0);
   const [transactions, setTransactions] = useState([]);
   const [categoryPercentages, setCategoryPercentages] = useState([]);
-  const [date, setDate] = useState("1M");
+  const [date, setDate] = useState({ type: 'preset_period', period: 30 });
   const [isTransactionsUpdated, setIsTransactionsUpdated] = useState(false);
   const [transactionDates, setTransactionDates] = useState([]);
 
@@ -18,7 +18,7 @@ const OfficialDashboard = () => {
     const fetchDashboardData = async () => {
       if (user && user?.id) {
         try {
-          const { data: getTransactions } = await fetchTransactions(user.id, date);
+          const { data: getTransactions } = await fetchTransactions(user.id, date.type, date.period);
           const { transactions: fetchedTransactions } = getTransactions;
           setTransactions(fetchedTransactions);
 

@@ -10,7 +10,7 @@ const TrialDashboard = () => {
   const [shouldRefetchData, setShouldRefetchData] = useState(0);
 
   // Add one to month because it is zero indexed
-  const [date, setDate] = useState("1M");
+  const [date, setDate] = useState({ type: 'preset_period', period: 30 });
   const [transactionDates, setTransactionDates] = useState([]);
 
   // Create a reviver function to parse the amount as a float
@@ -83,7 +83,13 @@ const TrialDashboard = () => {
       return transactionDate >= cutoffDate;
     });
   };
-  
+
+  const filterTransactionsByRange = (transactions, startDate, endDate) => {
+    return transactions.filter(transaction => {
+      const transactionDate = new Date(transaction.date);
+      return transactionDate >= startDate && transactionDate <= endDate;
+    });
+  }
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -96,21 +102,14 @@ const TrialDashboard = () => {
 
         let newTransactions;
 
-        if (["1M", "3M", "6M", "1Y"].includes(date)) {
-          if (date === "1M") {
-            newTransactions = filterTransactionsByPeriod(transactions, 30);
-          }
-          if (date === "3M") {
-            newTransactions = filterTransactionsByPeriod(transactions, 90);
-          }
-          if (date === "6M") {
-            newTransactions = filterTransactionsByPeriod(transactions, 180);
-          }
-          if (date === "1Y") {
-            newTransactions = filterTransactionsByPeriod(transactions, 365);
-          }
+        if (date.type === 'preset_period') {
+          newTransactions = filterTransactionsByPeriod(transactions, date.period);
+        } else if (date.type === 'month') {
+          newTransactions = transactionsGroupedByMonth[date.period];
         } else {
-          newTransactions = transactionsGroupedByMonth[date];
+          // fetch custom date range
+          const [startDate, endDate] = date.period.split(",").map(d => new Date(d));
+          newTransactions = filterTransactionsByRange(transactions, startDate, endDate);
         }
 
         setTransactions(newTransactions);

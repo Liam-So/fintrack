@@ -43,19 +43,39 @@ const NewDashboard = ({ transactions, transactionDates, categoryPercentages, amo
   const { user } = useUser();
 
   const dateMultipliers = {
-    "3M": 3,
-    "6M": 6,
-    "1Y": 12,
+    30: 1,
+    90: 3,
+    180: 6,
+    365: 12,
   };
 
   const getMonthlyRevenue = () => {
     let monthlyRevenue = user?.income ?? window.sessionStorage.getItem("income");
     
-    if (GROUP_BY_MONTHS.includes(date)) {
-      monthlyRevenue *= dateMultipliers[date];
+    if (GROUP_BY_MONTHS.includes(date.period)) {
+      monthlyRevenue *= dateMultipliers[date.period];
+    } else if (date.type === 'range') {
+      const [startDate, endDate] = date.period.split(",");
+      const monthsBetween = calculateMonthsBetween(startDate, endDate);
+      monthlyRevenue *= monthsBetween;
     }
 
     return monthlyRevenue;
+  }
+
+  const calculateMonthsBetween = (startDate, endDate) => {
+    // Ensure startDate and endDate are Date objects
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // Calculate the total number of months
+    const yearsDifference = end.getFullYear() - start.getFullYear();
+    const monthsDifference = end.getMonth() - start.getMonth();
+
+    // Combine years and months
+    const totalMonths = yearsDifference * 12 + monthsDifference;
+
+    return totalMonths;
   }
 
   const monthlyRevenue = getMonthlyRevenue();
@@ -131,7 +151,7 @@ const NewDashboard = ({ transactions, transactionDates, categoryPercentages, amo
 
             </div>
             {/* To prevent having a huge table. We can do pagination down the line */}
-            {!GROUP_BY_MONTHS.includes(date) && (
+            {(!GROUP_BY_MONTHS.includes(date.period) && date.type !== 'range') && (
               <TransactionTable 
                 postedTransactions={transactions} 
                 handleSaveAction={handleSaveAction}

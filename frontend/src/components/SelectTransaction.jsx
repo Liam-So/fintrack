@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Calendar, ChevronDown } from 'lucide-react';
 import { toLocaleDateString } from '../utils/util';
 
@@ -95,10 +95,11 @@ const SelectTransaction = ({ availableMonths, setDate, date }) => {
       }
       return "Select Month";
     }
-    if (customType === 'range') {
+    if (customType === 'range' && selectedOption === 'custom') {
       return `${toLocaleDateString(startDate) ?? 'Start Date'} - ${toLocaleDateString(endDate) ?? 'End Date'}`;
     }
-    return "Custom";
+
+    return customType === 'range' ? 'Select Date Range' : 'Select Custom Period';
   };
 
   return (
@@ -197,6 +198,7 @@ const SelectTransaction = ({ availableMonths, setDate, date }) => {
                     </label>
                     <input
                       type="date"
+                      value={startDate || ""}
                       className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 px-3 py-2"
                       onChange={(e) => setStartDate(e.target.value)}
                     />
@@ -207,6 +209,7 @@ const SelectTransaction = ({ availableMonths, setDate, date }) => {
                     </label>
                     <input
                       type="date"
+                      value={endDate || ""}
                       className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 px-3 py-2"
                       onChange={(e) => setEndDate(e.target.value)}
                     />

@@ -19,7 +19,7 @@ const DonutChart = ({ categoryPercentages }) => {
     const colors = generateRandomColors(Object.entries(categoryPercentages).length);
 
     return {
-      labels: [].concat(Object.keys(categoryPercentages)).map((category_id) => categories[category_id]),
+      labels: [].concat(Object.keys(categoryPercentages)).map((category_id) => categories[category_id]['name']),
       datasets: [
         {
           data: Object.values(categoryPercentages),

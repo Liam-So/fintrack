@@ -18,7 +18,7 @@ import {
 } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import LineChart from './LineChart';
-import CategorySelection from './CategorySelection';
+import TimePeriodSelector from './TimePeriodSelector';
 import { formatCurrency } from '../utils/util';
 import { GROUP_BY_MONTHS } from '../utils/constants';
 import Sidebar from './Sidebar';
@@ -93,7 +93,7 @@ const NewDashboard = ({ transactions, transactionDates, categoryPercentages, amo
             <h2 className='text-2xl italic font-semibold text-gray-800'>
               Income Tracking
             </h2>
-            <CategorySelection 
+            <TimePeriodSelector 
               availableMonths={transactionDates}
               setDate={setDate} 
               date={date}

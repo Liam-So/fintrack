@@ -30,7 +30,6 @@ const TransactionTable = ({ postedTransactions = [], handleSubmit, handleSaveAct
   const { user } = useUser();
   const { categories } = user;
   
-  
   useEffect(() => {
     setTransactions(postedTransactions);
   }, [postedTransactions]);
@@ -134,12 +133,12 @@ const TransactionTable = ({ postedTransactions = [], handleSubmit, handleSaveAct
                     >
                       {Object.keys(categories).map((category_id) => (
                         <option key={category_id} value={category_id}>
-                          {categories[category_id]}
+                          {categories[category_id]['name']}
                         </option>
                       ))}
                     </select>
                   ) : (
-                    <CategoryBadge category={categories[transaction.category_id]} />
+                    <CategoryBadge category={categories[transaction.category_id]['name']} />
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium border-b">

@@ -1,4 +1,5 @@
 from app.models.db_models import User, Category, user_categories
+from app.models.category import UserCategory
 from app import db
 from uuid import UUID
 
@@ -6,12 +7,16 @@ class UserService:
 
   @staticmethod
   def update_user(id: int, data: dict) -> User:
-    user = User.query.get(id)
-    if not user:
-      raise ValueError(f'User {id} not found')
-    user.email = data.get("email", user.email)
-    user.monthly_income = data.get("monthly_income", user.monthly_income)
-    db.session.commit()
+    try:
+      user = User.query.get(id)
+      if not user:
+        raise ValueError(f'User {id} not found')
+      user.email = data.get("email", user.email)
+      user.monthly_income = data.get("monthly_income", user.monthly_income)
+      db.session.commit()
+    except Exception as e:
+      db.session.rollback()
+      raise ValueError(f'Error updating user: {str(e)}')
 
     return user
   
@@ -87,41 +92,71 @@ class UserService:
 
   @staticmethod
   def create_user(data: dict) -> User:
-    new_user = User(username=data['username'], email=data['email'], monthly_income=data.get("monthly_income", None))
-    db.session.add(new_user)
-    db.session.commit()
+    try:
+      new_user = User(username=data['username'], email=data['email'], monthly_income=data.get("monthly_income", None))
+      db.session.add(new_user)
+      db.session.commit()
+    except Exception as e:
+      db.session.rollback()
+      raise ValueError(f'Error creating user: {str(e)}')
     return new_user
   
 
   @staticmethod
   def get_user_by_email(email: str) -> User:
-    user = User.query.filter_by(email=email).first()
-    if not user:
-      raise ValueError(f'User {email} not found')
+    try:
+      user = User.query.filter_by(email=email).first()
+      if not user:
+        raise ValueError(f'User {email} not found')
+    except Exception as e:
+      raise ValueError(f'Error getting user: {str(e)}')
     return user
 
 
   @staticmethod
   def get_user_categories(id: int) -> dict:
-    user = User.query.get(id)
-    if not user:
-      raise ValueError(f'User {id} not found')
-    return { cat.id: cat.name for cat in user.categories }
+    try:
+      user = User.query.get(id)
+
+      if not user:
+        raise ValueError(f'User {id} not found')
+
+      user_category_details = db.session.query(
+        Category.id,
+        Category.name, 
+        user_categories.c.essential
+      ).join(
+          user_categories, 
+          Category.id == user_categories.c.category_id
+      ).filter(
+          user_categories.c.user_id == user.id
+      ).all()
+
+      # validate if user has categories
+      user_categories_list = [UserCategory(category_id=uc.id, name=uc.name, essential=uc.essential) for uc in user_category_details]
+      return { cat.category_id: cat.dict() for cat in user_categories_list }
+      
+    except Exception as e:
+      raise ValueError(f'Error getting user: {str(e)}')
+    
   
 
   @staticmethod
   def get_categories_by_percentages(transactions: list) -> dict:
-    transactions_by_category = {}
+    try:
+      transactions_by_category = {}
 
-    for transaction in transactions:
-      category = transaction['category_id']
-      amount = transaction['amount']
+      for transaction in transactions:
+        category = transaction['category_id']
+        amount = transaction['amount']
 
-      if category not in transactions_by_category:
-        transactions_by_category[category] = amount
-      else:
-        transactions_by_category[category] += amount
+        if category not in transactions_by_category:
+          transactions_by_category[category] = amount
+        else:
+          transactions_by_category[category] += amount
 
-      round(transactions_by_category[category], 2)
+        round(transactions_by_category[category], 2)
+    except Exception as e:
+      raise ValueError(f'Error getting categories by percentages: {str(e)}')
     
     return transactions_by_category

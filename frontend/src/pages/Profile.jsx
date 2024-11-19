@@ -133,9 +133,9 @@ const Profile = () => {
                 {Object.entries(categories).map(([key, value]) => (
                   <div
                     key={key}
-                    className="bg-blue-100 px-3 py-1 rounded-full flex items-center gap-2"
+                    className={`px-3 py-1 rounded-full flex items-center gap-2 ${value.essential ? 'bg-green-200 text-green-800' : 'bg-yellow-200 text-yellow-800'}`}
                   >
-                    <span>{value}</span>
+                    <span>{value.name}</span>
                     <button
                       onClick={() => handleRemoveCategory(Number(key))}
                       className="text-blue-500 hover:text-blue-700"

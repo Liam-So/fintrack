@@ -79,8 +79,25 @@ const NewDashboard = ({ transactions, transactionDates, categoryPercentages, amo
   }
 
   const monthlyRevenue = getMonthlyRevenue();
-  const amountSaved = Math.round((monthlyRevenue - amountSpent) * 100)/100;
-  const amountSpentPercentage = Math.round(amountSpent / monthlyRevenue * 100);
+  const amountSaved = (monthlyRevenue - amountSpent).toFixed(2);
+  const amountSpentPercentage = (amountSpent / monthlyRevenue * 100).toFixed(2);
+
+  // Initialize totals
+  let essentialSum = 0;
+  let nonEssentialSum = 0;
+
+  // Iterate through the amounts
+  for (const [id, amount] of Object.entries(categoryPercentages)) {
+    const isEssential = user.categories[id]?.essential;
+    if (isEssential === true) {
+      essentialSum += amount;
+    } else {
+      nonEssentialSum += amount;
+    }
+  }
+
+  const essentialPercentages = ((essentialSum/amountSaved)* 100).toFixed(2);
+  const nonEssentialPercentages = ((nonEssentialSum/amountSaved)* 100).toFixed(2);
 
   return (
     <div className='flex min-h-screen bg-custom'>
@@ -116,18 +133,25 @@ const NewDashboard = ({ transactions, transactionDates, categoryPercentages, amo
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-3xl font-bold text-gray-700">{formatCurrency(amountSpent)}</p>
-                    <p className="text-sm text-gray-500">vs last month</p>
+                    <p className="text-sm text-gray-500">({amountSpentPercentage}% of income)</p>
                   </div>
                 </div>
               </Card>
               <Card>
                 <h2 className="text-xl font-semibold mb-4 text-gray-700">{"Revenue Expense Breakdown"}</h2>
                   <div className="flex justify-between mb-1">
-                    <span className="text-base font-medium text-gray-700 dark:text-white">Total Revenue</span>
-                    <span className="text-sm font-medium text-gray-700 dark:text-white">{formatCurrency(monthlyRevenue)}</span>
+                    <span className="text-base font-medium text-gray-700 dark:text-white">Essentials</span>
+                    <span className="text-sm font-medium text-gray-700 dark:text-white">{formatCurrency(essentialSum)} ({essentialPercentages}%)</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full dark:bg-gray-700">
-                    <div className="bg-slate-700 text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full" style={{width: `${amountSpentPercentage || 0}%`}}> {amountSpentPercentage}%</div>
+                    <div className="bg-slate-700 text-xs font-medium text-blue-100 text-center p-1 leading-none rounded-full" style={{width: `${essentialPercentages || 0}%`}}></div>
+                  </div>
+                  <div className="flex justify-between mb-1">
+                    <span className="text-base font-medium text-gray-700 dark:text-white">Non-Essentials</span>
+                    <span className="text-sm font-medium text-gray-700 dark:text-white">{formatCurrency(nonEssentialSum)} ({nonEssentialPercentages}%)</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full dark:bg-gray-700">
+                    <div className="bg-slate-700 text-xs font-medium text-blue-100 text-center p-1 leading-none rounded-full" style={{width: `${nonEssentialPercentages || 0}%`}}></div>
                   </div>
               </Card>
             </div>

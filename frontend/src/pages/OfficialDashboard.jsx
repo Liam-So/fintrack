@@ -9,7 +9,7 @@ const OfficialDashboard = () => {
   // Data to pass to DashboardUI component
   const [monthlyExpenses, setMonthlyExpenses] = useState(0);
   const [transactions, setTransactions] = useState([]);
-  const [categoryPercentages, setCategoryPercentages] = useState([]);
+  const [categoryPercentages, setCategoryPercentages] = useState({});
   const [date, setDate] = useState({ type: 'preset_period', period: 30 });
   const [isTransactionsUpdated, setIsTransactionsUpdated] = useState(false);
   const [transactionDates, setTransactionDates] = useState([]);

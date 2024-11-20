@@ -124,7 +124,7 @@ const NewDashboard = ({ transactions, transactionDates, categoryPercentages, amo
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-3xl font-bold text-gray-700">{formatCurrency(amountSaved)}</p>
-                    <p className="text-sm text-gray-500">vs last month</p>
+                    <p className="text-sm text-gray-500">(Approximation based on monthly income)</p>
                   </div>
                 </div>
               </Card>
@@ -175,7 +175,7 @@ const NewDashboard = ({ transactions, transactionDates, categoryPercentages, amo
 
             </div>
             {/* To prevent having a huge table. We can do pagination down the line */}
-            {(!GROUP_BY_MONTHS.includes(date.period) && date.type !== 'range') && (
+            {(![90, 180, 365].includes(date.period) && date.type !== 'range') && (
               <TransactionTable 
                 postedTransactions={transactions} 
                 handleSaveAction={handleSaveAction}

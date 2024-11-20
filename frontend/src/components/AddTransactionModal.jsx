@@ -94,7 +94,7 @@ const AddTransactionModal = ({ isOpen, onClose, onAdd, categories }) => {
             >
               {Object.keys(categories).map((category_id) => (
                 <option key={category_id} value={category_id}>
-                  {categories[category_id]}
+                  {categories[category_id]['name']}
                 </option>
               ))}
             </select>

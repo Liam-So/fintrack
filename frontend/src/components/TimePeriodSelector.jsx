@@ -84,7 +84,8 @@ const TimePeriodSelector = ({ availableMonths, setDate, date }) => {
     setDate({
       type: 'range',
       period: `${startDate},${endDate}`
-    })
+    });
+    setSelectedOption('custom');
     setIsCustomOpen(false);
   }
 

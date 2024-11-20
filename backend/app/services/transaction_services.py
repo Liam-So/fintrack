@@ -110,7 +110,7 @@ class TransactionService:
             'category_id': row.category_id
         })
 
-      return result
+      return { "transactions": result }
 
 
   @staticmethod

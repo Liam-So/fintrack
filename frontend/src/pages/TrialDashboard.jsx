@@ -4,14 +4,16 @@ import DashboardUI from '../components/DashboardUI';
 
 // TODO: refactor to optimize performance AND calculate percentages on the frontend (since it's a trial)
 const TrialDashboard = () => {
-  const [transactions, setTransactions] = useState([]);
-  const [categoryPercentages, setCategoryPercentages] = useState([]);
-  const [amountSpent, setAmountSpent] = useState(0);
   const [shouldRefetchData, setShouldRefetchData] = useState(0);
 
   // Add one to month because it is zero indexed
   const [date, setDate] = useState({ type: 'preset_period', period: 30 });
-  const [transactionDates, setTransactionDates] = useState([]);
+  const [dashboardData, setDashboardData] = useState({
+    transactions: [],
+    categoryPercentages: {},
+    amountSpent: 0,
+    transactionDates: [],
+  });
 
   // Create a reviver function to parse the amount as a float
   const getStoredTransactions = () => {
@@ -97,8 +99,6 @@ const TrialDashboard = () => {
         const categories = JSON.parse(window.sessionStorage.getItem("categories"));
         const transactions = getStoredTransactions();
         const transactionsGroupedByMonth = groupedTransactions();
-        
-        setTransactionDates(Object.keys(transactionsGroupedByMonth));
 
         let newTransactions;
 
@@ -112,12 +112,15 @@ const TrialDashboard = () => {
           newTransactions = filterTransactionsByRange(transactions, startDate, endDate);
         }
 
-        setTransactions(newTransactions);
         const { data: postCategoryPercentages } = await postCalculateCategoryPercentages(newTransactions, categories);
-        setCategoryPercentages(postCategoryPercentages);
-        
         const totalAmount = Object.values(postCategoryPercentages).reduce((acc, curr) => acc + curr, 0).toFixed(2);
-        setAmountSpent(totalAmount);
+
+        setDashboardData({
+          transactions: newTransactions,
+          categoryPercentages: postCategoryPercentages,
+          amountSpent: totalAmount,
+          transactionDates: Object.keys(transactionsGroupedByMonth),
+        });
       } catch (err) {
         console.error('Error fetching transactions:', err);
       }
@@ -129,12 +132,12 @@ const TrialDashboard = () => {
 
   return (
     <DashboardUI 
-      transactions={transactions}
-      categoryPercentages={categoryPercentages}
-      amountSpent={amountSpent}
+      transactions={dashboardData.transactions}
+      categoryPercentages={dashboardData.categoryPercentages}
+      amountSpent={dashboardData.amountSpent}
       date={date}
       setDate={setDate}
-      transactionDates={transactionDates}
+      transactionDates={dashboardData.transactionDates}
       handleSaveAction={handleSaveAction}
       handleDeleteAction={handleDeleteAction}
       handleAddAction={handleAddAction}

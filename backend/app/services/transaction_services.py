@@ -83,10 +83,9 @@ class TransactionService:
       start_date, end_date = period.split(',')
       start_date = datetime.strptime(start_date, '%Y-%m-%d')
       end_date = datetime.strptime(end_date, '%Y-%m-%d')
-      
       time_span = end_date - start_date
       
-      if time_span.days <= 14:
+      if time_span.days <= 30:
           grouped_query = TransactionService.group_by_query(id, start_date, end_date, 'day')
 
       elif time_span.days <= 180:

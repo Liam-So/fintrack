@@ -7,12 +7,14 @@ const OfficialDashboard = () => {
   const { user } = useUser();
 
   // Data to pass to DashboardUI component
-  const [monthlyExpenses, setMonthlyExpenses] = useState(0);
-  const [transactions, setTransactions] = useState([]);
-  const [categoryPercentages, setCategoryPercentages] = useState({});
   const [date, setDate] = useState({ type: 'preset_period', period: 30 });
   const [isTransactionsUpdated, setIsTransactionsUpdated] = useState(false);
-  const [transactionDates, setTransactionDates] = useState([]);
+  const [dashboardData, setDashboardData] = useState({
+    transactions: [],
+    categoryPercentages: {},
+    monthlyExpenses: 0,
+    transactionDates: [],
+  });
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -20,16 +22,16 @@ const OfficialDashboard = () => {
         try {
           const { data: getTransactions } = await fetchTransactions(user.id, date.type, date.period);
           const { transactions: fetchedTransactions } = getTransactions;
-          setTransactions(fetchedTransactions);
-
           const { data: getCategoryPercentages } = await fetchCategoryPercentages(user.id, fetchedTransactions);
-          setCategoryPercentages(getCategoryPercentages);
-
           const totalAmount = Object.values(getCategoryPercentages).reduce((acc, curr) => acc + curr, 0).toFixed(2);
-          setMonthlyExpenses(totalAmount);
-
           const { data: dates } = await fetchTransactionDates(user.id);
-          setTransactionDates(dates);
+          
+          setDashboardData({
+            transactions: fetchedTransactions,
+            categoryPercentages: getCategoryPercentages,
+            monthlyExpenses: totalAmount,
+            transactionDates: dates,
+          });
         } catch (error) {
           console.error('Error fetching transactions:', error);
         }
@@ -80,15 +82,15 @@ const OfficialDashboard = () => {
   return (
     <>
       <DashboardUI
-        transactions={transactions}
-        categoryPercentages={categoryPercentages}
-        amountSpent={monthlyExpenses}
+        transactions={dashboardData?.transactions}
+        categoryPercentages={dashboardData?.categoryPercentages}
+        amountSpent={dashboardData?.monthlyExpenses}
         date={date}
         setDate={setDate}
         handleSaveAction={updateUserTransaction}
         handleDeleteAction={deleteUserTransaction}
         handleAddAction={addUserTransaction}
-        transactionDates={transactionDates}
+        transactionDates={dashboardData?.transactionDates}
       />
     </>
   )

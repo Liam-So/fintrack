@@ -4,11 +4,42 @@ import re
 from typing import List, Optional, Any
 import json
 from retry import retry
+import time
+
+import openai
+from pydantic import BaseModel
+from enum import Enum
+
+class Category(str, Enum):
+  GROCERIES = "🛒 Groceries"
+  DINING = "🍽️ Dining Out"
+  DRINKS = "🍷 Drinks"
+  RENT = "🏠 Rent"
+  ENTERTAINMENT = "🎭 Entertainment"
+  UTILITIES = "💡 Utilities"
+  SHOPPING = "🛍️ Shopping"
+  TRANSPORTATION = "🚗 Transportation"
+  TRAVEL = "✈️ Travel"
+  HEALTH = "💪🏼 Health"
+  SUBSCRIPTIONS = "📦 Subscriptions"
+
+  def __str__(self):
+    return self.value
+
+class CategorizedTransaction(BaseModel):
+  description: str
+  category: Category
+
+class CategorizedTransactions(BaseModel):
+  transactions: list[CategorizedTransaction]
 
 OLLAMA_API_URL = "http://localhost:11434/api/generate"  # Adjust this URL if your Ollama server is running elsewhere
-
+client = openai.OpenAI()
 # LLM Misinterpretation
 LLM_MISS = "UNKNOWN"
+
+OPEN_AI_MODEL = 'gpt-4o-mini'
+OLLAMA_MODEL = 'llama3.1'
 
 class PromptRequest(BaseModel):
     prompt: str = Field(..., min_length=1, description="The prompt to send to the Ollama model")
@@ -16,17 +47,72 @@ class PromptRequest(BaseModel):
 
 @retry(ValueError, tries=3)
 def generate_response(prompt_request: PromptRequest) -> List[dict]:
-    raw_response = send_to_ollama(prompt_request.prompt, prompt_request.model)
-    return json.loads(raw_response)
-    # # print(raw_response)
-    # return parse_json_response(raw_response)
+    if prompt_request.model == OLLAMA_MODEL:
+      raw_response = send_to_ollama(prompt_request.prompt, prompt_request.model)
+      print(f'Response from Ollama: {raw_response}')
+      return json.loads(raw_response)
+    elif prompt_request.model == OPEN_AI_MODEL:
+       response = send_to_openai(prompt_request.prompt, prompt_request.model)
+       return response
+    
+    return []
 
-def send_to_ollama(prompt, model="llama2"):
+
+def send_to_openai(prompt, model=OPEN_AI_MODEL):
+   try:
+      start = time.time()
+      print(f'Starting inference ✨')
+
+      completion = client.beta.chat.completions.parse(
+          model=model,
+          messages=[
+              {"role": "system", "content": "You are the most precise and accurate classifier. Your task is to categorize the following transactions into the correct categories."},
+              {
+                  "role": "user",
+                  "content": prompt
+              }
+          ],
+          response_format=CategorizedTransactions,
+          max_tokens=1000
+      )
+      categorization_task = completion.choices[0].message
+      end = time.time()
+
+      print(f"⏱️ Elapsed time: {end - start} seconds")
+
+      if categorization_task.parsed:
+        transactions = categorization_task.parsed.transactions
+
+        for transaction in transactions:
+          print(f'{transaction.description}: {transaction.category}')
+
+      elif categorization_task.refusal:
+        print(categorization_task.refusal)
+      
+      return transactions
+   except Exception as e:
+      # Handle edge cases
+      if type(e) == openai.LengthFinishReasonError:
+          # Retry with a higher max tokens
+          print("Too many tokens: ", e)
+          pass
+      else:
+          # Handle other exceptions
+          print(e)
+          pass
+
+
+def send_to_ollama(prompt, model="llama3.1"):
   payload = {
     "model": model,
     "prompt": prompt,
     "stream": False,
-    "format": "json"
+    "format": "json",
+    "options": {
+      "temperature": 0.1,
+      "top_p": 0.9,
+      "top_k": 10
+    }
   }
 
   try:
@@ -75,60 +161,3 @@ def clean_response(parsed_items: List[dict], categories: List[str], descriptions
       chunk_of_transactions[index].category = parsed_items[index]
 
    return chunk_of_transactions
-
-def get_transaction_prompt(categories: list, descriptions: str) -> str:
-#     return f"""
-# Task: Category Classification
-# You are a classification system. Your task is to assign each item in the provided list to the most appropriate category from the given set of categories.
-
-# Important Rules:
-# Use ONLY the categories provided in the list below.
-# Do not create or use any categories not in this list.
-# If an item doesn't perfectly fit any category, choose the closest match.
-# If there is a duplicate description, give it the same category as the other.
-# Provide your answer as a list of categories, maintaining the same order as the input items.
-
-# Categories:
-# {categories}
-# Input Items:
-# {descriptions}
-# Example:
-# Input Items: ["Apple", "Toyota", "Facebook"]
-# Categories: ["Food", "Technology", "Automotive"]
-# Output: ["Food", "Automotive", "Technology"]
-
-# Your Task:
-# Classify the Input Items using only the provided Categories. Your output should be a list of categories in the same order as the input items. Nothing else.
-# Make it JSON readable and do not explain.
-#     """
-    return f"""
-You are an AI assistant designed to categorize financial transactions with extreme precision. Your task is to classify each description into EXACTLY ONE of the provided categories. You must ONLY use categories from the given list. No exceptions.
-Categories
-{categories}
-
-Critical Instructions:
-Do NOT create or select categories outside this list.
-You MUST ONLY use categories from the above list. Do not create new categories or use any category not listed.
-Assign EXACTLY ONE category to each description.
-If no category seems to fit perfectly, choose the closest match from the provided options.
-After categorizing, verify that each assigned category is in the original list.
-
-Descriptions to Categorize
-{descriptions}
-
-Output Format:
-Output your response as a list of categories, one for each description, in the same order as the input descriptions.
-It should be JSON readable.
-For example:
-["Category1", "Category2", "Category3", ...]
-
-Verification Step
-After generating your response, perform these checks:
-
-Ensure every "category" value is EXACTLY as it appears in the Categories list above.
-If any category is not in the list, replace it with the closest match from the provided categories.
-Confirm that the number of objects in your output matches the number of input descriptions. Even if there are duplicate descriptions.
-No need to explain reasoning, just return the list of categories.
-
-Remember: It is CRITICAL that you ONLY use categories from the provided list. Your task is not complete until you've verified this.
-    """

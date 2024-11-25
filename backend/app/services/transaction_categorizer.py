@@ -5,6 +5,9 @@ from dataclasses import dataclass
 
 import logging
 
+OPEN_AI_MODEL = 'gpt-4o-mini'
+OLLAMA_MODEL = 'llama3.1'
+
 # TODO: Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -46,26 +49,45 @@ class TransactionCategorizer:
     def _process_transactions(self, transactions: List[UserTransaction], 
                             parsed_items: Dict[str, str]) -> CategorizationResult:
         '''Process transactions and separate successful and failed ones'''
-        successful = []
-        failed = []
-        failure_reasons = {}
+        if self.model == OLLAMA_MODEL:
+          successful = []
+          failed = []
+          failure_reasons = {}
 
-        for item in parsed_items:
-            idx = int(item) - 1
-            row_data = transactions[idx]
-            new_category = parsed_items[item]
+          for item in parsed_items:
+              idx = int(item) - 1
+              row_data = transactions[idx]
+              new_category = parsed_items[item]
 
-            if row_data.category_id == -1 and new_category in self.categories:
-                print(f'✨: {row_data.description} -> {new_category}')
-                row_data.category_id = self.categories[new_category]
-                successful.append(row_data)
-            else:
-                if row_data.category_id == -1:
-                    print(f'❌: {row_data.description} -> {new_category}')
-                    failed.append(row_data)
-                    failure_reasons[idx] = f"Invalid category: {new_category}"
+              if row_data.category_id == -1 and new_category in self.categories:
+                  print(f'✨: {row_data.description} -> {new_category}')
+                  row_data.category_id = self.categories[new_category]
+                  successful.append(row_data)
+              else:
+                  if row_data.category_id == -1:
+                      print(f'❌: {row_data.description} -> {new_category}')
+                      failed.append(row_data)
+                      failure_reasons[idx] = f"Invalid category: {new_category}"
 
-        return CategorizationResult(successful, failed, failure_reasons)
+          return CategorizationResult(successful, failed, failure_reasons)
+
+        elif self.model == OPEN_AI_MODEL:
+           successful = []
+           failed = []
+           failure_reasons = {}
+
+           for index, transaction in enumerate(transactions):
+              row_data = transactions[index]
+              print(row_data)
+              new_category = parsed_items[index].category
+              print(f'New category: {new_category}')
+              if new_category in self.categories:
+                 print(f'✨: {row_data.description} -> {new_category}')
+                 row_data.category_id = self.categories[new_category]
+                 successful.append(row_data)
+
+           return CategorizationResult(successful, failed, failure_reasons)
+
 
     def categorize_chunk(self, chunk: List[UserTransaction], 
                         retry_count: int = 0) -> CategorizationResult:
@@ -74,7 +96,11 @@ class TransactionCategorizer:
             descriptions = self._create_descriptions(chunk)
             category_list = list(self.categories.keys())
             
-            prompt = self.create_prompt(category_list, descriptions)
+            if self.model == OLLAMA_MODEL:
+              prompt = self.create_prompt(category_list, descriptions)
+            elif self.model == OPEN_AI_MODEL:
+              prompt = self.create_open_ai_prompt(category_list, descriptions)
+
             prompt_request = PromptRequest(prompt=prompt, model=self.model)
             
             parsed_items = self._get_llm_response(prompt_request)
@@ -88,38 +114,72 @@ class TransactionCategorizer:
             logger.error(f"Categorization failed: {str(e)}")
             return CategorizationResult([], chunk, {i: str(e) for i in range(len(chunk))})
 
+
     def categorize_all(self, transactions_df: List[List[UserTransaction]]) -> None:
         """Categorize all transactions with smart retry logic."""
-        failed_transactions = []
-        retry_count = 0
+        if self.model == OLLAMA_MODEL:
+          failed_transactions = []
+          retry_count = 0
 
-        # First pass through all chunks
-        for i, chunk in enumerate(transactions_df):
-            logger.info(f'Processing chunk {i}')
-            result = self.categorize_chunk(chunk)
-            failed_transactions.extend(result.failed)
+          # First pass through all chunks
+          for i, chunk in enumerate(transactions_df):
+              logger.info(f'Processing chunk {i}')
+              result = self.categorize_chunk(chunk)
+              failed_transactions.extend(result.failed)
 
-        # Retry logic for failed transactions
-        while failed_transactions and retry_count < self.max_retries:
-            retry_count += 1
-            print(f'Retry attempt {retry_count} for {len(failed_transactions)} failed transactions')
-            print(failed_transactions)
-            
-            # Process failed transactions in a new chunk
-            retry_result = self.categorize_chunk(failed_transactions, retry_count)
-            
-            # Update failed_transactions list with only the new failures
-            failed_transactions = retry_result.failed
+          # Retry logic for failed transactions
+          while failed_transactions and retry_count < self.max_retries:
+              retry_count += 1
+              print(f'Retry attempt {retry_count} for {len(failed_transactions)} failed transactions')
+              print(failed_transactions)
+              
+              # Process failed transactions in a new chunk
+              retry_result = self.categorize_chunk(failed_transactions, retry_count)
+              
+              # Update failed_transactions list with only the new failures
+              failed_transactions = retry_result.failed
 
-            if not failed_transactions:
-                print('All transactions successfully categorized after retry')
-                break
+              if not failed_transactions:
+                  print('All transactions successfully categorized after retry')
+                  break
 
-        if failed_transactions:
-            print(f"Failed to categorize {len(failed_transactions)} transactions "
-                         f"after {self.max_retries} retries")
-            for tx in failed_transactions:
-                print(f"Failed transaction: {tx.description}")
+          if failed_transactions:
+              print(f"Failed to categorize {len(failed_transactions)} transactions "
+                          f"after {self.max_retries} retries")
+              for tx in failed_transactions:
+                  print(f"Failed transaction: {tx.description}")
+
+        elif self.model == OPEN_AI_MODEL:
+            for i, chunk in enumerate(transactions_df):
+                result = self.categorize_chunk(chunk)
+
+
+    def create_open_ai_prompt(self, categories: list[str], descriptions: list[str]):
+        ''''''
+        enumerated_categories = ""
+        enumerated_descriptions = ""
+
+        for index, description in enumerate(descriptions):
+          enumerated_descriptions += f"{index+1}. {description}\n"
+
+        for index, category in enumerate(categories):
+          enumerated_categories += f"{index+1}. {category}\n"
+
+        return f'''Classify the following transactions into the most suitable categories:
+      Categories:
+      {enumerated_categories}
+
+      Transactions:
+      {enumerated_descriptions}
+
+      ## IMPORTANT ##
+      ONLY USE THE CATEGORIES I PROVIDED. DO NOT ADD OR REMOVE CATEGORIES.
+
+      I have provided {len(descriptions)} transactions.
+      You MUST return {len(descriptions)} categories.
+
+      Before returning, double check that the category you selected is in the list of categories provided above.''' 
+
 
     def create_prompt(self, categories: list[str], descriptions: list[str]):
       enumerated_descriptions = ""
@@ -156,5 +216,5 @@ class TransactionCategorizer:
   The value of the JSON should be the category name nothing else.
 
   Before returning, double check that the category you selected is in the list of categories provided above.
-  If not, retry,
+  If not, retry.
   '''

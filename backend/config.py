@@ -52,7 +52,7 @@ class Config:
 
 class DevelopmentConfig(Config):
   DEBUG = True
-  ENV = 'development'
+  ENV = 'dev'
 
 class DemoConfig(Config):
   DEBUG = True

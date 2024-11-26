@@ -14,13 +14,8 @@ from http import HTTPStatus
 from werkzeug.exceptions import BadRequest
 from app.services.transaction_categorizer import TransactionCategorizer
 
-
 extraction_bp = Blueprint('extraction', __name__)
-
 MAX_RETRIES = 3
-OPEN_AI_MODEL = 'gpt-4o-mini'
-OLLAMA_MODEL = 'llama3.1'
-
 
 @extraction_bp.route('/<id>', methods=['POST'])
 def extract_csv(id):
@@ -33,6 +28,7 @@ def extract_csv(id):
     temp_file_path, df = CSVExtractorService.load_csv_file(request.files['file'])
     print(f"📁 CSV file loaded successfully: {temp_file_path}")
 
+    # TODO refactor isTrial to use os env
     is_trial = 'temp' in id and 'json' in request.form
 
     if is_trial:
@@ -56,8 +52,7 @@ def extract_csv(id):
 
     print(f"📊 Categorizing {len(new_transactions)} transactions...")
 
-    model = OPEN_AI_MODEL if is_trial else OLLAMA_MODEL
-    categorizer = TransactionCategorizer(categories, model, MAX_RETRIES)
+    categorizer = TransactionCategorizer(categories=categories, max_retries=MAX_RETRIES)
     categorizer.categorize_all(list_df)
 
     return jsonify({"transactions": [t.__dict__ for t in new_transactions]}), 200

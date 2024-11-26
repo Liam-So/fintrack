@@ -22,6 +22,12 @@ class Category(str, Enum):
   TRAVEL = "✈️ Travel"
   HEALTH = "💪🏼 Health"
   SUBSCRIPTIONS = "📦 Subscriptions"
+  PETCARE = "🐾 Pet Care"
+  EDUCATION = "📚 Education"
+  CLOTHING = "👗 Clothing"
+  PHONE = "📱 Cell Phone"
+  INSURANCE = "💊 Insurance"
+  REPAIRS = "🔧 Repairs"
 
   def __str__(self):
     return self.value
@@ -56,7 +62,6 @@ def generate_response(prompt_request: PromptRequest) -> List[dict]:
        return response
     
     return []
-
 
 def send_to_openai(prompt, model=OPEN_AI_MODEL):
    try:

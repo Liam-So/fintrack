@@ -38,16 +38,20 @@ export const UserProvider = ({ children }) => {
       
       const categories = JSON.parse(window.sessionStorage.getItem("categories"));
       const income = window.sessionStorage.getItem("income");
-      
-      const newCategoriesObj = categories.reduce((acc, item) => {
-        acc[item.id] = {
-          category_id: item.id,
-          name: item.name,
-          essential: item.essential
-          // color: item.color
-        };
-          return acc;
-      }, {});
+
+      let newCategoriesObj = {};
+
+      if (categories) {
+        newCategoriesObj = categories.reduce((acc, item) => {
+          acc[item.id] = {
+            category_id: item.id,
+            name: item.name,
+            essential: item.essential
+            // color: item.color
+          };
+            return acc;
+        }, {});
+      }
 
       setAdditionalUserInfo({
         id: window.sessionStorage.getItem("session"),

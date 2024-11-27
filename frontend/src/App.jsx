@@ -4,16 +4,13 @@ import {
   createBrowserRouter,
   Navigate
 } from "react-router-dom";
+import { useAuth0 } from "@auth0/auth0-react";
 import LandingPage from "./pages/LandingPage";
 import TrialDashboard from "./pages/TrialDashboard";
 import OnboardingFlow from "./pages/OnboardingFlow";
-import { useAuth0 } from "@auth0/auth0-react";
 import Profile from "./pages/Profile";
 import OfficialDashboard from "./pages/OfficialDashboard";
-import TrialFileUploaderPage from "./pages/TrialFileUploaderPage";
-import OfficialFileUploader from "./pages/OfficialFileUploader";
 import UploadPage from "./pages/UploadPage";
-
 
 const FunLoadingPage = () => {
   return (
@@ -29,30 +26,27 @@ const FunLoadingPage = () => {
 
 const Callback = () => {
   const { isAuthenticated, isLoading } = useAuth0();
-
   if (isLoading) {
     return <FunLoadingPage />;
   }
   return isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/" />;
 };
 
-// TODO: protected trial routes?
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth0();
-
   if (isLoading) {
     return <FunLoadingPage />;
   }
-
   return isAuthenticated ? children : <Navigate to="/" />;
 };
 
 const ProtectedTrialRoute = ({ children }) => {
   const sessionId = window.sessionStorage.getItem("session");
   return sessionId ? children : <Navigate to="/" />;
-}
+};
 
-const router = createBrowserRouter([
+// Official routes (used when VITE_DEMO_MODE is false)
+const officialRoutes = [
   {
     path: "/",
     element: <LandingPage />,
@@ -61,11 +55,6 @@ const router = createBrowserRouter([
     path: "/callback",
     element: <Callback />,
   },
-  {
-    path: "*",
-    element: <p>Not Found 🤔</p>,
-  },
-  // Can we refactor protected routes?
   {
     path: "/dashboard",
     element: <ProtectedRoute><OfficialDashboard /></ProtectedRoute>
@@ -83,18 +72,39 @@ const router = createBrowserRouter([
     element: <ProtectedRoute><UploadPage /></ProtectedRoute>
   },
   {
-    path: "/trial/upload",
+    path: "*",
+    element: <p>Not Found 🤔</p>,
+  },
+];
+
+// Demo routes (used when VITE_DEMO_MODE is true)
+const demoRoutes = [
+  {
+    path: "/",
+    element: <LandingPage />,  // Sharing landing page between both modes
+  },
+  {
+    path: "/upload",
     element: <ProtectedTrialRoute><UploadPage isTrial /></ProtectedTrialRoute>,
   },
   {
-    path: "/trial/onboard",
-    element:  <ProtectedTrialRoute><OnboardingFlow isTrial /></ProtectedTrialRoute>,
+    path: "/onboard",
+    element: <ProtectedTrialRoute><OnboardingFlow isTrial /></ProtectedTrialRoute>,
   },
   {
-    path: "/trial/dashboard",
+    path: "/dashboard",
     element: <ProtectedTrialRoute><TrialDashboard /></ProtectedTrialRoute>,
+  },
+  {
+    path: "*",
+    element: <p>Not Found 🤔</p>,
   }
-]);
+];
+
+// Create router based on VITE_DEMO_MODE environment variable
+const router = createBrowserRouter(
+  import.meta.env.VITE_DEMO_MODE === 'true' ? demoRoutes : officialRoutes
+);
 
 export default function App() {
   return (

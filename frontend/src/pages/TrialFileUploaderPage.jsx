@@ -19,7 +19,7 @@ const TrialFileUploaderPage = () => {
     } else {
       window.sessionStorage.setItem("transactions", JSON.stringify(transactions));
     }
-    navigate(`/trial/dashboard`);
+    navigate(`/dashboard`);
   }
 
   const handleDelete = (id) => {

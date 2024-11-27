@@ -5,8 +5,8 @@ import { useUser } from '../context/UserContext';
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const { logout, isAuthenticated } = useUser();
 
-  const dashboardUrl = isAuthenticated ? '/dashboard' : '/trial/dashboard';
-  const uploadUrl = isAuthenticated ? '/upload' : '/trial/upload';
+  const dashboardUrl = '/dashboard';
+  const uploadUrl = '/upload';
   
   const handleLogout = () => {
     sessionStorage.clear();

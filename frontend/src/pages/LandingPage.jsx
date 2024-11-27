@@ -14,7 +14,7 @@ const LandingPage = () => {
       if (response.data.session_id) {
         window.sessionStorage.setItem('session', response.data.session_id);
         setTrialSession(response.data.session_id);
-        navigate(`/trial/onboard`);
+        navigate(`/onboard`);
       }
     }).catch((error) => {
       console.error('Error generating temp session:', error);

@@ -1,0 +1,1 @@
+export const GROUP_BY_MONTHS = [30, 90, 180, 365];

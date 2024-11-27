@@ -5,7 +5,15 @@ from decimal import Decimal
 
 class Transaction(BaseModel):
     id: str
-    date: str # TODO: Change to date
+    date: date
     amount: Decimal = Field(..., decimal_places=2)
     description: str
     category: str
+
+
+class UserTransaction(BaseModel):
+    id: str
+    date: date
+    amount: Decimal = Field(..., decimal_places=2)
+    description: str
+    category_id: int

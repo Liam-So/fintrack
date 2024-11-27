@@ -1,40 +1,36 @@
 import React, { useState } from 'react'
 import MonthlyIncomeInput from '../components/MonthlyIncomeInput';
-import CategorySelection from '../components/CategorySelection';
-import { useNavigate, useParams } from 'react-router-dom';
+import CategorySelection from '../pages/CategorySelection';
+import { useUser } from '../context/UserContext';
+import TrialFileUploaderPage from './TrialFileUploaderPage';
+import OfficialFileUploader from './OfficialFileUploader';
 
 const OnboardingFlow = ({ isTrial }) => {
   const [step, setStep] = useState('income');
-  const [income, setIncome] = useState(null);
-  const [categories, setCategories] = useState([]);
-
-  const navigate = useNavigate();
-  const { id } = useParams();
+  const { updateUserCategories, updateUserIncome } = useUser();
 
   const handleNext = (income) => {
-    setIncome(income);
+    updateUserIncome(income);
     setStep('categories');
   }
 
-  const handleComplete = (selectedCategories) => {
-    setCategories(selectedCategories);
-
-    // TODO: if not trial flow, send to backend
-    if (isTrial) {
-      navigate(`/trial/upload/${id}`, {
-        state: {
-          selectedCategories,
-          income
-        }
-      })
-    }
+  const handleComplete = async (selectedCategories) => {
+    updateUserCategories(selectedCategories);
+    setStep('upload')
   }
 
   return (
-    <>
+    <div className='bg-custom'>
       {step === 'income' && <MonthlyIncomeInput onNext={handleNext} />}
-      {step === 'categories' && <CategorySelection onComplete={handleComplete} />}
-    </>
+      {step === 'categories' && <CategorySelection isTrial={isTrial} onSend={handleComplete} />}
+      {step === 'upload' && (
+        isTrial ? (
+          <TrialFileUploaderPage />
+        ) : (
+          <OfficialFileUploader />
+        )
+      )}
+    </div >
   )
 }
 

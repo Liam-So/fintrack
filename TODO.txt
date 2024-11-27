@@ -1,7 +1,8 @@
 TODO:
-[] Retry mechanism
-[] Table edits
-[] Send categories
+[] SecureFileUpload- make it dynamic for trials. If not a trial, run a GET for categories to see if they exist.
+[] Store basic user info in a context for easy access
+[] BUG with adding new transaction with incorrect categories
+[] Refactor dashboard to remove prop drilling
 [] React count-up for values
 [] Chart visualization via Chart.js
 

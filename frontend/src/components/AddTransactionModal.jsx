@@ -6,7 +6,7 @@ const AddTransactionModal = ({ isOpen, onClose, onAdd, categories }) => {
     date: '',
     description: '',
     amount: '',
-    category: categories[0]
+    category_id: categories && Object.keys(categories)[0]
   });
 
   const handleChange = (e) => {
@@ -16,10 +16,12 @@ const AddTransactionModal = ({ isOpen, onClose, onAdd, categories }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
     onAdd({
       ...transaction,
       amount: parseFloat(transaction.amount),
-      id: Date.now() // Simple way to generate a unique id
+      id: Date.now(), // Simple way to generate a unique id
+      category_id: transaction.category_id
     });
     onClose();
   };
@@ -84,15 +86,15 @@ const AddTransactionModal = ({ isOpen, onClose, onAdd, categories }) => {
               Category
             </label>
             <select
-              id="category"
-              name="category"
-              value={transaction.category}
+              id="category_id"
+              name="category_id"
+              value={transaction.category_id}
               onChange={handleChange}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             >
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
+              {Object.keys(categories).map((category_id) => (
+                <option key={category_id} value={category_id}>
+                  {categories[category_id]['name']}
                 </option>
               ))}
             </select>

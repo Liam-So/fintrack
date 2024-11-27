@@ -1,26 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react'
 import { Upload, Lock, CheckCircle } from 'lucide-react';
-import TransactionReview from '../components/TransactionReview';
 import { api } from '../axios';
-import { useParams, useLocation } from 'react-router-dom';
+import { useUser } from '../context/UserContext';
 
-const SecureFileUpload = ({ isTrial }) => {
-  const [publicKey, setPublicKey] = useState('');
+const FileUploader = ({ categories, setTransactions }) => {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
-  const [transactions, setTransactions] = useState([]);
-
-  const location = useLocation();
-
-  // Access the state
-  const { state } = location;
-
-  useEffect(() => {
-    api.get('/get-public-key')
-      .then(response => setPublicKey(response.data))
-      .catch(error => console.error('Error fetching public key:', error));
-  }, []);
+  const { user } = useUser();
+  const { id } = user;
 
   const encryptAndUploadFile = async () => {
     if (!file) {
@@ -28,19 +16,28 @@ const SecureFileUpload = ({ isTrial }) => {
     }
 
     const formData = new FormData();
-    formData.append('pdf', file);
+    formData.append('file', file);
 
-    const jsonMetadata = { categories: state.selectedCategories };
+    const jsonMetadata = { categories: categories };
     formData.append('json', JSON.stringify(jsonMetadata));
 
     try {
       setUploading(true);
-      const response = await api.post("/extract", formData, {
+
+      const { data } = await api.post(`/extraction/${id}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
-      setTransactions(response.data.transactions)
+      
+      // Decrypt the transactions
+      data.transactions.map(transaction => {
+        let newDate = new Date(transaction.date);
+        let formattedDate = newDate.toISOString().split('T')[0];
+        transaction.date = formattedDate;
+      })
+
+      setTransactions(data.transactions)
       setUploadComplete(true)
     } catch (error) {
       console.error(error);
@@ -56,16 +53,7 @@ const SecureFileUpload = ({ isTrial }) => {
   };
 
   return (
-    <>
-    {(transactions.length > 0 && uploadComplete) ? (
-     <TransactionReview 
-        transactions={transactions}
-        categories={state.selectedCategories} 
-        isTrialFlow={isTrial}
-        income={state.income}
-     /> 
-    ): (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center px-4">
         <div className="max-w-md w-full space-y-8">
           <div>
             <h2 className="mt-6 text-center text-3xl font-semibold text-gray-900">
@@ -143,9 +131,7 @@ const SecureFileUpload = ({ isTrial }) => {
           </div>
         </div>
       </div>
-    )}
-    </>
-  );
-};
+  )
+}
 
-export default SecureFileUpload;
+export default FileUploader

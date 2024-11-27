@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Plus, ArrowRight, ArrowLeft } from 'lucide-react';
+import { X, Plus, ArrowRight, ArrowLeft, Search } from 'lucide-react';
 
 const defaultCategories = [
   { "id": 1, "name": "🛒 Groceries", essential: true },
@@ -20,13 +20,16 @@ const defaultCategories = [
   { "id": 16, "name": "📦 Subscriptions", essential: false }
 ];
 
-
-
-const CategorySelection = ({ availableCategories = defaultCategories, onSend }) => {
+const CategorySelection = ({ availableCategories = defaultCategories, onSend, isTrial }) => {
   const [categories, setCategories] = useState(availableCategories);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [isEssential, setIsEssential] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredCategories = categories.filter(category => 
+    category.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const toggleCategory = (category) => {
     setSelectedCategories((prev) =>
@@ -47,6 +50,7 @@ const CategorySelection = ({ availableCategories = defaultCategories, onSend }) 
   const addCustomCategory = () => {
     if (newCategoryName.trim()) {
       const newCategory = {
+        id: Math.max(...categories.map(c => c.id)) + 1,
         name: newCategoryName.trim(),
         essential: isEssential,
       };
@@ -60,127 +64,145 @@ const CategorySelection = ({ availableCategories = defaultCategories, onSend }) 
     setSelectedCategories((prev) =>
       prev.filter((c) => c.id !== category.id)
     );
-  }
-
-  const handleSend = () => {
-    if (onSend) {
-      onSend(selectedCategories);
-    } else {
-      console.log('Selected categories:', selectedCategories);
-    }
   };
 
+  const renderCategoryList = (isEssential) => {
+    const filteredList = filteredCategories.filter((category) => category.essential === isEssential);
+    
+    if (filteredList.length === 0) {
+      return (
+        <div className="bg-gray-50 p-4 rounded-lg text-gray-500 text-center">
+          No {isEssential ? 'essential' : 'non-essential'} categories found
+        </div>
+      );
+    }
 
-  const renderCategoryList = (isEssential) => (
-    <div className="space-y-3">
-      {categories
-        .filter((category) => category.essential === isEssential)
-        .map((category) => (
-          <div key={category.id} className="flex items-center space-x-2">
+    return (
+      <div className="space-y-2">
+        {filteredList.map((category) => (
+          <div key={category.id} className="flex items-center gap-2">
             <button
-              onClick={() => toggleCategory(category)}
-              className={`flex-grow px-4 py-2 text-left rounded ${
+              className={`flex-grow text-left px-4 py-2 rounded-lg transition-all duration-200 ${
                 selectedCategories.some((c) => c.id === category.id)
                   ? isEssential
-                    ? 'bg-green-500 text-white'
-                    : 'bg-yellow-500 text-white'
+                    ? 'bg-green-500 hover:bg-green-600 text-white'
+                    : 'bg-yellow-500 hover:bg-yellow-600 text-white'
                   : isEssential
-                  ? 'bg-transparent outline outline-1 outline-stone-200 text-green-700 hover:bg-green-100'
-                  : 'bg-transparent outline outline-1 outline-stone-200 text-yellow-700 hover:bg-yellow-100'
-              } transition-colors duration-200`}
+                  ? 'border border-gray-200 hover:bg-green-50 text-green-700'
+                  : 'border border-gray-200 hover:bg-yellow-50 text-yellow-700'
+              }`}
+              onClick={() => toggleCategory(category)}
             >
               {category.name}
             </button>
             <button
               onClick={() => moveCategory(category, !isEssential)}
-              className="p-2 rounded bg-gray-200 hover:bg-gray-300 transition-colors duration-200"
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
             >
-              {isEssential ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
+              {isEssential ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
             </button>
             <button
               onClick={() => deleteCategory(category)}
-              className="p-2 rounded bg-gray-200 hover:bg-red-100 text-gray-600 hover:text-red-600 transition-colors duration-200"
+              className="p-2 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors duration-200"
             >
-              <X size={16} />
+              <X className="w-4 h-4" />
             </button>
           </div>
         ))}
-    </div>
-  );
+      </div>
+    );
+  };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 min-h-screen">
-      <h1 className="text-3xl font-semibold mb-6 text-gray-800">Categorize Your Transactions</h1>
-      
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold mb-2 text-gray-700">Selected Categories:</h2>
-        <div className="flex flex-wrap gap-2">
-          {selectedCategories.map((category) => (
-            <span
-              key={category.id}
-              className={`px-3 py-1 rounded-full text-sm font-medium flex items-center ${
-                category.essential ? 'bg-green-200 text-green-800' : 'bg-yellow-200 text-yellow-800'
-              }`}
-            >
-              {category.name}
-              <button
-                onClick={() => toggleCategory(category)}
-                className="ml-2 focus:outline-none"
-              >
-                <X size={16} />
-              </button>
-            </span>
-          ))}
-        </div>
-      </div>
-
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold mb-2 text-gray-700">Add Custom Category:</h2>
-        <div className="flex items-center space-x-2">
+    <div className="max-w-5xl mx-auto p-6 space-y-8 min-h-screen">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold text-gray-700">Select Your Categories</h1>
+        <div className="relative w-64">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input
             type="text"
-            value={newCategoryName}
-            onChange={(e) => setNewCategoryName(e.target.value)}
-            placeholder="Category name"
-            className="flex-grow px-4 py-2 rounded border border-stone-300 bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Search categories..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
-          <select
-            value={isEssential}
-            onChange={(e) => setIsEssential(e.target.value === 'true')}
-            className="px-4 py-2 rounded border bg-transparent border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="true">Essential</option>
-            <option value="false">Non-Essential</option>
-          </select>
-          <button
-            onClick={addCustomCategory}
-            className="p-2 rounded bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-200"
-          >
-            <Plus size={24} />
-          </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <div>
-          <h2 className="text-xl font-semibold mb-2 text-green-700">Essential Categories</h2>
+      <div className="rounded-xl shadow-sm border border-gray-200 p-6">
+        <h2 className="text-lg font-semibold mb-4">Selected Categories</h2>
+        <div className="flex flex-wrap gap-2">
+          {selectedCategories.length === 0 ? (
+            <p className="text-gray-500">No categories selected</p>
+          ) : (
+            selectedCategories.map((category) => (
+              <span
+                key={category.id}
+                onClick={() => toggleCategory(category)}
+                className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium cursor-pointer transition-colors duration-200 ${
+                  category.essential 
+                    ? 'bg-green-100 text-green-800 hover:bg-green-200' 
+                    : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
+                }`}
+              >
+                {category.name}
+                <X className="ml-1.5 w-3 h-3" />
+              </span>
+            ))
+          )}
+        </div>
+      </div>
+
+      {!isTrial && (
+        <div className="rounded-xl shadow-sm border border-gray-200 p-6">
+          <h2 className="text-lg font-semibold mb-4">Add Custom Category</h2>
+          <div className="flex items-center gap-4">
+            <input
+              type="text"
+              value={newCategoryName}
+              onChange={(e) => setNewCategoryName(e.target.value)}
+              placeholder="Category name"
+              className="flex-grow px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <select
+              value={isEssential.toString()}
+              onChange={(e) => setIsEssential(e.target.value === 'true')}
+              className="px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="true">Essential</option>
+              <option value="false">Non-Essential</option>
+            </select>
+            <button
+              onClick={addCustomCategory}
+              className="p-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-200"
+            >
+              <Plus className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="rounded-xl shadow-sm border border-gray-200 p-6">
+          <h2 className="text-lg font-semibold mb-4 text-green-700">Essential Categories</h2>
           {renderCategoryList(true)}
         </div>
-        <div>
-          <h2 className="text-xl font-semibold mb-2 text-yellow-700">Non-Essential Categories</h2>
+
+        <div className="rounded-xl shadow-sm border border-gray-200 p-6">
+          <h2 className="text-lg font-semibold mb-4 text-yellow-700">Non-Essential Categories</h2>
           {renderCategoryList(false)}
         </div>
       </div>
 
       <div className="flex justify-center">
         <button
-          onClick={handleSend}
+          onClick={() => onSend(selectedCategories)}
           disabled={selectedCategories.length === 0}
-          className={`px-6 py-3 rounded-lg text-white font-medium ${
+          className={`px-8 py-3 rounded-2xl font-medium transition-colors duration-200 ${
             selectedCategories.length === 0
-              ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-blue-500 hover:bg-blue-600'
-          } transition-colors duration-200`}
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-gray-700 text-white hover:bg-gray-800'
+          }`}
         >
           Send Selected Categories
         </button>

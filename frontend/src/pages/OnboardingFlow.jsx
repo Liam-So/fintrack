@@ -23,10 +23,12 @@ const OnboardingFlow = ({ isTrial }) => {
     <div className='bg-custom'>
       {step === 'income' && <MonthlyIncomeInput onNext={handleNext} />}
       {step === 'categories' && <CategorySelection onSend={handleComplete} />}
-      {step === 'upload' &&  isTrial ? (
-        <TrialFileUploaderPage />
-      ) : (
-        <OfficialFileUploader />
+      {step === 'upload' && (
+        isTrial ? (
+          <TrialFileUploaderPage />
+        ) : (
+          <OfficialFileUploader />
+        )
       )}
     </div >
   )

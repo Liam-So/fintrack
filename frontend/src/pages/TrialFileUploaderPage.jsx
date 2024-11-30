@@ -52,6 +52,7 @@ const TrialFileUploaderPage = () => {
           <FileUploader 
             categories={categories}
             setTransactions={setTransactions}
+            isTrial={true}
           />
         )
       )}

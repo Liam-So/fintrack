@@ -127,18 +127,20 @@ const TransactionTable = ({ postedTransactions = [], handleSubmit, handleSaveAct
                 <td className="px-6 py-4 whitespace-nowrap border-b">
                   {editingId === transaction.id ? (
                     <select 
-                      value={transaction.category_id}
+                      value={categories[transaction.category_id] ? transaction.category_id : ''}
                       onChange={(e) => handleChange(transaction.id, 'category_id', e.target.value)}
                       className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       {Object.keys(categories).map((category_id) => (
                         <option key={category_id} value={category_id}>
-                          {categories[category_id]['name']}
+                          {categories[category_id]?.name || 'Unnamed Category'}
                         </option>
                       ))}
                     </select>
                   ) : (
-                    <CategoryBadge category={categories[transaction.category_id]['name']} />
+                    <CategoryBadge 
+                      category={categories[transaction.category_id]?.name || 'Uncategorized'} 
+                    />
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium border-b">

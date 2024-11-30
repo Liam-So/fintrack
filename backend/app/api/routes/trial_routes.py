@@ -1,7 +1,8 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, make_response
 from http import HTTPStatus
-import traceback
+from app.services.csv_generator import generate_csv
 
+import traceback
 import json
 import uuid
 
@@ -35,3 +36,14 @@ def trial_categories():
     return jsonify({"Error processing JSON": str(e)}), 400
 
   return categories, HTTPStatus.OK
+
+
+@trial_bp.route('/download', methods=['GET'])
+def download_csv():
+  sample = request.args.get('sample', None)
+
+  if sample and sample in ['TX', 'MTL']:
+    output = make_response(generate_csv(sample))
+    output.headers["Content-Disposition"] = "attachment; filename=export.csv"
+    output.headers["Content-type"] = "text/csv"
+    return output

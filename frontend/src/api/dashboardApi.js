@@ -17,6 +17,15 @@ export const fetchTransactions = async (id, type, period) => (
   })
 )
 
+export const generateCSV = (sample) => (
+  api.get(`/trial/download`, {
+    params: {
+      sample: sample
+    },
+    responseType: 'blob'
+  })
+)
+
 export const fetchCategoryPercentages = (id, transactions) => (
   api.post(`/user/categories/percentages/${id}`, {
     transactions: transactions

@@ -6,17 +6,17 @@ const DonutChart = ({ categoryPercentages }) => {
   const { user } = useUser();
   const { categories } = user;
 
-  function generateRandomColors(numColors) {
-    return Array.from({ length: numColors }, () => {
-      const hue = Math.floor(Math.random() * 360);
-      const saturation = Math.floor(Math.random() * 25) + 70; // 70-95%
-      const lightness = Math.floor(Math.random() * 15) + 75; // 75-90%
-      return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-    });
+  const generateRandomColor = () => {
+    const hue = Math.floor(Math.random() * 360);
+    const saturation = Math.floor(Math.random() * 25) + 70; // 70-95%
+    const lightness = Math.floor(Math.random() * 15) + 75; // 75-90%
+    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
   }
 
   const doughnutData = (categoryPercentages) => {
-    const colors = generateRandomColors(Object.entries(categoryPercentages).length);
+    const colors = Object.values(categories).map((category) => 
+      category.color || generateRandomColor()
+    );
   
     return {
       labels: Object.keys(categoryPercentages).map(

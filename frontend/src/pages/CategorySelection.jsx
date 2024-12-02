@@ -2,23 +2,24 @@ import React, { useState } from 'react';
 import { X, Plus, ArrowRight, ArrowLeft, Search } from 'lucide-react';
 
 const defaultCategories = [
-  { "id": 1, "name": "🛒 Groceries", essential: true },
-  { "id": 2, "name": "🏠 Rent", essential: true },
-  { "id": 3, "name": "💡 Utilities", essential: true },
-  { "id": 4, "name": "🍽️ Dining Out", essential: false },
-  { "id": 5, "name": "🎭 Entertainment", essential: false },
-  { "id": 6, "name": "🛍️ Shopping", essential: false },
-  { "id": 7, "name": "🚗 Transportation", essential: true },
-  { "id": 8, "name": "💪🏼 Health", essential: true },
-  { "id": 9, "name": "📚 Education", essential: true },
-  { "id": 10, "name": "✈️ Travel", essential: false },
-  { "id": 11, "name": "📱 Cell Phone", essential: true },
-  { "id": 12, "name": "💊 Insurance", essential: true },
-  { "id": 13, "name": "🐾 Pet Care", essential: false },
-  { "id": 14, "name": "🔧 Repairs", essential: true },
-  { "id": 15, "name": "👗 Clothing", essential: false },
-  { "id": 16, "name": "📦 Subscriptions", essential: false }
-];
+  { "id": 1, "name": "🛒 Groceries", "essential": true, "color": "hsl(221, 92%, 68%)" },
+  { "id": 2, "name": "🏠 Rent", "essential": true, "color": "hsl(234, 74%, 70%)" },
+  { "id": 3, "name": "💡 Utilities", "essential": true, "color": "hsl(238, 90%, 66%)" },
+  { "id": 4, "name": "🍽️ Dining Out", "essential": false, "color": "hsl(359, 84%, 75%)" },
+  { "id": 5, "name": "🎭 Entertainment", "essential": false, "color": "hsl(350, 76%, 70%)" },
+  { "id": 6, "name": "🛍️ Shopping", "essential": false, "color": "hsl(16, 82%, 76%)" },
+  { "id": 7, "name": "🚗 Transportation", "essential": true, "color": "hsl(39, 86%, 79%)" },
+  { "id": 8, "name": "💪🏼 Health", "essential": true, "color": "hsl(29, 85%, 68%)" },
+  { "id": 9, "name": "📚 Education", "essential": true, "color": "hsl(341, 75%, 70%)" },
+  { "id": 10, "name": "✈️ Travel", "essential": false, "color": "hsl(219, 71%, 64%)" },
+  { "id": 11, "name": "📱 Cell Phone", "essential": true, "color": "hsl(72, 93%, 77%)" },
+  { "id": 12, "name": "💊 Insurance", "essential": true, "color": "hsl(59, 85%, 73%)" },
+  { "id": 13, "name": "🐾 Pet Care", "essential": false, "color": "hsl(204, 70%, 79%)" },
+  { "id": 14, "name": "🔧 Repairs", "essential": true, "color": "hsl(25, 83%, 66%)" },
+  { "id": 15, "name": "👗 Clothing", "essential": false, "color": "hsl(260, 92%, 80%)" },
+  { "id": 16, "name": "📦 Subscriptions", "essential": false, "color": "hsl(43, 87%, 72%)" }
+]
+
 
 const CategorySelection = ({ availableCategories = defaultCategories, onSend, isTrial }) => {
   const [categories, setCategories] = useState(availableCategories);

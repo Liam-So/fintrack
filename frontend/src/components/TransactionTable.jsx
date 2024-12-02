@@ -112,13 +112,13 @@ const TransactionTable = ({ postedTransactions = [], handleSubmit, handleSaveAct
                     transaction.description
                   )}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap border-b">
+                <td className={`px-6 py-4 whitespace-nowrap border-b ${transaction.amount > 0 ? 'text-red-500' : 'text-green-500'}`}>
                   {editingId === transaction.id ? (
                     <input 
                       type="number" 
                       value={transaction.amount} 
                       onChange={(e) => handleChange(transaction.id, 'amount', parseFloat(e.target.value))}
-                      className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500}`}
                     />
                   ) : (
                     `${formatCurrency(transaction.amount)}`

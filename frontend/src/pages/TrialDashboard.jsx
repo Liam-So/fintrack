@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { postCalculateCategoryPercentages } from '../api/dashboardApi';
 import DashboardUI from '../components/DashboardUI';
 
-// TODO: refactor to optimize performance AND calculate percentages on the frontend (since it's a trial)
 const TrialDashboard = () => {
   const [shouldRefetchData, setShouldRefetchData] = useState(0);
 
@@ -114,12 +112,20 @@ const TrialDashboard = () => {
             newTransactions = filterTransactionsByRange(transactions, startDate, endDate);
           }
 
-          const { data: postCategoryPercentages } = await postCalculateCategoryPercentages(newTransactions, categories);
-          const totalAmount = Object.values(postCategoryPercentages).reduce((acc, curr) => acc + curr, 0).toFixed(2);
+          const calculatedSums = newTransactions.reduce((acc, curr) => {
+            const category = categories.filter(cat => cat.id === curr.category_id)[0].id || 'Unknown Category';
+            const amount = parseFloat(curr.amount) || 0;
+          
+            acc[category] = (acc[category] || 0) + amount;
+          
+            return acc;
+          }, {});
+          
+          const totalAmount = Object.values(calculatedSums).reduce((acc, curr) => acc + curr, 0).toFixed(2);
 
           setDashboardData({
             transactions: newTransactions,
-            categoryPercentages: postCategoryPercentages,
+            categoryPercentages: calculatedSums,
             amountSpent: totalAmount,
             transactionDates: Object.keys(transactionsGroupedByMonth),
           });

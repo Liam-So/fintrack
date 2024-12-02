@@ -45,13 +45,6 @@ export const deleteCategory = (id, category) => (
   })
 )
 
-export const postCalculateCategoryPercentages = (transactions, categories) => (
-  api.post("/trial/categories/percentages", {
-    transactions: transactions,
-    categories: categories
-  })
-);
-
 export const getUserCategories = (id) => (api.get(`/user/categories/${id}`));
 
 export const postNewUser = (user) => (

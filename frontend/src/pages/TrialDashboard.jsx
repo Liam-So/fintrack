@@ -98,29 +98,32 @@ const TrialDashboard = () => {
       try {
         const categories = JSON.parse(window.sessionStorage.getItem("categories"));
         const transactions = getStoredTransactions();
-        const transactionsGroupedByMonth = groupedTransactions();
 
-        let newTransactions;
+        if (transactions) {
+          const transactionsGroupedByMonth = groupedTransactions();
 
-        if (date.type === 'preset_period') {
-          newTransactions = filterTransactionsByPeriod(transactions, date.period);
-        } else if (date.type === 'month') {
-          newTransactions = transactionsGroupedByMonth[date.period];
-        } else {
-          // fetch custom date range
-          const [startDate, endDate] = date.period.split(",").map(d => new Date(d));
-          newTransactions = filterTransactionsByRange(transactions, startDate, endDate);
+          let newTransactions;
+
+          if (date.type === 'preset_period') {
+            newTransactions = filterTransactionsByPeriod(transactions, date.period);
+          } else if (date.type === 'month') {
+            newTransactions = transactionsGroupedByMonth[date.period];
+          } else {
+            // fetch custom date range
+            const [startDate, endDate] = date.period.split(",").map(d => new Date(d));
+            newTransactions = filterTransactionsByRange(transactions, startDate, endDate);
+          }
+
+          const { data: postCategoryPercentages } = await postCalculateCategoryPercentages(newTransactions, categories);
+          const totalAmount = Object.values(postCategoryPercentages).reduce((acc, curr) => acc + curr, 0).toFixed(2);
+
+          setDashboardData({
+            transactions: newTransactions,
+            categoryPercentages: postCategoryPercentages,
+            amountSpent: totalAmount,
+            transactionDates: Object.keys(transactionsGroupedByMonth),
+          });
         }
-
-        const { data: postCategoryPercentages } = await postCalculateCategoryPercentages(newTransactions, categories);
-        const totalAmount = Object.values(postCategoryPercentages).reduce((acc, curr) => acc + curr, 0).toFixed(2);
-
-        setDashboardData({
-          transactions: newTransactions,
-          categoryPercentages: postCategoryPercentages,
-          amountSpent: totalAmount,
-          transactionDates: Object.keys(transactionsGroupedByMonth),
-        });
       } catch (err) {
         console.error('Error fetching transactions:', err);
       }

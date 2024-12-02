@@ -20,16 +20,16 @@ const sampleFiles = [
 ];
 
 const FileUploader = ({ categories, setTransactions, isTrial }) => {
-  console.log(isTrial);
-  
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
   const [activeSample, setActiveSample] = useState(null);
+  const [error, setError] = useState('');
   const { user } = useUser();
   const { id } = user;
 
   const encryptAndUploadFile = async () => {
+    setError('');
     if (!file) {
       return;
     }
@@ -59,7 +59,7 @@ const FileUploader = ({ categories, setTransactions, isTrial }) => {
       setTransactions(data.transactions)
       setUploadComplete(true)
     } catch (error) {
-      console.error(error);
+      setError(error.response.data)
     } finally {
       setUploading(false);
     }
@@ -162,7 +162,8 @@ const FileUploader = ({ categories, setTransactions, isTrial }) => {
               </label>
             </div>
           </div>
-          <div className="flex items-center justify-center">
+          <div className="flex flex-col items-center justify-center">
+            {error && <p className="text-red-500 text-sm py-2">{error}</p>}
             {!activeSample && (
               <button
                 onClick={encryptAndUploadFile}

@@ -1,7 +1,7 @@
 import io
 import csv
 import random
-from datetime import datetime, date, timedelta
+from datetime import datetime, timedelta
 
 LOCAL_TX_TRANSACTIONS = [
   ("WF MARKET #0234 AUSTIN TX", 82.50),
@@ -110,37 +110,45 @@ LOCAL_MTL_TRANSACTIONS = [
 ]
 
 def generate_csv(sample: str):
-  print(sample)
-  si = io.StringIO()
-  cw = csv.writer(si)
-
-  cw.writerow(['Date', 'Description', 'Amount'])
-
-  today = datetime.today()
-
-  this_month_dates = [
-    today - timedelta(days=random.randint(0, 29))
-    for _ in range(20)
-  ]
+    # Explicitly specify UTF-8 encoding when creating StringIO
+    si = io.StringIO(newline='')
     
-  last_month_dates = [
-    today - timedelta(days=random.randint(30, 59))
-    for _ in range(15)
-  ]
-  
-  two_months_ago_dates = [
-    today - timedelta(days=random.randint(60, 89))
-    for _ in range(15)
-  ]
+    # Create CSV writer with proper line endings
+    cw = csv.writer(si, lineterminator='\n')
 
-  all_dates = this_month_dates + last_month_dates + two_months_ago_dates
-  all_dates.sort()
+    # Write BOM (Byte Order Mark) to ensure UTF-8 detection
+    si.write('\ufeff')  # UTF-8 BOM
 
-  transactions = LOCAL_TX_TRANSACTIONS if sample == 'TX' else LOCAL_MTL_TRANSACTIONS
+    cw.writerow(['Date', 'Description', 'Amount'])
 
-  for i in range(len(transactions)):
-    transaction = transactions[i]
-    date = all_dates[i]
-    cw.writerow([date.date(), transaction[0], transaction[1]])
+    today = datetime.today()
+    
+    this_month_dates = [
+        today - timedelta(days=random.randint(0, 29))
+        for _ in range(20)
+    ]
+    
+    last_month_dates = [
+        today - timedelta(days=random.randint(30, 59))
+        for _ in range(15)
+    ]
+    
+    two_months_ago_dates = [
+        today - timedelta(days=random.randint(60, 89))
+        for _ in range(15)
+    ]
 
-  return si.getvalue()
+    all_dates = this_month_dates + last_month_dates + two_months_ago_dates
+    all_dates.sort()
+
+    transactions = LOCAL_TX_TRANSACTIONS if sample == 'TX' else LOCAL_MTL_TRANSACTIONS
+
+    for i in range(len(transactions)):
+        transaction = transactions[i]
+        date = all_dates[i]
+        cw.writerow([date.date(), transaction[0], transaction[1]])
+    
+    csv_content = si.getvalue().encode('utf-8')
+    si.close()
+
+    return csv_content

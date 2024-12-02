@@ -18,6 +18,8 @@ const TrialDashboard = () => {
     return JSON.parse(window.sessionStorage.getItem("transactions"), (key, value) => {
       if (key === "amount") {
         return parseFloat(value);
+      } else if (key === "category_id") {
+        return parseInt(value)
       }
       return value;
     });

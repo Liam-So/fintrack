@@ -7,17 +7,16 @@ import { useUser } from '../context/UserContext';
 // Assign these colours to higher-order components
 const CategoryBadge = ({ category }) => {
   const baseClasses = "px-2 py-1 rounded-full text-xs font-semibold";
+
   const categoryColors = {
-    food: "bg-green-100 text-green-800",
-    transport: "bg-blue-100 text-blue-800",
-    utilities: "bg-yellow-100 text-yellow-800",
-    entertainment: "bg-purple-100 text-purple-800",
+    essential: "bg-green-100 text-green-800",
+    nonEssential: "bg-yellow-100 text-yellow-800",
     other: "bg-gray-100 text-gray-800"
   };
 
   return (
-    <span className={`${baseClasses} ${categoryColors[category] || categoryColors.other}`}>
-      {category}
+    <span className={`${baseClasses} ${category.essential ? categoryColors['essential'] : categoryColors['nonEssential'] || categoryColors.other}`}>
+      {category.name}
     </span>
   );
 };
@@ -112,7 +111,7 @@ const TransactionTable = ({ postedTransactions = [], handleSubmit, handleSaveAct
                     transaction.description
                   )}
                 </td>
-                <td className={`px-6 py-4 whitespace-nowrap border-b ${transaction.amount > 0 ? 'text-red-500' : 'text-green-500'}`}>
+                <td className={`px-6 py-4 whitespace-nowrap border-b`}>
                   {editingId === transaction.id ? (
                     <input 
                       type="number" 
@@ -139,7 +138,7 @@ const TransactionTable = ({ postedTransactions = [], handleSubmit, handleSaveAct
                     </select>
                   ) : (
                     <CategoryBadge 
-                      category={categories[transaction.category_id]?.name || 'Uncategorized'} 
+                      category={categories[transaction.category_id] || 'Uncategorized'} 
                     />
                   )}
                 </td>

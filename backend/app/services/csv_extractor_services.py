@@ -122,5 +122,8 @@ class CSVExtractorService:
         # Remove any rows with NaN values
         df = df.dropna(subset=['Date', 'Description', 'Amount'])
 
+        # sort by date
+        df = df.sort_values(by='Date', ascending=False)
+
         # Reset index after cleaning
         return df.reset_index(drop=True)

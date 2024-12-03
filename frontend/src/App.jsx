@@ -64,7 +64,7 @@ const officialRoutes = [
     element: <ProtectedRoute><Profile /></ProtectedRoute>
   },
   {
-    path: "/onboard/:id",
+    path: "/onboard",
     element: <ProtectedRoute><OnboardingFlow /></ProtectedRoute>
   },
   {

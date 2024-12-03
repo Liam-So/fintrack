@@ -48,7 +48,7 @@ export const deleteCategory = (id, category) => (
 export const getUserCategories = (id) => (api.get(`/user/categories/${id}`));
 
 export const postNewUser = (user) => (
-  api.post("/user", {
+  api.post("/user/", {
     username: user.nickname,
     email: user.email
   })

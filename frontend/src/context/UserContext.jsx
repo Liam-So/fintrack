@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
-import { deleteCategory, fetchUserData, getUserCategories, postCategories, updateUser } from '../api/dashboardApi';
+import { deleteCategory, fetchUserData, getUserCategories, postCategories, postNewUser, updateUser } from '../api/dashboardApi';
 
 const UserContext = createContext();
 
@@ -14,19 +14,24 @@ export const UserProvider = ({ children }) => {
   useEffect(() => {
     // Should we add user id for trial?
     if (isAuthenticated && user) {
-      // Fetch additional user info from your backend
       const fetchAdditionalInfo = async () => {
         try {
           const { data: userData } = await fetchUserData(user);
           const { data: categories } = await getUserCategories(userData.id);
-          
           setAdditionalUserInfo({
             id: userData.id,
             categories: categories,
             income: userData.monthly_income
           });
         } catch (error) {
-          console.error('Error fetching additional user info:', error);
+          // If user is not found, create a new user
+          if (error.status === 404) {
+            try {
+              await postNewUser(user);
+            } catch (error) {
+              console.error('Error creating new user:', error);
+            }
+          }
         }
       };
 

@@ -101,6 +101,7 @@ class CSVExtractorService:
         finally:
             # If any error occurred and file exists, clean it up
             if 'df' not in locals() and os.path.exists(temp_file_path):
+                print(f"Cleaning up {temp_file_path}")
                 os.remove(temp_file_path)
 
     @staticmethod

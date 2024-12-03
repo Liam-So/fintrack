@@ -144,14 +144,20 @@ const NewDashboard = ({ transactions, transactionDates, categoryPercentages, amo
                     <span className="text-sm font-medium text-gray-700 dark:text-white">{formatCurrency(essentialSum)} ({essentialPercentages}%)</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full dark:bg-gray-700">
-                    <div className="bg-slate-700 text-xs font-medium text-blue-100 text-center p-1 leading-none rounded-full" style={{width: `${essentialPercentages || 0}%`}}></div>
+                    <div 
+                      className={`${essentialPercentages > 100 ? '' : 'bg-slate-700'} text-xs font-medium text-blue-100 text-center p-1 leading-none rounded-full`}
+                      style={{width: `${essentialPercentages > 100 ? 100 : essentialPercentages}%`}}>
+                    </div>
                   </div>
                   <div className="flex justify-between mb-1">
                     <span className="text-base font-medium text-gray-700 dark:text-white">Non-Essentials</span>
                     <span className="text-sm font-medium text-gray-700 dark:text-white">{formatCurrency(nonEssentialSum)} ({nonEssentialPercentages}%)</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full dark:bg-gray-700">
-                    <div className="bg-slate-700 text-xs font-medium text-blue-100 text-center p-1 leading-none rounded-full" style={{width: `${nonEssentialPercentages || 0}%`}}></div>
+                    <div 
+                      className={`${nonEssentialPercentages > 100 ? '' : 'bg-slate-700'} text-xs font-medium text-blue-100 text-center p-1 leading-none rounded-full`} 
+                      style={{width: `${nonEssentialPercentages > 100 ? 100 : nonEssentialPercentages}%`}}>
+                    </div>
                   </div>
               </Card>
             </div>

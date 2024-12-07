@@ -1,0 +1,154 @@
+import io
+import csv
+import random
+from datetime import datetime, timedelta
+
+LOCAL_TX_TRANSACTIONS = [
+  ("WF MARKET #0234 AUSTIN TX", 82.50),
+  ("AMZN Mktp US*2H4LL Austin TX", 45.99),
+  ("NETFLIX.COM 888-824-1234 CA", 15.99),
+  ("SHELL OIL 57442419 AUSTIN TX", 48.75),
+  ("CHEESECAKE AUSTIN 23 AUSTIN TX", 65.30),
+  ("UBER   *TRIP-WX5F2 CA", 22.15),
+  ("STARBUCKS STORE #8234 AUSTIN TX", 5.75),
+  ("24HOUR FITNESS #2342 AUSTIN TX", 49.99),
+  ("AT&T *BILL PAYMENT 800-331-0500 TX", 75.00),
+  ("AUSTIN ENERGY 800-375-8375 TX", 110.25),
+  ("SPECTRUM CABLE 855-707-7328 TX", 79.99),
+  ("TARGET T-2839 AUSTIN TX", 93.45),
+  ("CVS/PHARMACY #4829 AUSTIN TX", 28.50),
+  ("AMC THEATRES #234 AUSTIN TX", 32.00),
+  ("PETSMART INC 1754 AUSTIN TX", 55.75),
+  ("GEICO *AUTO INS 800-841-3000 DC", 145.00),
+  ("SUPERCUTS 8234 AUSTIN TX", 85.00),
+  ("HOME DEPOT 2318 AUSTIN TX", 127.85),
+  ("SPOTIFY USA NEW YORK NY", 9.99),
+  ("OFFICE DEPOT #2875 AUSTIN TX", 42.30),
+  ("OLIVE GARDEN 5634 AUSTIN TX", 72.45),
+  ("H&M 0175 AUSTIN TX", 95.80),
+  ("BEST BUY #257 AUSTIN TX", 199.99),
+  ("ASPEN DENTAL #4385 AUSTIN TX", 150.00),
+  ("CITY OF AUSTIN PARKING TX", 15.00),
+  ("PETSMART GROOMING #1754 AUSTIN TX", 65.00),
+  ("CITY OF AUSTIN UTILITIES TX", 45.50),
+  ("APL*ITUNES.COM/BILL 866-712-7753 CA", 9.99),
+  ("CHIPOTLE 1754 AUSTIN TX", 12.85),
+  ("CHEVRON 0238575 AUSTIN TX", 52.30),
+  ("AMZN PRIME AMZN.COM/PRME WA", 14.99),
+  ("TRADERS JOE'S #442 AUSTIN TX", 98.75),
+  ("VUDU.COM 888-858-8838 CA", 5.99),
+  ("ACE HARDWARE #5324 AUSTIN TX", 34.25),
+  ("UCHI AUSTIN AUSTIN TX", 89.99),
+  ("CAPITAL METRO TX", 75.00),
+  ("MARTINIZING DRY CLN AUSTIN TX", 28.50),
+  ("BARNES&NOBLE #2342 AUSTIN TX", 42.99),
+  ("PP*ROBLOX.COM 888-858-8838 CA", 4.99),
+  ("TORCHYS TACOS #4 AUSTIN TX", 15.75),
+  ("GNC #5483 AUSTIN TX", 65.99),
+  ("FIRESTONE #4752 AUSTIN TX", 245.00),
+  ("TILLERY ST PLANT CO AUSTIN TX", 38.50),
+  ("RADIO COFFEE & BEER AUSTIN TX", 6.25),
+  ("CHICK-FIL-A #03384 AUSTIN TX", 13.50),
+  ("AMAZON.COM*2K8MD AMZN.COM/BILL WA", 49.99),
+  ("ROGUE FITNESS USA 614-358-6190 OH", 129.99),
+  ("DOMINOS 7648 AUSTIN TX", 25.99),
+  ("MICHAELS #1579 AUSTIN TX", 72.50),
+  ("HANDY.COM* CLEANING NYC NY", 150.00)
+]
+
+LOCAL_MTL_TRANSACTIONS = [
+  ("METRO ETS BERRI MONTREAL QC", 82.50),
+  ("AMZN.CA*2H4LL8N23 MONTREAL QC", 45.99),
+  ("NETFLIX.COM NETFLIX.COM QC", 16.99),
+  ("PETRO-CANADA #4421 MONTREAL QC", 48.75),
+  ("LA BANQUISE MONTREAL QC", 65.30),
+  ("UBER *TRIP-WX5F2 MONTREAL QC", 22.15),
+  ("TIM HORTONS #4223 MONTREAL QC", 5.75),
+  ("ECONOFITNESS MONT-ROYAL MTL QC", 49.99),
+  ("BELL MOBILITY 888-333-2811 QC", 75.00),
+  ("HYDRO-QUEBEC MTLHYDRO QC", 110.25),
+  ("VIDEOTRON LTEE 877-512-0911 QC", 79.99),
+  ("CANADIAN TIRE #081 MONTREAL QC", 93.45),
+  ("PHARMAPRIX #1421 MONTREAL QC", 28.50),
+  ("CINEMA BANQUE SCOTIA MONTREAL QC", 32.00),
+  ("MONDOU #32 MONTREAL QC", 55.75),
+  ("DESJARDINS ASSURANCE QC", 145.00),
+  ("MAISON PRIVEE MONTREAL QC", 85.00),
+  ("RONA LE PLATEAU #4452 MTL QC", 127.85),
+  ("SPOTIFY CANADA TORONTO ON", 9.99),
+  ("BUREAU EN GROS #621 MONTREAL QC", 42.30),
+  ("ST-HUBERT #427 MONTREAL QC", 72.45),
+  ("H&M CF EATON CTR MONTREAL QC", 95.80),
+  ("BEST BUY #932 MONTREAL QC", 199.99),
+  ("CENTRE DENT GRIFFINTOWN MTL QC", 150.00),
+  ("STATIONNEMENT MONTREAL QC", 15.00),
+  ("TOILETTAGE TOUTOU MONTREAL QC", 65.00),
+  ("EAU MONTREAL MONTREAL QC", 45.50),
+  ("APL*ITUNES.COM/BILL TORONTO ON", 9.99),
+  ("SCHWARTZ'S MONTREAL QC", 12.85),
+  ("SHELL #4427 MONTREAL QC", 52.30),
+  ("AMAZON PRIME CA AMAZON.CA ON", 14.99),
+  ("IGA EXTRA #8251 MONTREAL QC", 98.75),
+  ("CRAVE.CA BELL MEDIA ON", 5.99),
+  ("QUINCAILLERIE HOMEDEPOT MTL QC", 34.25),
+  ("JOE BEEF MONTREAL QC", 89.99),
+  ("STM - OPUS MONTREAL QC", 75.00),
+  ("NETTOYEUR ÉCOLOGIQUE MTL QC", 28.50),
+  ("INDIGO #832 MONTREAL QC", 42.99),
+  ("PP*ROBLOX.COM MONTREAL QC", 4.99),
+  ("LA BELLE PROVINCE MTL QC", 15.75),
+  ("NUTRITION DEPOT #214 MONTREAL QC", 65.99),
+  ("MIDAS AUTO SERVICE MTL QC", 245.00),
+  ("PEPINIERE MTL MONTREAL QC", 38.50),
+  ("CAFE OLIMPICO MONTREAL QC", 6.25),
+  ("ST-VIATEUR BAGEL MONTREAL QC", 13.50),
+  ("AMZN.CA*2K8MD8N23 AMAZON.CA ON", 49.99),
+  ("NAUTILUS PLUS MONTREAL QC", 129.99),
+  ("DOMINOS PIZZA #4421 MONTREAL QC", 25.99),
+  ("DESERRES #24 MONTREAL QC", 72.50),
+  ("MENAGE TOTAL MONTREAL QC", 150.00)
+]
+
+def generate_csv(sample: str):
+    # Explicitly specify UTF-8 encoding when creating StringIO
+    si = io.StringIO(newline='')
+    
+    # Create CSV writer with proper line endings
+    cw = csv.writer(si, lineterminator='\n')
+
+    # Write BOM (Byte Order Mark) to ensure UTF-8 detection
+    si.write('\ufeff')  # UTF-8 BOM
+
+    cw.writerow(['Date', 'Description', 'Amount'])
+
+    today = datetime.today()
+    
+    this_month_dates = [
+        today - timedelta(days=random.randint(0, 29))
+        for _ in range(20)
+    ]
+    
+    last_month_dates = [
+        today - timedelta(days=random.randint(30, 59))
+        for _ in range(15)
+    ]
+    
+    two_months_ago_dates = [
+        today - timedelta(days=random.randint(60, 89))
+        for _ in range(15)
+    ]
+
+    all_dates = this_month_dates + last_month_dates + two_months_ago_dates
+    all_dates.sort()
+
+    transactions = LOCAL_TX_TRANSACTIONS if sample == 'TX' else LOCAL_MTL_TRANSACTIONS
+
+    for i in range(len(transactions)):
+        transaction = transactions[i]
+        date = all_dates[i]
+        cw.writerow([date.date(), transaction[0], transaction[1]])
+    
+    csv_content = si.getvalue().encode('utf-8')
+    si.close()
+
+    return csv_content

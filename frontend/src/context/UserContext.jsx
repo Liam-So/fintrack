@@ -46,8 +46,8 @@ export const UserProvider = ({ children }) => {
           acc[item.id] = {
             category_id: item.id,
             name: item.name,
-            essential: item.essential
-            // color: item.color
+            essential: item.essential,
+            color: item.color
           };
             return acc;
         }, {});
@@ -104,8 +104,8 @@ export const UserProvider = ({ children }) => {
         acc[item.id] = {
           category_id: item.id,
           name: item.name,
-          essential: item.essential
-          // color:
+          essential: item.essential,
+          color: item.color
         };
         return acc;
       }, {});

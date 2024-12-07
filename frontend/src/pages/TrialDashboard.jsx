@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { postCalculateCategoryPercentages } from '../api/dashboardApi';
 import DashboardUI from '../components/DashboardUI';
 
-// TODO: refactor to optimize performance AND calculate percentages on the frontend (since it's a trial)
 const TrialDashboard = () => {
   const [shouldRefetchData, setShouldRefetchData] = useState(0);
 
@@ -20,6 +18,8 @@ const TrialDashboard = () => {
     return JSON.parse(window.sessionStorage.getItem("transactions"), (key, value) => {
       if (key === "amount") {
         return parseFloat(value);
+      } else if (key === "category_id") {
+        return parseInt(value)
       }
       return value;
     });
@@ -98,29 +98,40 @@ const TrialDashboard = () => {
       try {
         const categories = JSON.parse(window.sessionStorage.getItem("categories"));
         const transactions = getStoredTransactions();
-        const transactionsGroupedByMonth = groupedTransactions();
 
-        let newTransactions;
+        if (transactions) {
+          const transactionsGroupedByMonth = groupedTransactions();
 
-        if (date.type === 'preset_period') {
-          newTransactions = filterTransactionsByPeriod(transactions, date.period);
-        } else if (date.type === 'month') {
-          newTransactions = transactionsGroupedByMonth[date.period];
-        } else {
-          // fetch custom date range
-          const [startDate, endDate] = date.period.split(",").map(d => new Date(d));
-          newTransactions = filterTransactionsByRange(transactions, startDate, endDate);
+          let newTransactions;
+
+          if (date.type === 'preset_period') {
+            newTransactions = filterTransactionsByPeriod(transactions, date.period);
+          } else if (date.type === 'month') {
+            newTransactions = transactionsGroupedByMonth[date.period];
+          } else {
+            // fetch custom date range
+            const [startDate, endDate] = date.period.split(",").map(d => new Date(d));
+            newTransactions = filterTransactionsByRange(transactions, startDate, endDate);
+          }
+
+          const calculatedSums = newTransactions.reduce((acc, curr) => {
+            const category = categories.filter(cat => cat.id === curr.category_id)[0].id || 'Unknown Category';
+            const amount = parseFloat(curr.amount) || 0;
+          
+            acc[category] = (acc[category] || 0) + amount;
+          
+            return acc;
+          }, {});
+          
+          const totalAmount = Object.values(calculatedSums).reduce((acc, curr) => acc + curr, 0).toFixed(2);
+
+          setDashboardData({
+            transactions: newTransactions,
+            categoryPercentages: calculatedSums,
+            amountSpent: totalAmount,
+            transactionDates: Object.keys(transactionsGroupedByMonth),
+          });
         }
-
-        const { data: postCategoryPercentages } = await postCalculateCategoryPercentages(newTransactions, categories);
-        const totalAmount = Object.values(postCategoryPercentages).reduce((acc, curr) => acc + curr, 0).toFixed(2);
-
-        setDashboardData({
-          transactions: newTransactions,
-          categoryPercentages: postCategoryPercentages,
-          amountSpent: totalAmount,
-          transactionDates: Object.keys(transactionsGroupedByMonth),
-        });
       } catch (err) {
         console.error('Error fetching transactions:', err);
       }

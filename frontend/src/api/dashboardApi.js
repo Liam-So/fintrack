@@ -17,6 +17,15 @@ export const fetchTransactions = async (id, type, period) => (
   })
 )
 
+export const generateCSV = (sample) => (
+  api.get(`/trial/download`, {
+    params: {
+      sample: sample
+    },
+    responseType: 'blob'
+  })
+)
+
 export const fetchCategoryPercentages = (id, transactions) => (
   api.post(`/user/categories/percentages/${id}`, {
     transactions: transactions
@@ -35,13 +44,6 @@ export const deleteCategory = (id, category) => (
     }
   })
 )
-
-export const postCalculateCategoryPercentages = (transactions, categories) => (
-  api.post("/trial/categories/percentages", {
-    transactions: transactions,
-    categories: categories
-  })
-);
 
 export const getUserCategories = (id) => (api.get(`/user/categories/${id}`));
 

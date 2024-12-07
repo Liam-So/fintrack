@@ -7,17 +7,16 @@ import { useUser } from '../context/UserContext';
 // Assign these colours to higher-order components
 const CategoryBadge = ({ category }) => {
   const baseClasses = "px-2 py-1 rounded-full text-xs font-semibold";
+
   const categoryColors = {
-    food: "bg-green-100 text-green-800",
-    transport: "bg-blue-100 text-blue-800",
-    utilities: "bg-yellow-100 text-yellow-800",
-    entertainment: "bg-purple-100 text-purple-800",
+    essential: "bg-green-100 text-green-800",
+    nonEssential: "bg-yellow-100 text-yellow-800",
     other: "bg-gray-100 text-gray-800"
   };
 
   return (
-    <span className={`${baseClasses} ${categoryColors[category] || categoryColors.other}`}>
-      {category}
+    <span className={`${baseClasses} ${category.essential ? categoryColors['essential'] : categoryColors['nonEssential'] || categoryColors.other}`}>
+      {category.name}
     </span>
   );
 };
@@ -112,13 +111,13 @@ const TransactionTable = ({ postedTransactions = [], handleSubmit, handleSaveAct
                     transaction.description
                   )}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap border-b">
+                <td className={`px-6 py-4 whitespace-nowrap border-b`}>
                   {editingId === transaction.id ? (
                     <input 
                       type="number" 
                       value={transaction.amount} 
                       onChange={(e) => handleChange(transaction.id, 'amount', parseFloat(e.target.value))}
-                      className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500}`}
                     />
                   ) : (
                     `${formatCurrency(transaction.amount)}`
@@ -127,18 +126,20 @@ const TransactionTable = ({ postedTransactions = [], handleSubmit, handleSaveAct
                 <td className="px-6 py-4 whitespace-nowrap border-b">
                   {editingId === transaction.id ? (
                     <select 
-                      value={transaction.category_id}
+                      value={categories[transaction.category_id] ? transaction.category_id : ''}
                       onChange={(e) => handleChange(transaction.id, 'category_id', e.target.value)}
                       className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       {Object.keys(categories).map((category_id) => (
                         <option key={category_id} value={category_id}>
-                          {categories[category_id]['name']}
+                          {categories[category_id]?.name || 'Unnamed Category'}
                         </option>
                       ))}
                     </select>
                   ) : (
-                    <CategoryBadge category={categories[transaction.category_id]['name']} />
+                    <CategoryBadge 
+                      category={categories[transaction.category_id] || 'Uncategorized'} 
+                    />
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium border-b">

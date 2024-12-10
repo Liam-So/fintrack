@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-const baseURL = import.meta.env.DEMO_MODE ? import.meta.env.VITE_DEMO_BACKEND_URL : import.meta.env.VITE_DEV_BACKEND_URL;
-console.log('baseURL:', baseURL);
+const baseURL = import.meta.env.VITE_DEMO_MODE ? import.meta.env.VITE_DEMO_BACKEND_URL : import.meta.env.VITE_DEV_BACKEND_URL;
 
 export const api = axios.create({
   baseURL: baseURL,

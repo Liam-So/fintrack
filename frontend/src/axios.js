@@ -1,9 +1,8 @@
 import axios from 'axios';
 
 export const api = axios.create({
-  baseURL: 'http://localhost:8000/api',
+  baseURL: import.meta.env.DEMO_MODE ? import.meta.env.VITE_DEMO_BACKEND_URL : import.meta.env.VITE_DEV_BACKEND_URL,
   headers: {
-    'Content-Type': 'application/json',
-    // 'Authorization': `Bearer ${yourAuthToken}` // Replace with your actual auth token
+    'Content-Type': 'application/json'
   }
 });

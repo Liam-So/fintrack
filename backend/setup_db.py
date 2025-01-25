@@ -25,6 +25,41 @@ def create_database(database_name: str, user: str, password: str, host: str):
       conn.close()
 
 
+def upload_category_data(database_name: str, user: str, password: str, host: str):
+    '''Upload category data to the database'''
+    conn = psycopg2.connect(dbname=database_name, user=user, password=password, host=host)
+    cur = conn.cursor()
+
+    try:
+        cur.execute('''
+          INSERT INTO categories (id, name) VALUES
+          (1, 'Groceries'),
+          (2, 'Rent'),
+          (3, 'Utilities'),
+          (4, 'Dining Out'),
+          (5, 'Drinks'),
+          (6, 'Entertainment'),
+          (7, 'Shopping'),
+          (8, 'Transportation'),
+          (9, 'Health'),
+          (10, 'Education'),
+          (11, 'Travel'),
+          (12, 'Cell Phone'),
+          (13, 'Insurance'),
+          (14, 'Pet Care'),
+          (15, 'Repairs'),
+          (16, 'Clothing'),
+          (17, 'Subscriptions')
+        ''')
+        conn.commit()
+        print('Category data uploaded successfully!')
+    except Exception as e:
+        print(f'Error uploading category data: {e}')
+    finally:
+        cur.close()
+        conn.close()
+
+
 def setup_database():
     '''Setup the complete database with schema'''
     DB_NAME = os.getenv('DB_NAME', 'fintrack')
@@ -45,6 +80,9 @@ def setup_database():
         os.system('flask db migrate -m "Initial migration"')
         os.system('flask db upgrade')
         print('Migration applied successfully!')
+
+        # Upload category data
+        upload_category_data(DB_NAME, DB_USER, DB_PASSWORD, DB_HOST)
     except Exception as e:
         print(f'Error applying migrations: {e}')
 

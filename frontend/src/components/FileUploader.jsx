@@ -6,13 +6,13 @@ import { generateCSV } from '../api/dashboardApi';
 
 const sampleFiles = [
   {
-    name: "🕺🏻 Personal Banking",
+    name: "Personal Banking",
     description: "Common personal checking account transactions",
     rowCount: "📍 Montreal, Canada",
     type: "MTL"
   },
   {
-    name: "🕺🏻 Personal Banking",
+    name: "Personal Banking",
     description: "Common personal checking account transactions",
     rowCount: "📍 Texas, USA",
     type: "TX"

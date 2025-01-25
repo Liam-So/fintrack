@@ -1,5 +1,4 @@
 Single-database configuration for Flask.
-
 To migrate perform the sequence of commands:
 ```
 flask db init # only if you haven't ran this before

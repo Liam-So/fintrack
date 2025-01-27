@@ -68,9 +68,6 @@ const LandingPage = () => {
                     Try It Now
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </button>
-                  <button className="border border-gray-300 text-gray-700 px-8 py-3 hover:bg-gray-50 transition-colors rounded-3xl font-semibold">
-                    Watch Demo
-                  </button>
                 </>
               ) : (
                 <button 

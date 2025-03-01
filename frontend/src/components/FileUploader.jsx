@@ -134,7 +134,6 @@ const FileUploader = ({ categories, setTransactions, isTrial }) => {
                         <span className="relative rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
                           Upload a file
                         </span>
-                        <p className="pl-1">or drag and drop</p>
                       </div>
                       <p className="text-xs text-gray-500">PDF up to 10MB</p>
                     </>

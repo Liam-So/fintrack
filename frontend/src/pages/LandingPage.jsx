@@ -59,7 +59,7 @@ const LandingPage = () => {
               Smart Expense Tracking Powered by AI
             </h1>
             <p className="mt-6 px-1 text-xl text-gray-600">
-              Automatically categorize your expenses and gain insights into your spending patterns with our advanced AI technology.
+              Automatically categorize your expenses and gain insights into your spending patterns with AI technology.
             </p>
             <div className="mt-8 flex space-x-4">
               {isDemoMode ? (
@@ -131,11 +131,6 @@ const LandingPage = () => {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center">
               <span className="ml-2 text-lg font-bold">FinTrack</span>
-            </div>
-            <div className="mt-4 md:mt-0">
-              <p>
-                &copy; 2024 FinTrack. All rights reserved.
-              </p>
             </div>
             <div className="flex items-center space-x-6">
             <a 
